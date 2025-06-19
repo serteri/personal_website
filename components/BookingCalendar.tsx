@@ -1,23 +1,28 @@
 'use client'
 import { useState } from 'react';
 import FullCalendar, {
-    DateClickArg,
     DayCellContentArg,
-    EventContentArg,
+
 } from '@fullcalendar/react';
 import dayGridPlugin from "@fullcalendar/daygrid";
-import timeGridPlugin from "@fullcalendar/timegrid";
+
 import interactionPlugin from "@fullcalendar/interaction";
-import toast from 'react-hot-toast';
+
 import { Dialog } from '@headlessui/react';
+
+
+
+// Props arayüzünü daha spesifik hale getirelim
+interface BookingCalendarProps {
+    events: { title: string; start: string }[];
+    onDateClick: (info: { date: Date }) => void; // dateClick'ten gelen info objesine göre güncelledik
+}
 
 export default function BookingCalendar({
                                             events,
                                             onDateClick,
-                                        }: {
-    events: { title: string; start: string }[];
-    onDateClick: (info: { start: Date; end?: Date }) => void;
-}) {
+                                        }:  BookingCalendarProps
+) {
 
     const [showModal, setShowModal] = useState(false);
 // Create a local Date at midnight today
@@ -120,7 +125,7 @@ export default function BookingCalendar({
                         🚫 Sunday Closed
                     </Dialog.Title>
                     <Dialog.Description className="mb-4">
-                        Sorry, we don’t take bookings on Sundays.
+                        Sorry, we don&apos;t take bookings on Sundays.
                     </Dialog.Description>
                     <button
                         className="mt-2 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"

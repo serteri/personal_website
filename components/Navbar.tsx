@@ -28,7 +28,7 @@ export default function Navbar() {
     // --- TÜM SCROLL MANTIĞINI BİRLEŞTİREN MODERN YÖNTEM ---
     useMotionValueEvent(scrollY, "change", (latest) => {
         const previous = scrollY.getPrevious() || 0;
-        const diff = latest - previous;
+
         
         // 1. Navbar'ı küçültme/büyütme mantığı
         setIsShrunk(latest > 50);

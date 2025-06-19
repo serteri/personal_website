@@ -83,12 +83,12 @@ export default function CallToAction() {
                     We are ready to tell <span className="text-lime-300">your story!</span>
                 </h1>
                 <p className="mt-4 text-lg text-gray-300">
-                    Book an appointment and let's make something amazing!
+                    Book an appointment and let&apos;s make something amazing!
                 </p>
                 <div className="mt-8">
                     <Link href="/booking" ref={buttonRef} >
                         <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 text-[#00ff88] font-bold py-4 px-10 rounded-full transition-colors duration-300 hover:bg-gray-700">
-                            Let's chat
+                            let&apos;s chat
                         </div>
                     </Link>
                 </div>

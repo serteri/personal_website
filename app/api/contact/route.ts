@@ -31,7 +31,7 @@ export async function POST(req:Request) {
         const {firstName, lastName, email, phone, countryCode, message} = validateData;
 
         // --- YENİ: VERİTABANINA KAYDETME KODU ---
-        const { data: dbData, error: dbError } = await supabase
+        const {  error: dbError } = await supabase
             .from('contacts') // Tablo adımız
             .insert([
                 {

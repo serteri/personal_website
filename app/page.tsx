@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useRef } from "react";
+
 import { gsap } from "gsap";
 import ScrollTrigger     from "gsap/dist/ScrollTrigger";
 import PromotionalBanner from "@/components/PromotionalBanner";
