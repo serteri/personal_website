@@ -16,7 +16,5 @@ export default [
       "react/react-in-jsx-scope": "off"
     }
   },
-  {
-    "extends": "next/core-web-vitals"
-  }
+
 ];
