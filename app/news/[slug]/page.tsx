@@ -3,9 +3,7 @@ import Image from 'next/image';
 import type { Metadata } from 'next';
 
 
-type Props = {
-    params: { slug: string }
-}
+
 
 // Bu fonksiyon, Next.js'e hangi sayfaları önceden oluşturacağını söyler.
 export async function generateStaticParams() {
@@ -15,7 +13,7 @@ export async function generateStaticParams() {
     }));
 }
 // generateMetadata fonksiyonu da aynı doğru tipi kullanmalı.
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
     const post = await getPostBySlug(params.slug);
 
     if (!post) {
@@ -38,7 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         }
     };
 }
-export default async function PostPage({ params }:  Props) {
+export default async function PostPage({ params }: { params: { slug: string } }) {
     const post = await getPostBySlug(params.slug);
 
     return (
