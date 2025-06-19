@@ -10,13 +10,13 @@ export default function BrandingPage() {
                 <div className="max-w-3xl mx-auto">
                     <h2 className="text-3xl font-bold mb-4">What is Branding?</h2>
                     <p className="text-lg text-gray-300 leading-relaxed">
-                        Branding is more than a logo; it's the entire experience your customers have with your company. It's your story, your values, and your promise. We help you define a strong brand identity that builds trust, recognition, and loyalty.
+                        Branding is more than a logo; it&apos;s  the entire experience your customers have with your company. It&apos;s your story, your values, and your promise. We help you define a strong brand identity that builds trust, recognition, and loyalty.
                     </p>
 
                     <h3 className="text-2xl font-bold mt-12 mb-4">Our Branding Process</h3>
                     <ul className="space-y-4 text-gray-300">
                         <li><strong>1. Discovery & Strategy:</strong> We dive deep into your business, market, and audience to build a solid brand strategy.</li>
-                        <li><strong>2. Visual Identity Design:</strong> We create your logo, color palette, typography, and other visual elements that form your brand's look and feel.</li>
+                        <li><strong>2. Visual Identity Design:</strong> We create your logo, color palette, typography, and other visual elements that form your brand&apos;s look and feel.</li>
                         <li><strong>3. Brand Guidelines:</strong> We deliver a comprehensive brand book to ensure consistency across all your marketing materials.</li>
                     </ul>
                 </div>

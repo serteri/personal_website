@@ -15,7 +15,7 @@ export default function WebDesignPage() {
 
                     <h3 className="text-2xl font-bold mt-12 mb-4">Our Web Design Process</h3>
                     <ul className="space-y-4 text-gray-300">
-                        <li><strong>1. UI/UX Design:</strong> We create intuitive wireframes and stunning visual mockups that focus on your user's journey.</li>
+                        <li><strong>1. UI/UX Design:</strong> We create intuitive wireframes and stunning visual mockups that focus on your user&apos;s journey.</li>
                         <li><strong>2. Development:</strong> Our developers bring the designs to life using modern, fast, and secure technologies like Next.js.</li>
                         <li><strong>3. Launch & Optimization:</strong> We handle the launch process and ensure your website is optimized for speed, performance, and different devices.</li>
                     </ul>

@@ -6,7 +6,7 @@ export default function ContactPage() {
             <div className="container mx-auto text-center">
                 <h1 className="text-5xl font-bold text-white">Contact Us</h1>
                 <p className="mt-4 max-w-2xl mx-auto text-lg text-gray-400">
-                    Have a project in mind or just want to say hello? Fill out the form below and we'll get back to you as soon as possible.
+                    Have a project in mind or just want to say hello? Fill out the form below and we&apos;ll get back to you as soon as possible.
                 </p>
             </div>
             <div className="mt-12">
