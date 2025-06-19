@@ -1,5 +1,30 @@
 import { getAllPosts, getPostBySlug } from '@/lib/posts';
 import Image from 'next/image';
+import type { Metadata } from 'next';
+
+
+type Props = {
+    params: { slug: string }
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+    const post = await getPostBySlug(params.slug);
+
+    return {
+        title: post.title,
+        description: post.excerpt,
+        openGraph: {
+            title: post.title,
+            description: post.excerpt,
+            images: [
+                {
+                    url: post.coverImage,
+                }
+            ]
+        }
+    };
+}
+
 
 // Bu fonksiyon, Next.js'e hangi sayfaları önceden oluşturacağını söyler.
 export async function generateStaticParams() {
