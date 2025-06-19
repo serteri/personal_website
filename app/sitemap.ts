@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next';
-import { getAllPosts } from './lib/posts'; // Post fonksiyonumuzu import ediyoruz
+import { getAllPosts } from '@/lib/posts';
 
 export default function sitemap(): MetadataRoute.Sitemap {
     const siteUrl = 'https://altiqdesign.com'; // KENDİ DOMAINİNİZİ YAZIN
