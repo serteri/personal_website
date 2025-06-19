@@ -7,8 +7,22 @@ type Props = {
     params: { slug: string }
 }
 
+// Bu fonksiyon, Next.js'e hangi sayfaları önceden oluşturacağını söyler.
+export async function generateStaticParams() {
+    const posts = getAllPosts();
+    return posts.map(post => ({
+        slug: post.slug,
+    }));
+}
+// generateMetadata fonksiyonu da aynı doğru tipi kullanmalı.
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const post = await getPostBySlug(params.slug);
+
+    if (!post) {
+        return {
+            title: "Post Not Found",
+        };
+    }
 
     return {
         title: post.title,
@@ -24,17 +38,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         }
     };
 }
-
-
-// Bu fonksiyon, Next.js'e hangi sayfaları önceden oluşturacağını söyler.
-export async function generateStaticParams() {
-    const posts = getAllPosts();
-    return posts.map(post => ({
-        slug: post.slug,
-    }));
-}
-
-export default async function PostPage({ params }: { params: { slug: string } }) {
+export default async function PostPage({ params }:  Props) {
     const post = await getPostBySlug(params.slug);
 
     return (
