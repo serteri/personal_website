@@ -1,8 +1,12 @@
+
+
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
+
   --background: #ffffff;
   --foreground: #171717;
 }
@@ -14,8 +18,84 @@
   }
 }
 
+
+@layer base {
+  /* 1) Kill FullCalendar’s inner bg-div so it can’t override you */
+  .fc-theme-standard .fc-daygrid-day-bg {
+    display: none;
+  }
+
+  /* 2) Style every day-cell <td>: border, bg, text + transition */
+  .fc-theme-standard .fc-scrollgrid .fc-scrollgrid-section-body td {
+    @apply border bg-teal-900  text-gray-200;
+    transition: background-color 0.2s;
+  }
+
+  /* 3) Hover the entire cell */
+  .fc-theme-standard .fc-scrollgrid .fc-scrollgrid-section-body td:hover {
+    @apply bg-teal-500;
+  }
+
+  /* 4) “Today” gets its own highlight */
+  .fc-theme-standard .fc-scrollgrid .fc-scrollgrid-section-body td.fc-day-today {
+    @apply bg-orange-900 !important ;
+  }
+  .fc .fc-toolbar .fc-button {
+    @apply bg-gray-800 text-white hover:bg-gray-700 !important;
+  }
+  .fc .fc-toolbar-title {
+    @apply text-white text-xl font-bold !important;
+  }
+
+}
+
 body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+  overscroll-behavior: none;
+  @apply bg-[#0a0a0a];
+  height: 100%;
+
+
+}
+.main {
+  min-height: 100vh;
+  perspective: 600px; /* ✅ Stronger 3D effect */
+}
+html {
+  scroll-behavior: smooth;
+  overscroll-behavior: none;
+}
+nav {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 6rem; /* Adjust height */
+  z-index: 100;
+  background-color: black; /* Ensure navbar stays visible */
+}
+
+@keyframes fadeInImage {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInHeading {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeInHeading {
+  animation: fadeInHeading 0.5s ease-out;
 }

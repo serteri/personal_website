@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String    @id @default(uuid())
+  name           String?
+  email          String?   @unique
+  emailVerified  DateTime?
+  image          String?
+  hashedPassword String?
+  isAdmin        Boolean   @default(false)
+  accounts       Account[]
+  sessions       Session[]
+  bookings       Booking[]
+}
+
+model Account {
+  id                 String  @id @default(uuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+  oauth_token_secret String?
+  oauth_token        String?
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Booking {
+  id        BigInt   @id @default(autoincrement())
+  firstName String
+  lastName  String
+  email     String
+  phone     String
+  date      DateTime // date of appointment
+  time      String // timeslot (e.g. "14:00")
+  createdAt DateTime @default(now())
+  User      User?    @relation(fields: [userId], references: [id])
+  userId    String?
+}
+
+model Availability {
+  id     Int      @id @default(autoincrement())
+  start  DateTime
+  end    DateTime
+  reason String?
+}
+
+model Contact {
+  id          BigInt   @id @default(autoincrement())
+  createdAt   DateTime @default(now()) @map("created_at")
+  firstName   String   @map("first_name")
+  lastName    String   @map("last_name")
+  email       String
+  countryCode String   @map("country_code")
+  phone       String
+  message     String
+
+  // Prisma'ya bu modelin veritabanındaki 'contacts' tablosuna
+  // karşılık geldiğini söylüyoruz.
+  @@map("contacts")
+}
