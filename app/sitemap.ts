@@ -1,15 +1,10 @@
 import { MetadataRoute } from 'next';
-import { getAllPosts } from '@/lib/posts';
+
 
 export default function sitemap(): MetadataRoute.Sitemap {
     const siteUrl = 'https://altiqdesign.com'; // KENDİ DOMAINİNİZİ YAZIN
 
-    // Blog postları için dinamik URL'ler oluşturuyoruz
-    const posts = getAllPosts();
-    const postUrls = posts.map((post) => ({
-        url: `${siteUrl}/news/${post.slug}`,
-        lastModified: new Date(post.date),
-    }));
+
 
     // Statik sayfaları ekliyoruz
     const staticUrls = [
