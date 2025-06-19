@@ -19,7 +19,7 @@ const PhilosophySection = () => {
                 </div>
                 <div className="text-lg text-gray-300 space-y-4">
                     <p>
-                        We believe that great design is not just about aesthetics; it's about solving problems. It's the silent ambassador of your brand. Our philosophy is rooted in a deep understanding of your business and your audience to create designs that are not only beautiful but also intuitive, effective, and meaningful.
+                        We believe that great design is not just about aesthetics; It&apos;s about solving problems. It&apos;s the silent ambassador of your brand. Our philosophy is rooted in a deep understanding of your business and your audience to create designs that are not only beautiful but also intuitive, effective, and meaningful.
                     </p>
                     <p>
                         From the simplest logo to the most complex website, every element is crafted with intention, ensuring a cohesive and compelling brand story that resonates and endures.

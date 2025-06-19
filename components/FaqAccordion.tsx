@@ -2,8 +2,13 @@
 
 import { useState } from 'react';
 
+// ÇÖZÜM: 'any' yerine kullanılacak olan tip arayüzünü tanımlıyoruz.
+interface FaqItemData {
+    question: string;
+    answer: string;
+}
 // Soru-Cevap verilerini buraya girebilirsiniz.
-const faqData = [
+const faqData: FaqItemData[] = [
     {
         question: "How does your design process work from start to finish?",
         answer: "Our process is collaborative. We start with a discovery call to understand your goals, followed by strategy and design mockups. Once you approve the design, we move to development. We keep you updated at every key milestone before the final launch."
@@ -39,7 +44,7 @@ const faqData = [
 ];
 
 // Tek bir SSS öğesini yönetecek alt component
-const FaqItem = ({ item, isOpen, onClick }: { item: any, isOpen: boolean, onClick: () => void }) => {
+const FaqItem = ({ item, isOpen, onClick }: { item: FaqItemData, isOpen: boolean, onClick: () => void }) => {
     return (
         <div className="border-b border-lime-300/20 py-4">
             <button

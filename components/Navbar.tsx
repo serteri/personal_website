@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import Link from "next/link"
 import Image from 'next/image'
 import { FiMenu, FiX } from "react-icons/fi";
