@@ -10,10 +10,9 @@ const footerLinks = {
         { name: 'SEO', href: '/whatwedo/seo' },
     ],
     about: [
-        { name: 'Olya Black', href: '/about' },
-        { name: 'Wix Studio', href: '/wix-studio' }, // Örnek link
-        { name: 'Case Studies', href: '/case-studies' }, // Örnek link
-        { name: 'Insights', href: '/news' }, // News sayfasına yönlendirilebilir
+        { name: 'Serter Iyigunlu', href: '/about' },
+        { name: 'Case Studies', href: '/whatwedo' }, // Örnek link
+        { name: 'Insights', href: '/whatwedo' }, // News sayfasına yönlendirilebilir
     ]
 };
 
@@ -56,8 +55,7 @@ const Footer = () => {
                         <h3 className="font-bold text-lime-300 mb-4">CONTACT US</h3>
                         <ul className="space-y-3">
                             <li><a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">instagram</a></li>
-                            <li><a href="mailto:info@olyablack.com" className="hover:text-white transition-colors">info@olyablack.com</a></li>
-                            <li><a href="tel:+61405086537" className="hover:text-white transition-colors">+61405086537</a></li>
+                            <li><a href="tel:+61405636970" className="hover:text-white transition-colors">+61405086537</a></li>
                         </ul>
                     </div>
                     
@@ -66,9 +64,7 @@ const Footer = () => {
                          <ul className="space-y-3">
                             <li><Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
                             <li className="pt-4">© 2024 All Rights Reserved by Olya Black.</li>
-                            <li>Wix Pro Pty Ltd.</li>
-                            <li>Certified Wix Partner | Australia, Brisbane</li>
-                            <li>Website Created with Wix Studio.</li>
+
                         </ul>
                     </div>
                 </div>
