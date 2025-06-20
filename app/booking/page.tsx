@@ -4,11 +4,13 @@
 
 import BookingClient from './BookingClient';
 import prisma from '@/lib/prisma';
+import { Booking } from "@prisma/client";
+
 
 export default async function BookingPage() {
 
     const raw = await prisma.booking.findMany();
-    const events = raw.map(b => ({
+    const events = raw.map( (b:Booking) => ({
         title: `${b.firstName} ${b.lastName}`,
         start: b.date.toISOString(),
     }));

@@ -1,11 +1,8 @@
 'use client'
 import { useState } from 'react';
-import FullCalendar, {
-    DayCellContentArg,
-
-} from '@fullcalendar/react';
+import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from "@fullcalendar/daygrid";
-
+import { DayCellContentArg } from '@fullcalendar/core';
 import interactionPlugin from "@fullcalendar/interaction";
 
 import { Dialog } from '@headlessui/react';
@@ -98,7 +95,7 @@ export default function BookingCalendar({
             ]}
             validRange={{ start: today }}       // ← no clicks before today
 
-            navLinkClassNames={() => ['text-white']}
+
             dayCellContent={(arg: DayCellContentArg) => (
                 <div
                     className="

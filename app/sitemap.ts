@@ -15,5 +15,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
         // ... diğer statik sayfalarınız ...
     ];
 
-    return [...staticUrls, ...postUrls];
+    return [...staticUrls];
 }

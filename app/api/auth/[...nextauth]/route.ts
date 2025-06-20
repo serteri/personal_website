@@ -36,7 +36,7 @@ const authOptions: AuthOptions = {
                     where: { email: credentials.email },
                 });
 
-                if (!user || !user.password) {
+                if (!user || !user.hashedPassword) {
                     // Kullanıcı bulunamadı veya bu kullanıcının şifresi yok (örn: Google ile kayıt olmuş)
                     throw new Error("Bu e-posta adresiyle kayıtlı kullanıcı bulunamadı.");
                 }
@@ -44,7 +44,7 @@ const authOptions: AuthOptions = {
                 // GÜVENLİ YÖNTEM: Gelen şifre ile veritabanındaki hash'lenmiş şifreyi karşılaştır
                 const isPasswordCorrect = await bcrypt.compare(
                     credentials.password,
-                    user.password
+                    user.hashedPassword
                 );
 
                 if (!isPasswordCorrect) {

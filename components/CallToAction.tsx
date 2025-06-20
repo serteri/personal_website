@@ -6,7 +6,7 @@ import { gsap } from 'gsap';
 
 export default function CallToAction() {
     const torusRef = useRef<HTMLDivElement>(null);
-    const buttonRef = useRef<HTMLDivElement>(null);
+    const buttonRef = useRef<HTMLAnchorElement>(null);
 
     // 1. Mouse ile hareket eden obje (Parallax) animasyonu
     useEffect(() => {
