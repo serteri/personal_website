@@ -63,7 +63,7 @@ const Footer = () => {
                     <div className="lg:col-span-2 lg:border-l lg:border-gray-700 lg:pl-12">
                          <ul className="space-y-3">
                             <li><Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
-                            <li className="pt-4">© 2024 All Rights Reserved by Olya Black.</li>
+                            <li className="pt-4">© 2025 All Rights Reserved by Serter Iyigunlu.</li>
 
                         </ul>
                     </div>
