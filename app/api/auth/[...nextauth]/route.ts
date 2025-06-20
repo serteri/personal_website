@@ -8,7 +8,7 @@ import bcrypt from "bcrypt";
 // ÖNEMLİ: Yeni bir prisma client oluşturmak yerine, singleton client'ımızı import ediyoruz.
 import prisma from "@/lib/prisma";
 
-export const authOptions: AuthOptions = {
+const authOptions: AuthOptions = {
     // PrismaAdapter'ı singleton client'ımızla kullanıyoruz
     adapter: PrismaAdapter(prisma),
 
