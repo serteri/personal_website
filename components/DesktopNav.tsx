@@ -42,11 +42,6 @@ export default function DesktopNav({ openDropdown, handleMouseEnter, handleMouse
                 )}
             </li>
             <li>
-                <Link href="/news" className="font-medium text-white hover:text-lime-400 transition-colors">
-                    News
-                </Link>
-            </li>
-            <li>
                 <Link href="/booking" className="font-medium text-white hover:text-lime-400 transition-colors">
                     Contact
                 </Link>

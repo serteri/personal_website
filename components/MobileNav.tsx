@@ -30,7 +30,6 @@ export default function MobileNav({ isOpen, closeMenu }: MobileNavProps) {
                     <ul className="flex flex-col items-center py-6 space-y-4">
                         <li><Link href="/about" className="block py-3 text-lg font-medium hover:text-lime-400" onClick={closeMenu}>About</Link></li>
                         <li><Link href="/whatwedo" className="block py-3 text-lg font-medium hover:text-lime-400" onClick={closeMenu}>What We Do</Link></li>
-                        <li><Link href="/news" className="block py-3 text-lg font-medium hover:text-lime-400" onClick={closeMenu}>News</Link></li>
                         <li><Link href="/contact" className="block py-3 text-lg font-medium hover:text-lime-400" onClick={closeMenu}>Contact</Link></li>
                     </ul>
                 </motion.div>
