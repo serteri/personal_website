@@ -66,6 +66,11 @@ export default function BookingCalendar({
                 }
                 onDateClick({ date: info.date })}}
             events={events}
+            eventTimeFormat={{
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false // 24 saat formatını kullanmak için
+            }}
             height="auto"
             headerToolbar={{
                 left: 'prev,next today',
@@ -94,8 +99,6 @@ export default function BookingCalendar({
                 'cursor-pointer',
             ]}
             validRange={{ start: today }}       // ← no clicks before today
-
-
             dayCellContent={(arg: DayCellContentArg) => (
                 <div
                     className="

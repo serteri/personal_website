@@ -55,7 +55,7 @@ const Footer = () => {
                         <h3 className="font-bold text-lime-300 mb-4">CONTACT US</h3>
                         <ul className="space-y-3">
                             <li><a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">instagram</a></li>
-                            <li><a href="tel:+61405636970" className="hover:text-white transition-colors">+61405086537</a></li>
+                            <li><a href="tel:+61405636970" className="hover:text-white transition-colors">+61405636970</a></li>
                         </ul>
                     </div>
                     

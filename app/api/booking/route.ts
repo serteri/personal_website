@@ -13,6 +13,30 @@ const bookingSchema = z.object({
     time: z.string(),
 });
 
+// YENİ EKLENEN GET FONKSİYONU
+export async function GET() {
+    try {
+        const bookings = await prisma.booking.findMany({
+            orderBy: {
+                date: 'asc',
+            },
+        });
+
+        // BigInt ve Date tiplerini JSON uyumlu hale getiriyoruz
+        const safeBookings = bookings.map(booking => ({
+            ...booking,
+            id: booking.id.toString(),
+            createdAt: booking.createdAt.toISOString(),
+            date: booking.date.toISOString(),
+        }));
+
+        return NextResponse.json(safeBookings);
+
+    } catch (error) {
+        console.error("Failed to fetch bookings:", error);
+        return NextResponse.json({ message: "Failed to fetch bookings" }, { status: 500 });
+    }
+}
 
 export async function POST(req: Request) {
     try {
