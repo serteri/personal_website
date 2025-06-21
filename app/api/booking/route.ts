@@ -37,8 +37,15 @@ export async function POST(req: Request) {
                 time: time,           // YENİ: time kaydediliyor
             }
         });
-
-        return NextResponse.json({ message: 'Booking successful!', booking: newBooking }, { status: 201 });
+// --- ÇÖZÜM BURADA ---
+        // BigInt ve Date tiplerini JSON'un anlayacağı güvenli tiplere (string) çeviriyoruz.
+        const safeBooking = {
+            ...newBooking,
+            id: newBooking.id.toString(), // BigInt'i string'e çevir
+            createdAt: newBooking.createdAt.toISOString(), // Date'i string'e çevir
+            date: newBooking.date.toISOString(), // Date'i string'e çevir
+        };
+        return NextResponse.json({ message: 'Booking successful!', booking: safeBooking }, { status: 201 });
 
     } catch (error) {
         if (error instanceof z.ZodError) {
