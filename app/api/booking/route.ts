@@ -24,15 +24,17 @@ export async function POST(req: Request) {
         // Gelen tarih ve saati birleştirip tam bir Date objesi oluşturuyoruz
         const bookingDateTime = new Date(date);
         const [hours, minutes] = time.split(':').map(Number);
-        bookingDateTime.setHours(hours, minutes);
+        bookingDateTime.setUTCHours(hours, minutes, 0, 0); // Saat dilimi sorunlarını önlemek için UTC kullanmak daha güvenlidir
 
-        // Veritabanına yeni rezervasyonu kaydediyoruz
+        // prisma.booking.create çağrısını güncelledik
         const newBooking = await prisma.booking.create({
             data: {
                 firstName: firstName,
                 lastName: lastName,
                 email: email,
-                date: bookingDateTime, // Veritabanına tam tarih olarak kaydediyoruz
+                phone: phone,         // YENİ: phone kaydediliyor
+                date: bookingDateTime,
+                time: time,           // YENİ: time kaydediliyor
             }
         });
 
