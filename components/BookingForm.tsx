@@ -49,7 +49,7 @@ export default function BookingForm({date, time, onSuccess}: BookingFormProps) {
         };
 
         try {
-            const response = await fetch('/api/bookings', {
+            const response = await fetch('/api/booking', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
