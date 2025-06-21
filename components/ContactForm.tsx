@@ -84,11 +84,11 @@ return(
             </div>
             <div>
                 <label htmlFor="phone" className="block text-sm font-medium text-gray-300">Phone Number</label>
-                <div className="mt-1 flex rounded-md shadow-sm">
-                    <select {...register('countryCode')} id="countryCode" className="block bg-gray-800 border-gray-600 rounded-l-md p-3 text-white focus:ring-lime-400 focus:border-lime-400">
+                <div className="mt-1 flex flex-col sm:flex-row rounded-md shadow-sm">
+                    <select {...register('countryCode')} id="countryCode" className="block bg-gray-800 border-gray-600 rounded-l-md p-3 text-white focus:ring-lime-400 focus:border-lime-400 sm:rounded-r-none mb-2 sm:mb-0">
                         {countryCodes.map(c => <option key={c.code} value={c.dial_code}>{c.name} ({c.dial_code})</option>)}
                     </select>
-                    <input {...register('phone')} id="phone" placeholder="Phone Number" type="tel" className="flex-1 block w-full bg-gray-800 border-gray-600 rounded-r-md p-3 text-white focus:ring-lime-400 focus:border-lime-400" />
+                    <input {...register('phone')} id="phone" placeholder="Phone Number" type="tel" className="flex-1 block w-full bg-gray-800 border-gray-600  p-3 text-white focus:ring-lime-400 focus:border-lime-400 rounded-md sm:rounded-r-md sm:rounded-l-none" />
                 </div>
                 {errors.phone && <p className="mt-1 text-red-500 text-sm">{errors.phone.message}</p>}
             </div>
