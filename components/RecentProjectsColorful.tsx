@@ -12,6 +12,7 @@ export interface Project {
     imageUrl: string;
     link?: string;
     category?: string;
+    index: number;
 }
 
 /* uniq helper */
