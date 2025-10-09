@@ -10,7 +10,8 @@ import ClientsBigMarquee from "@/components/ClientsBigMarquee";
 import WhatWeDo from "@/components/WhatWeDo"; // Yeni component'i import et
 import FaqAccordion from "@/components/FaqAccordion";
 import CallToAction from "@/components/CallToAction";
-
+import RecentProjectsModern, { Project } from "@/components/RecentProjectsModern";
+import RecentProjectsColorful, { Project } from "@/components/RecentProjectsColorful";
 gsap.registerPlugin(ScrollTrigger);
 
 export default function Home( ){
@@ -220,7 +221,7 @@ const clientsRef = useRef<HTMLDivElement>(null); // Clients bölümü için yeni
 
    {/* RECENT PROJECTS BÖLÜMÜ */}
                 <div ref={recentProjectsContainerRef}>
-                    <RecentProjects projects={projects} />
+                    <RecentProjectsColorful projects={projects} subtitle="Colorful, brand-led cases — crafted to convert." />;
                 </div>
        
                 <div ref={whatWeDoRef}>

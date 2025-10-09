@@ -11,7 +11,13 @@ export default {
       colors: {
         'wix-blue': '#0075ff',
         'wix-green': '#00ff88',
-        'calendar-accent': '#fbbf24', // amber-400
+        'calendar-accent': '#fbbf24',
+        brandPink: '#EC4899',
+        brandIndigo: '#6366F1',
+        brandAmber: '#F59E0B'// amber-400
+      },
+      backgroundImage: {
+        'brand-grad': 'linear-gradient(90deg,#EC4899,#6366F1,#F59E0B)'
       },
       fontFamily: {
         'sans': ['Inter', 'sans-serif'], // Modern font similar to Wix Pro
@@ -47,7 +53,10 @@ export default {
 
 
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/line-clamp'),
+    // ...
+  ],
   safelist: [
     'fc',
     'fc-theme-standard',
