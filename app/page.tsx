@@ -1,16 +1,17 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import {useLayoutEffect, useEffect, useRef } from "react";
 
 import { gsap } from "gsap";
 import ScrollTrigger     from "gsap/dist/ScrollTrigger";
 import PromotionalBanner from "@/components/PromotionalBanner";
 import RecentProjects, { Project } from "@/components/RecentProjects"; // Yeni component'i import et
-import ClientsFloating from "@/components/ClientsFloating"; // Yeni component'i import et
+import ClientsBigMarquee from "@/components/ClientsBigMarquee";
 import WhatWeDo from "@/components/WhatWeDo"; // Yeni component'i import et
 import FaqAccordion from "@/components/FaqAccordion";
 import CallToAction from "@/components/CallToAction";
 
+gsap.registerPlugin(ScrollTrigger);
 
 export default function Home( ){
 
@@ -52,67 +53,90 @@ const clientsRef = useRef<HTMLDivElement>(null); // Clients bölümü için yeni
     ]
 
     // 1) Intersection Observer for section‐based background colors
-  useEffect(() => {
-        gsap.registerPlugin(ScrollTrigger);
+    useLayoutEffect(() => {
         const main = mainContainerRef.current;
-
         if (!main) return;
-         // 1. Geçiş: Açıktan Siyaha
-        gsap.to(main, {
-            backgroundColor: "#111111",
-            ease: "none",
-            scrollTrigger: {
-                trigger: contentRef.current, // Siyah bölüm tetikler
-                scrub: true,
-                start: "top bottom", // Siyah bölümün tepesi ekranın altına değince başla
-                end: "top center",   // Siyah bölümün tepesi ekranın ortasına gelince bitir
-            }
-        });
 
-        // 2. Geçiş: Siyahtan Yeni Renginize (#273F4F)
-        gsap.to(main, {
-            backgroundColor: "#201d3a", // Yeni renginiz
-            ease: "none",
-            scrollTrigger: {
-                trigger: recentProjectsContainerRef.current, // Projeler bölümü tetikler
-                scrub: true,
-                start: "top bottom",
-                end: "top center",
-            },
-             immediateRender: false, 
-        });
+        const ctx = gsap.context(() => {
+            // 0) Varsayılan arka planı tanımla
+            gsap.set(main, { backgroundColor: "#EFEEEA" });
 
-        // YENİ Geçiş 3: Projeler Renginden (#273F4F) Siyaha (WhatWeDo bölümü için)
-        gsap.to(main, {
-            backgroundColor: "#111111",
-            ease: "none",
-            immediateRender: false,
-            scrollTrigger: {
-                trigger: whatWeDoRef.current, // Yeni bölüm tetikliyor
-                scrub: true,
-                start: "top bottom",
-                end: "top center",
-            }
-        });
+            // 1) Açık → Siyah
+            gsap.to(main, {
+                backgroundColor: "#111111",
+                ease: "none",
+                immediateRender: false,
+                scrollTrigger: {
+                    trigger: contentRef.current,
+                    start: "top bottom",
+                    end: "top center",
+                    scrub: true,
+                },
+            });
 
-        // RECENT PROJECTS BAŞLIĞININ RENGİNİ DE GSAP İLE YÖNETİYORUZ
-        // Projeler bölümüne girerken başlık rengini beyaza çevir.
-        gsap.to("#recent-projects-heading", { // ID ile hedef alıyoruz
-            color: "#FFFFFF",
-            ease: "none",
-            scrollTrigger: {
-                trigger: recentProjectsContainerRef.current,
-                scrub: true,
-                start: "top bottom",
-                end: "top 80%", // Renk biraz daha hızlı değişsin
-            },
-             immediateRender: false, 
-        });
+            // 2) Siyah → #201d3a (projeler)
+            gsap.to(main, {
+                backgroundColor: "#201d3a",
+                ease: "none",
+                immediateRender: false,
+                scrollTrigger: {
+                    trigger: recentProjectsContainerRef.current,
+                    start: "top bottom",
+                    end: "top center",
+                    scrub: true,
+                },
+            });
 
-        
-        
- return () => {
-            ScrollTrigger.getAll().forEach(st => st.kill());
+            // 3) #201d3a → Siyah (whatWeDo)
+            gsap.to(main, {
+                backgroundColor: "#111111",
+                ease: "none",
+                immediateRender: false,
+                scrollTrigger: {
+                    trigger: whatWeDoRef.current,
+                    start: "top bottom",
+                    end: "top center",
+                    scrub: true,
+                },
+            });
+
+            // Başlık rengi örneği
+            gsap.to("#recent-projects-heading", {
+                color: "#FFFFFF",
+                ease: "none",
+                immediateRender: false,
+                scrollTrigger: {
+                    trigger: recentProjectsContainerRef.current,
+                    start: "top bottom",
+                    end: "top 80%",
+                    scrub: true,
+                },
+            });
+        }, mainContainerRef);
+
+        // --- ÖNEMLİ: Boyut değişince refresh ---
+        // 1) sayfa yüklendiğinde
+        const onLoad = () => ScrollTrigger.refresh();
+        window.addEventListener("load", onLoad);
+
+        // 2) marquee / resimler yüklenince (clientsRef’i izle)
+        const ro = new ResizeObserver(() => {
+            ScrollTrigger.refresh();
+        });
+        if (clientsRef.current) ro.observe(clientsRef.current);
+
+        // 3) pencere boyutu değişince GSAP zaten dinliyor ama güvence:
+        const onResize = () => ScrollTrigger.refresh();
+        window.addEventListener("resize", onResize);
+
+        // İlk render sonrasında da bir kez:
+        requestAnimationFrame(() => ScrollTrigger.refresh());
+
+        return () => {
+            window.removeEventListener("load", onLoad);
+            window.removeEventListener("resize", onResize);
+            ro.disconnect();
+            ctx.revert(); // tüm triggerları temizle
         };
     }, []);
 
@@ -181,9 +205,17 @@ const clientsRef = useRef<HTMLDivElement>(null); // Clients bölümü için yeni
         </section>
 
 {/* YENİ BÖLÜM BURADA */}
-                <div ref={clientsRef}>
-                    <ClientsFloating logos={logos} />
-                </div>
+                <section ref={clientsRef} className="py-10">
+                    <ClientsBigMarquee
+                        logos={logos}
+                        title="OUR CLIENTS"
+                        pps={28}         // px/sn — daha yavaş için 20–24
+                        itemWidth={300}  // büyük kart
+                        itemHeight={150}
+                        gap={40}
+                        pauseOnHover
+                    />
+                </section>
 
 
    {/* RECENT PROJECTS BÖLÜMÜ */}

@@ -34,13 +34,22 @@ export const metadata: Metadata = {
     },
 };
 
+async function safeGetSession() {
+    try {
+        return await getServerSession(authOptions);
+    } catch (e) {
+        console.error("[safeGetSession] getServerSession failed", e);
+        return null; // hatada boş session ile devam
+    }
+}
+
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   // This runs on the server.
-  const session = await getServerSession(authOptions);
+    const session = await safeGetSession();
 
   return (
     <html lang="en">
