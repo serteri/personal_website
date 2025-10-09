@@ -5,12 +5,11 @@ import {useLayoutEffect, useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import ScrollTrigger     from "gsap/dist/ScrollTrigger";
 import PromotionalBanner from "@/components/PromotionalBanner";
-import RecentProjects, { Project } from "@/components/RecentProjects"; // Yeni component'i import et
 import ClientsBigMarquee from "@/components/ClientsBigMarquee";
 import WhatWeDo from "@/components/WhatWeDo"; // Yeni component'i import et
 import FaqAccordion from "@/components/FaqAccordion";
 import CallToAction from "@/components/CallToAction";
-import RecentProjectsModern, { Project } from "@/components/RecentProjectsModern";
+
 import RecentProjectsColorful, { Project } from "@/components/RecentProjectsColorful";
 gsap.registerPlugin(ScrollTrigger);
 
