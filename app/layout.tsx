@@ -53,6 +53,10 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
+    <head>
+        {/* MANUEL OLARAK EKLEYECEĞİNİZ SATIR */}
+        <link rel="icon" href="/favicon.ico" type="image/x-icon" sizes="any" />
+    </head>
     <body >
       <Navbar/>
       <div className="pt-20">
