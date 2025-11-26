@@ -75,6 +75,12 @@ export default async function RootLayout({
 <Footer />
     </body>
     <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID || ""} />
+    {/* --- AJAN KOD BAŞLANGIÇ --- */}
+<div style={{ padding: "20px", background: "red", color: "white", textAlign: "center", position: "fixed", bottom: 0, left: 0, width: "100%", zIndex: 9999 }}>
+  DEBUG MODU: 
+  ID DURUMU: [{process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID ? process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID : "BOŞ GELİYOR"}]
+</div>
+{/* --- AJAN KOD BİTİŞ --- */}
     </html>
   );
 }
