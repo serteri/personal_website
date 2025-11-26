@@ -9,12 +9,12 @@ import countryCodes from "@/lib/countryCodes.json";
 //Zod ile form validasyon semasini olusturuyoruz (API deki ile ayni)
 
 const FormSchema = z.object({
-    firstName:z.string().min(2,"Ad alani bos birakilamaz."),
-    lastName:z.string().min(2,"Soyadi alani bos birakilamaz."),
-    email:z.string().min(1,"Email alani bos birakilamaz.").email("Lutfen gecerli bir email adresi giriniz"),
+    firstName:z.string().min(2,"First name required."),
+    lastName:z.string().min(2,"Last name required."),
+    email:z.string().min(1,"Email required.").email("Please enter a valid email address."),
     countryCode: z.string(),
-    phone:z.string().min(10, "Telefon alani bos birakilamaz."),
-    message:z.string().min(10, "Mesaj en az 10 karakter olmalidir"),
+    phone:z.string().min(10, "Phone number is required."),
+    message:z.string().min(10, "Message must be at least 10 characters long."),
 })
 
 type FormValues = z.infer<typeof FormSchema>;
