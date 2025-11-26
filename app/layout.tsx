@@ -9,6 +9,7 @@ import { getServerSession } from 'next-auth/next';
 import { Toaster } from 'react-hot-toast';
 import Footer from "@/components/Footer";
 import type { Metadata } from 'next';
+import { GoogleAnalytics } from '@next/third-parties/google'
 
 export const metadata: Metadata = {
     title: {
@@ -72,6 +73,7 @@ export default async function RootLayout({
       </div>
 <Footer />
     </body>
+    <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID} />
     </html>
   );
 }
