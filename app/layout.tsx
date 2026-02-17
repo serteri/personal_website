@@ -3,13 +3,14 @@
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import React from "react";
-import {Providers} from "@/components/Provider";
-import {authOptions} from "@/lib/auth";
+import { Providers } from "@/components/Provider";
+import { authOptions } from "@/lib/auth";
 import { getServerSession } from 'next-auth/next';
 import { Toaster } from 'react-hot-toast';
 import Footer from "@/components/Footer";
 import type { Metadata } from 'next';
 import { GoogleAnalytics } from '@next/third-parties/google'
+import Script from 'next/script';
 
 export const metadata: Metadata = {
     title: {
@@ -46,35 +47,36 @@ async function safeGetSession() {
 }
 
 export default async function RootLayout({
-  children,
+    children,
 }: Readonly<{
-  children: React.ReactNode;
+    children: React.ReactNode;
 }>) {
-  // This runs on the server.
+    // This runs on the server.
     const session = await safeGetSession();
 
-  return (
-    <html lang="en">
-    <head>
-        {/* MANUEL OLARAK EKLEYECEĞİNİZ SATIR */}
-        <link rel="icon" href="/favicon.ico" type="image/x-icon" sizes="any" />
-    </head>
-    <body >
-      <Navbar/>
-      <div className="pt-20">
-          <Toaster
-              position="top-center"
-              toastOptions={{
-                  success: { className: 'bg-green-500 text-white' },
-                  error:   { className: 'bg-red-500 text-white' },
-              }}
-          />
-          <Providers session={session}>{children}</Providers>
+    return (
+        <html lang="en">
+            <head>
+                {/* MANUEL OLARAK EKLEYECEĞİNİZ SATIR */}
+                <link rel="icon" href="/favicon.ico" type="image/x-icon" sizes="any" />
+            </head>
+            <body >
+                <Navbar />
+                <div className="pt-20">
+                    <Toaster
+                        position="top-center"
+                        toastOptions={{
+                            success: { className: 'bg-green-500 text-white' },
+                            error: { className: 'bg-red-500 text-white' },
+                        }}
+                    />
+                    <Providers session={session}>{children}</Providers>
 
-      </div>
-<Footer />
-    </body>
-    <GoogleAnalytics gaId="G-F7R1QT46BJ" />
-    </html>
-  );
+                </div>
+                <Footer />
+                <Script src="https://www.pylonchat.com/widget.js?id=cmlqn0q6x0001jr04p3exaheu" />
+            </body>
+            <GoogleAnalytics gaId="G-F7R1QT46BJ" />
+        </html>
+    );
 }
