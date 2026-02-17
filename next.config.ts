@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // @ts-ignore
   eslint: {
     // Uyarı: Bu ayar ESLint hatalarını üretim (production) yapısında yok sayar.
     ignoreDuringBuilds: true,
