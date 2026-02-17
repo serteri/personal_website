@@ -10,7 +10,7 @@ import { Toaster } from 'react-hot-toast';
 import Footer from "@/components/Footer";
 import type { Metadata } from 'next';
 import { GoogleAnalytics } from '@next/third-parties/google'
-import Script from 'next/script';
+import ChatWidget from '@/components/ChatWidget';
 
 export const metadata: Metadata = {
     title: {
@@ -74,7 +74,7 @@ export default async function RootLayout({
 
                 </div>
                 <Footer />
-                <Script src="https://www.pylonchat.com/widget.js?id=cmlqn0q6x0001jr04p3exaheu" />
+                <ChatWidget />
             </body>
             <GoogleAnalytics gaId="G-F7R1QT46BJ" />
         </html>
