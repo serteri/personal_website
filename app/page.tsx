@@ -32,18 +32,17 @@ export default function Home() {
   const clientsRef = useRef<HTMLDivElement>(null); // Clients bölümü için yeni ref
 
   const projects: Project[] = [
-    { id: '1', title: 'Project Alkon', description: 'Alkon Energy', imageUrl: '/alkon_logo.jpeg', link: 'https://alkonenerji.com/', category: 'Web Design', index: 0 },
-    { id: '2', title: 'Project Guneysan', description: 'Guneysan', imageUrl: '/guneysan_logo.jpeg', link: '', category: 'Branding', index: 1 },
-    { id: '3', title: 'Project Petek Bal', description: 'Petek Bal', imageUrl: '/balpetek_logo.jpeg', link: 'https://www.balpetek.com.tr/', category: 'Mobile App', index: 2 },
     ...caseStudies.map((c, i) => ({
       id: `own-${c.slug}`,
       title: c.title,
       description: c.summary,
       link: c.liveUrl,
       slug: c.slug,
+      imageUrl: c.coverImage,
+      tags: c.tags,
       gradient: c.gradient,
       category: c.category,
-      index: 3 + i,
+      index: i,
     })),
   ];
 

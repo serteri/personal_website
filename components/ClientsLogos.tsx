@@ -56,7 +56,7 @@ export default function ClientsLogos({
                             </span>
                         );
                         const box =
-                            "flex items-center justify-center w-full sm:w-64 h-28 md:h-32 rounded-2xl bg-white shadow-md p-4";
+                            "flex items-center justify-center w-full sm:w-64 h-28 md:h-32 rounded-2xl bg-white shadow-md p-4 transition duration-300 hover:-translate-y-1 hover:shadow-2xl hover:ring-2 hover:ring-white/70 focus-visible:-translate-y-1 focus-visible:ring-2 focus-visible:ring-white";
                         return (
                             <li key={logo.name} className="flex justify-center">
                                 {logo.href ? (

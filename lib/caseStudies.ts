@@ -19,15 +19,16 @@ export interface CaseStudy {
     metric?: { label: string; value: string };
 }
 
-// TODO(serter): drop these screenshots into /public/projects/ :
-//   /public/projects/provider-shield.png
+// TODO(serter): drop these 1280x800 screenshots into /public/projects/ :
 //   /public/projects/logivisa.png
+//   /public/projects/providershield.png
 //   /public/projects/flightagent.png
-// then set `coverImage` below (the placeholder card is used until then).
+// Until the files exist, cards fall back to the gradient placeholder.
 
 export const caseStudies: (CaseStudy & { coverImage?: string })[] = [
     {
         slug: "provider-shield",
+        coverImage: "/projects/providershield.png",
         title: "Provider Shield",
         summary: "NDIS compliance, simplified: a RAG assistant and workflow built to help registered providers stay audit-ready.",
         tags: ["SaaS", "AI / RAG", "Compliance"],
@@ -49,6 +50,7 @@ export const caseStudies: (CaseStudy & { coverImage?: string })[] = [
     },
     {
         slug: "logivisa",
+        coverImage: "/projects/logivisa.png",
         title: "LogiVisa",
         summary: "Know where you stand before you apply: a visa and immigration readiness assessment, crafted to convert.",
         tags: ["Assessment Tool", "Immigration", "Web App"],
@@ -67,6 +69,7 @@ export const caseStudies: (CaseStudy & { coverImage?: string })[] = [
     },
     {
         slug: "flightagent",
+        coverImage: "/projects/flightagent.png",
         title: "FlightAgent.io",
         summary: "Flight disruption protection for travellers: support in place for when flights go wrong, crafted to convert.",
         tags: ["Travel", "Protection", "Web App"],

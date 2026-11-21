@@ -4,21 +4,20 @@
 import React, { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 export interface Project {
     id: string;
     title: string;
     description?: string;
-    imageUrl?: string;
-    link?: string;
+    imageUrl?: string; // screenshot in /public/projects/; gradient placeholder is used if missing
+    link?: string; // live site
     slug?: string; // when set, a case study page exists at /case-studies/[slug]
-    gradient?: string; // placeholder cover when there is no imageUrl
+    gradient?: string;
     category?: string;
+    tags?: string[];
     index: number;
 }
-
-const OWN = "Own Product";
 
 /* uniq helper */
 const uniq = (arr: (string | undefined)[]) => Array.from(new Set(arr.filter(Boolean) as string[]));
@@ -27,196 +26,109 @@ interface Props { projects: Project[]; subtitle?: string; }
 
 export default function RecentProjectsColorful({ projects, subtitle }: Props) {
     const [filter, setFilter] = useState<string>("All");
-    const [modalProject, setModalProject] = useState<Project | null>(null);
     const categories = useMemo(() => ["All", ...uniq(projects.map(p => p.category))], [projects]);
     const filtered = useMemo(() => filter === "All" ? projects : projects.filter(p => p.category === filter), [projects, filter]);
 
-    const clientItems = filtered.filter(p => p.category !== OWN);
-    const ownItems = filtered.filter(p => p.category === OWN);
+    return (
+        <section className="py-12 bg-gradient-to-b from-white via-rose-50 to-indigo-50">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
+                    <div>
+                        <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900">Recent Projects</h2>
+                        <p className="mt-1 text-sm text-slate-700 max-w-xl">
+                            {subtitle ?? "Vibrant, brand-forward projects — click any card to visit the live site."}
+                        </p>
+                    </div>
 
-    // prefers-reduced-motion
-    const prefersReduced = typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+                    {/* Filters: only shown when there is more than one real category */}
+                    {categories.length > 2 && (
+                        <div className="flex flex-wrap gap-3">
+                            {categories.map(cat => (
+                                <button
+                                    key={cat}
+                                    onClick={() => setFilter(cat)}
+                                    className={`px-3 py-1.5 rounded-full text-sm font-semibold transition focus:outline-none ${
+                                        filter === cat
+                                            ? "bg-gradient-to-r from-rose-500 via-orange-400 to-amber-400 text-white shadow-xl"
+                                            : "bg-white text-slate-700 border border-slate-200 hover:shadow-sm"
+                                    }`}
+                                    aria-pressed={filter === cat}
+                                >
+                                    {cat}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
 
-    // Palette notes: we use Tailwind built-in utility colors and gradients.
-    // If you want brand-specific colors, add them to tailwind.config.js and replace classes.
-    const renderGrid = (items: Project[]) => (
-        <div
-                    className="grid gap-6"
-                    style={{ gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))" }}
-                >
-                    {items.map((p, idx) => (
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {filtered.map((p, idx) => (
                         <motion.article
                             key={p.id}
                             layout
                             initial={{ opacity: 0, y: 8 }}
                             animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 6 }}
                             transition={{ duration: 0.45, delay: idx * 0.03 }}
-                            className="relative group"
+                            className="group rounded-2xl overflow-hidden shadow-md bg-white border border-slate-100 flex flex-col transition hover:shadow-xl"
                         >
-                            <motion.button
-                                onClick={() => setModalProject(p)}
-                                whileHover={prefersReduced ? {} : { scale: 1.02 }}
-                                whileTap={prefersReduced ? {} : { scale: 0.995 }}
-                                className="w-full text-left rounded-2xl overflow-hidden shadow-md bg-white border border-slate-100"
-                                aria-label={`Open project ${p.title}`}
+                            <a
+                                href={p.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block flex-1"
+                                aria-label={`Visit ${p.title} (opens in a new tab)`}
                             >
-                                {/* Thumb area */}
-                                <div className="relative w-full aspect-[4/3] bg-gradient-to-tr from-purple-100 via-pink-50 to-amber-50">
-                                    <Cover p={p} className="object-cover transition-transform duration-500 group-hover:scale-105" />
-
-                                    {/* Colorful overlay - appears on hover */}
-                                    <div className="absolute inset-0 pointer-events-none">
-                                        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                                             style={{ background: "linear-gradient(120deg, rgba(99,102,241,0.18), rgba(236,72,153,0.12) 40%, rgba(250,204,21,0.08) 80%)" }} />
-                                        {/* neon glow edges */}
-                                        <div className="absolute -inset-px rounded-2xl blur-xl opacity-0 group-hover:opacity-70 transition-opacity duration-300"
-                                             style={{ boxShadow: "0 10px 40px rgba(99,102,241,0.12), inset 0 0 30px rgba(236,72,153,0.06)" }} />
-                                    </div>
-
-                                    {/* CTA pill */}
-                                    <div className="absolute left-4 bottom-4 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                    <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-indigo-600 to-rose-500 text-white text-sm font-semibold shadow-md">
-                      View Case →
-                    </span>
+                                <div className="relative w-full aspect-[16/10] bg-slate-100 overflow-hidden">
+                                    <Cover p={p} />
+                                    <div className="absolute left-4 bottom-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                        <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-indigo-600 to-rose-500 text-white text-sm font-semibold shadow-md">
+                                            Visit site ↗
+                                        </span>
                                     </div>
                                 </div>
 
-                                {/* meta */}
-                                <div className="p-3 md:p-4">
-                                    <div className="flex items-center justify-between">
-                                        <h3 className="text-sm md:text-base font-semibold text-slate-900">{p.title}</h3>
-                                        <span className="text-xs text-slate-500">{p.category ?? "General"}</span>
+                                <div className="p-4">
+                                    <div className="flex items-center justify-between gap-2">
+                                        <h3 className="text-base font-semibold text-slate-900">{p.title}</h3>
+                                        <span className="text-xs font-semibold text-slate-500 whitespace-nowrap">{p.category ?? "General"}</span>
                                     </div>
-                                    <p className="mt-1 text-xs text-slate-600 line-clamp-3">{p.description}</p>
+                                    <p className="mt-1 text-sm text-slate-600">{p.description}</p>
+                                    {p.tags && (
+                                        <div className="mt-3 flex flex-wrap gap-1.5">
+                                            {p.tags.map(t => (
+                                                <span key={t} className="px-2 py-0.5 rounded-full bg-slate-100 text-[11px] font-semibold text-slate-600">{t}</span>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
-                            </motion.button>
-
-                            {/* Accent floating corner */}
-                            <div className="pointer-events-none absolute -top-3 -right-3 w-14 h-14 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-400"
-                                 style={{ background: "linear-gradient(135deg, rgba(236,72,153,0.18), rgba(99,102,241,0.16))", filter: "blur(18px)" }} />
+                            </a>
+                            {p.slug && (
+                                <div className="px-4 pb-4">
+                                    <Link href={`/case-studies/${p.slug}`} className="text-sm font-semibold text-indigo-600 hover:text-indigo-800">
+                                        Read case study →
+                                    </Link>
+                                </div>
+                            )}
                         </motion.article>
                     ))}
                 </div>
-    );
-
-    return (
-        <section className="py-12 bg-gradient-to-b from-white via-rose-50 to-indigo-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                {/* Header */}
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
-                    <div>
-                        <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900">Recent Projects</h2>
-                        <p className="mt-1 text-sm text-slate-700 max-w-xl">
-                            {subtitle ?? "Vibrant, brand-forward projects — click any card to explore the full case."}
-                        </p>
-                    </div>
-
-                    {/* Filters */}
-                    <div className="flex flex-wrap gap-3">
-                        {categories.map(cat => (
-                            <button
-                                key={cat}
-                                onClick={() => setFilter(cat)}
-                                className={`px-3 py-1.5 rounded-full text-sm font-semibold transition focus:outline-none ${
-                                    filter === cat
-                                        ? "bg-gradient-to-r from-rose-500 via-orange-400 to-amber-400 text-white shadow-xl"
-                                        : "bg-white text-slate-700 border border-slate-200 hover:shadow-sm"
-                                }`}
-                                aria-pressed={filter === cat}
-                            >
-                                {cat}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {clientItems.length > 0 && renderGrid(clientItems)}
-
-                {ownItems.length > 0 && (
-                    <div className="mt-14">
-                        <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900">Products we built and run ourselves</h3>
-                        <div className="mt-5">{renderGrid(ownItems)}</div>
-                    </div>
-                )}
             </div>
-
-            {/* Modal */}
-            <AnimatePresence>
-                {modalProject && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60"
-                        onClick={() => setModalProject(null)}
-                    >
-                        <motion.div
-                            initial={{ scale: 0.98, y: 20 }}
-                            animate={{ scale: 1, y: 0 }}
-                            exit={{ scale: 0.98, y: 20 }}
-                            transition={{ duration: 0.24 }}
-                            className="max-w-4xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            <div className="relative w-full aspect-[16/9] bg-slate-100">
-                                <Cover p={modalProject} className="object-cover" />
-                                {/* modal overlay accent */}
-                                <div className="absolute inset-0 pointer-events-none"
-                                     style={{ background: "linear-gradient(180deg, rgba(8,145,178,0.06), rgba(236,72,153,0.03))" }} />
-                            </div>
-
-                            <div className="p-6">
-                                <div className="flex items-start justify-between gap-4">
-                                    <div>
-                                        <h3 className="text-2xl font-bold text-slate-900">{modalProject.title}</h3>
-                                        {modalProject.category && <p className="text-sm text-slate-500 mt-1">{modalProject.category}</p>}
-                                    </div>
-                                    <div className="ml-auto flex items-center gap-3">
-                                        {modalProject.slug && (
-                                            <Link
-                                                href={`/case-studies/${modalProject.slug}`}
-                                                className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-slate-300 text-slate-800 text-sm font-semibold"
-                                            >
-                                                Read case study
-                                            </Link>
-                                        )}
-                                        {modalProject.link && (
-                                            <a
-                                                href={modalProject.link}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-rose-500 to-indigo-600 text-white text-sm font-semibold shadow"
-                                            >
-                                                Visit Site
-                                            </a>
-                                        )}
-                                        <button onClick={() => setModalProject(null)} className="text-slate-500 hover:text-slate-800 px-3 py-2 rounded">
-                                            Close
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <p className="mt-4 text-sm text-slate-700 leading-relaxed">{modalProject.description}</p>
-                            </div>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
         </section>
     );
 }
 
-function Cover({ p, className }: { p: Project; className?: string }) {
-    if (p.imageUrl) {
+/* Screenshot cover; falls back to a gradient wordmark card if the file is missing. */
+function Cover({ p }: { p: Project }) {
+    const [failed, setFailed] = useState(false);
+    if (p.imageUrl && !failed) {
         return (
             <Image
                 src={p.imageUrl}
-                alt={p.title}
+                alt={`${p.title} website screenshot`}
                 fill
-                className={className}
+                className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
                 sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 33vw"
-                priority={false}
+                onError={() => setFailed(true)}
             />
         );
     }
