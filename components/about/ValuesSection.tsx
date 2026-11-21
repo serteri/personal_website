@@ -28,22 +28,22 @@ const values = [
 const ValuesSection = () => {
     return (
         <motion.section
-            className="py-24 px-6"
+            className="border-b border-line py-24 px-6"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.7 }}
         >
-            <div className="container mx-auto text-center">
-                <h2 className="text-4xl font-bold mb-12">Our Core Values</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
+            <div className="mx-auto max-w-7xl">
+                <h2 className="text-4xl font-extrabold tracking-tight mb-12">Our Core Values</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border-t border-l border-line">
                     {values.map((value, index) => {
                         const Icon = value.icon;
                         return (
-                            <div key={index} className="flex flex-col items-center p-6">
-                                <Icon className="w-12 h-12 text-lime-300 mb-4"/>
-                                <h3 className="text-xl font-bold mb-2">{value.title}</h3>
-                                <p className="text-gray-400">{value.description}</p>
+                            <div key={index} className="flex flex-col items-start border-r border-b border-line bg-white p-6">
+                                <Icon className="w-8 h-8 text-ink mb-4"/>
+                                <h3 className="text-xl font-bold tracking-tight mb-2">{value.title}</h3>
+                                <p className="text-muted">{value.description}</p>
                             </div>
                         )
                     })}

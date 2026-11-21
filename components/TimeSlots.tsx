@@ -27,14 +27,14 @@ export default function TimeSlots({date,bookedTimes,onSelect}:{
 
     return (
         <div>
-            <h3 className="font-semibold text-white">Select a time for {date.toDateString()} :</h3>
+            <h3 className="font-semibold text-ink">Select a time for {date.toDateString()} :</h3>
             <div className="grid grid-cols-4 gap-4 mt-2">
                 {available.map(time => {
                     const taken = bookedTimes.includes(time);
                     return (
                         <button key={time} onClick={() => onSelect(time)} disabled={taken}
                                 title={taken ? 'Not available' : undefined}
-                                className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-700 disabled:text-gray-400 disabled:line-through disabled:cursor-not-allowed">
+                                className="p-2 bg-white border border-line text-ink font-mono text-sm hover:border-cobalt hover:text-cobalt disabled:bg-[#E4E4E7] disabled:text-zinc-400 disabled:line-through disabled:cursor-not-allowed disabled:hover:border-line disabled:hover:text-zinc-400">
                             {time}
                         </button>
                     );

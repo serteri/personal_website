@@ -9,6 +9,11 @@ export default {
   theme: {
     extend: {
       colors: {
+        paper: '#F4F4F5',
+        ink: '#18181B',
+        muted: '#52525B',
+        line: '#D4D4D8',
+        cobalt: '#0047FF',
         'wix-blue': '#0075ff',
         'wix-green': '#00ff88',
         'calendar-accent': '#fbbf24',
@@ -21,6 +26,7 @@ export default {
       },
       fontFamily: {
         'sans': ['Inter', 'sans-serif'], // Modern font similar to Wix Pro
+        'mono': ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
       keyframes: {
         borderFlip: {

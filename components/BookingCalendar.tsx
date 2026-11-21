@@ -32,30 +32,30 @@ export default function BookingCalendar({
             plugins={[dayGridPlugin, interactionPlugin]}
             initialView="dayGridMonth"
             dayHeaderClassNames={() => [
-                'bg-white',          // white bg for header row
-                'text-black',        // black text so it pops
+                'bg-white',          // header row
+                'text-ink',
                 'font-semibold',     // standout font
-                'hover:bg-teal-200',      // ← lighter on hover
+                'hover:bg-paper',
                 'cursor-pointer',         // ← show it’s clickable
                 'transition-colors duration-200',
             ]}
             dayCellClassNames={(arg) => {
                 const day = arg.date.getDay();
-                const base = ['border','border-gray-700','text-gray-200'];
+                const base = ['border','border-line','text-ink'];
                 if (day === 0) {
                     // Sunday → no bookings
-                    return [...base, 'bg-gray-800', 'opacity-50', 'pointer-events-none'];
+                    return [...base, 'bg-[#E4E4E7]', 'opacity-50', 'pointer-events-none'];
                 }
                 if (arg.date.toDateString() === new Date().toDateString()) {
                     // Today
-                    return [...base, 'bg-red-200'];
+                    return [...base, 'bg-paper'];
                 }
                 if (day === 6) {
                     // Saturday → slightly different shade
-                    return [...base, 'bg-gray-700'];
+                    return [...base, 'bg-white'];
                 }
                 // Weekday
-                return [...base, 'bg-gray-900'];
+                return [...base, 'bg-white'];
             }}
 
             // ← use dateClick instead of select:
@@ -93,9 +93,8 @@ export default function BookingCalendar({
                 },
             }}
             eventClassNames={() => [
-                'bg-indigo-500 text-white rounded p-1',
-                'hover:bg-indigo-600 hover:scale-105',  // ← color + pop
-                'transform transition-all duration-150',
+                'bg-cobalt text-white rounded-none p-1',
+                'transition-colors duration-150',
                 'cursor-pointer',
             ]}
             validRange={{ start: today }}       // ← no clicks before today
@@ -103,8 +102,8 @@ export default function BookingCalendar({
                 <div
                     className="
             w-full h-full p-2 flex items-start
-            bg-gray-900 text-gray-200
-            hover:bg-red-800
+            bg-white text-ink
+            hover:bg-paper
             transition-colors duration-150
             cursor-pointer
           "
@@ -118,9 +117,9 @@ export default function BookingCalendar({
             <Dialog
                 open={showModal}
                 onClose={() => setShowModal(false)}
-                className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+                className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50"
             >
-                <Dialog.Panel className="bg-white p-6 rounded-lg max-w-sm mx-auto">
+                <Dialog.Panel className="bg-white border border-line p-6 max-w-sm mx-auto">
                     <Dialog.Title className="text-xl font-bold mb-2">
                         🚫 Sunday Closed
                     </Dialog.Title>
@@ -128,7 +127,7 @@ export default function BookingCalendar({
                         Sorry, we don&apos;t take bookings on Sundays.
                     </Dialog.Description>
                     <button
-                        className="mt-2 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+                        className="mt-2 px-4 py-2 bg-cobalt text-white rounded-none hover:bg-[#0038CC]"
                         onClick={() => setShowModal(false)}
                     >
                         Got it

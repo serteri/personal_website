@@ -25,12 +25,12 @@ export default function MobileNav({ isOpen, closeMenu }: MobileNavProps) {
                     initial="initial"
                     animate="animate"
                     exit="exit"
-                    className="absolute top-full left-0 w-full bg-black bg-opacity-95 text-white z-40 md:hidden"
+                    className="absolute top-full left-0 w-full bg-[#F4F4F5] border-b border-line text-ink z-40 md:hidden"
                 >
                     <ul className="flex flex-col items-center py-6 space-y-4">
-                        <li><Link href="/about" className="block py-3 text-lg font-medium hover:text-lime-400" onClick={closeMenu}>About</Link></li>
-                        <li><Link href="/#services" className="block py-3 text-lg font-medium hover:text-lime-400" onClick={closeMenu}>What We Do</Link></li>
-                        <li><Link href="/contact" className="block py-3 text-lg font-medium hover:text-lime-400" onClick={closeMenu}>Contact</Link></li>
+                        <li><Link href="/about" className="block py-3 font-mono text-sm uppercase tracking-wider hover:text-cobalt" onClick={closeMenu}>About</Link></li>
+                        <li><Link href="/#services" className="block py-3 font-mono text-sm uppercase tracking-wider hover:text-cobalt" onClick={closeMenu}>What We Do</Link></li>
+                        <li><Link href="/contact" className="block py-3 font-mono text-sm uppercase tracking-wider hover:text-cobalt" onClick={closeMenu}>Contact</Link></li>
                     </ul>
                 </motion.div>
             )}

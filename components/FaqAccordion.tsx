@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import SwissHeader from './SwissHeader';
 
 // ÇÖZÜM: 'any' yerine kullanılacak olan tip arayüzünü tanımlıyoruz.
 interface FaqItemData {
@@ -46,15 +47,16 @@ const faqData: FaqItemData[] = [
 // Tek bir SSS öğesini yönetecek alt component
 const FaqItem = ({ item, isOpen, onClick }: { item: FaqItemData, isOpen: boolean, onClick: () => void }) => {
     return (
-        <div className="border-b border-lime-300/20 py-4">
+        <div className="border-b border-line">
             <button
-                className="w-full flex justify-between items-center text-left"
+                className="w-full flex justify-between items-center text-left py-5 hover:text-cobalt transition-colors"
+                aria-expanded={isOpen}
                 onClick={onClick}
             >
-                <span className="text-white text-lg">{item.question}</span>
+                <span className="text-ink text-lg font-semibold tracking-tight pr-6">{item.question}</span>
                 {/* Ok ikonu ve dönme animasyonu */}
                 <svg
-                    className={`flex-shrink-0 w-5 h-5 text-lime-300 transition-transform duration-300 ${isOpen ? 'transform rotate-180' : ''}`}
+                    className={`flex-shrink-0 w-5 h-5 text-ink transition-transform duration-300 ${isOpen ? 'transform rotate-180' : ''}`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -66,9 +68,9 @@ const FaqItem = ({ item, isOpen, onClick }: { item: FaqItemData, isOpen: boolean
             
             {/* Açılır/kapanır cevap bölümü */}
             <div
-                className={`overflow-hidden transition-all duration-500 ease-in-out ${isOpen ? 'max-h-96 mt-4' : 'max-h-0'}`}
+                className={`overflow-hidden transition-all duration-500 ease-in-out ${isOpen ? 'max-h-96 pb-6' : 'max-h-0'}`}
             >
-                <p className="text-gray-400">
+                <p className="text-muted max-w-3xl">
                     {item.answer}
                 </p>
             </div>
@@ -90,10 +92,10 @@ export default function FaqAccordion() {
     };
 
     return (
-        <section className="bg-black text-white py-24 px-4">
-            <div className="container mx-auto max-w-4xl">
-                <h2 className="text-4xl font-bold mb-8 text-center">Frequently asked questions</h2>
-                <div>
+        <section id="faq" className="bg-[#F4F4F5] border-b border-line py-20 px-4 scroll-mt-24">
+            <div className="mx-auto max-w-7xl sm:px-2 lg:px-8">
+                <SwissHeader index="03" label="FAQ" title="Frequently asked questions" />
+                <div className="border-t border-line bg-white px-6">
                     {faqData.map((item, index) => (
                         <FaqItem
                             key={index}

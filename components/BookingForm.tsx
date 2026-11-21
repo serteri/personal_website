@@ -78,14 +78,14 @@ export default function BookingForm({date, time, onSuccess}: BookingFormProps) {
     };
 
 return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 max-w-lg mx-auto text-white" noValidate>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 max-w-lg mx-auto text-ink" noValidate>
             {/* Honeypot: hidden from people, bots tend to fill it */}
             <div aria-hidden="true" style={{ position: 'absolute', left: '-10000px', width: 1, height: 1, overflow: 'hidden' }}>
                 <label>Website <input type="text" tabIndex={-1} autoComplete="off" {...register('website')} /></label>
             </div>
-        <div className="bg-gray-800 p-4 rounded-lg text-center">
+        <div className="bg-white border border-line p-4 text-center">
             <p>You are booking an appointment for:</p>
-            <p className="font-bold text-lime-300 text-lg">
+            <p className="font-bold text-cobalt text-lg">
                 {date.toDateString()} at {time}
             </p>
         </div>
@@ -93,14 +93,14 @@ return (
         <input
             {...register('firstName')}
             placeholder="First Name"
-            className="w-full p-3 bg-gray-800 border border-gray-600 rounded-md focus:ring-lime-400 focus:border-lime-400"
+            className="w-full p-3 bg-white border border-line rounded-none text-ink focus:outline-none focus:ring-0 focus:border-cobalt"
         />
         {errors.firstName && <p className="text-red-500 text-sm mt-1">{errors.firstName.message}</p>}
 
         <input
             {...register('lastName')}
             placeholder="Last Name"
-            className="w-full p-3 bg-gray-800 border border-gray-600 rounded-md focus:ring-lime-400 focus:border-lime-400"
+            className="w-full p-3 bg-white border border-line rounded-none text-ink focus:outline-none focus:ring-0 focus:border-cobalt"
         />
         {errors.lastName && <p className="text-red-500 text-sm mt-1">{errors.lastName.message}</p>}
 
@@ -108,7 +108,7 @@ return (
             {...register('email')}
             type="email"
             placeholder="Email"
-            className="w-full p-3 bg-gray-800 border border-gray-600 rounded-md focus:ring-lime-400 focus:border-lime-400"
+            className="w-full p-3 bg-white border border-line rounded-none text-ink focus:outline-none focus:ring-0 focus:border-cobalt"
         />
         {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
 
@@ -116,11 +116,11 @@ return (
             {...register('phone')}
             type="tel"
             placeholder="Phone"
-            className="w-full p-3 bg-gray-800 border border-gray-600 rounded-md focus:ring-lime-400 focus:border-lime-400"
+            className="w-full p-3 bg-white border border-line rounded-none text-ink focus:outline-none focus:ring-0 focus:border-cobalt"
         />
         {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>}
 
-        <button type="submit" disabled={isSubmitting} className="w-full py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-black bg-lime-300 hover:bg-lime-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lime-500 disabled:bg-gray-500 disabled:cursor-not-allowed">
+        <button type="submit" disabled={isSubmitting} className="w-full py-3 px-4 text-lg font-semibold text-white bg-[#0047FF] hover:bg-[#0038CC] focus:outline-none disabled:bg-zinc-400 disabled:cursor-not-allowed">
             {isSubmitting ? 'Booking...' : 'Book Appointment'}
         </button>
 

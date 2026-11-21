@@ -1,47 +1,46 @@
 import React from "react";
-import { Globe, Bot, LayoutDashboard, Gauge, type LucideIcon } from "lucide-react";
+import SwissHeader from "./SwissHeader";
 
-type Service = { title: string; description: string; Icon: LucideIcon };
+type Service = { title: string; description: string };
 
 const services: Service[] = [
     {
         title: "High-Converting Websites",
         description: "Fast, conversion-focused websites built to turn visitors into leads.",
-        Icon: Globe,
     },
     {
         title: "AI & Lead Automation",
         description: "24/7 AI assistants, automated booking flows, and instant CRM/SMS follow-ups.",
-        Icon: Bot,
     },
     {
         title: "Custom Web Apps & SaaS",
         description: "Scalable web applications, client portals, and interactive business tools.",
-        Icon: LayoutDashboard,
     },
     {
         title: "Speed & Technical SEO",
         description: "Core Web Vitals optimization, technical SEO audits, and conversion rate improvements.",
-        Icon: Gauge,
     },
 ];
 
 export default function WhatWeDo() {
     return (
-        <section id="services" className="bg-black py-16 px-4 scroll-mt-24">
-            <div className="container mx-auto max-w-5xl">
-                <h2 className="text-3xl md:text-4xl font-extrabold text-white text-center mb-10">What we do</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    {services.map(({ title, description, Icon }) => (
+        <section id="services" className="bg-[#F4F4F5] border-b border-line py-20 px-4 scroll-mt-24">
+            <div className="mx-auto max-w-7xl sm:px-2 lg:px-8">
+                <SwissHeader index="01" label="SERVICES" title="What we do" />
+                {/* 2x2 joined grid: shared 1px lines, no gaps */}
+                <div className="grid grid-cols-1 md:grid-cols-2 border-t border-l border-line">
+                    {services.map(({ title, description }, i) => (
                         <article
                             key={title}
-                            className="rounded-2xl border border-white/10 bg-zinc-900/60 p-7 transition hover:border-white/25"
+                            className="group relative border-r border-b border-line bg-white p-8 min-h-[220px] transition-colors duration-300 hover:bg-[#FAFAFA]"
                         >
-                            <div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-white/5 text-indigo-300">
-                                <Icon className="h-5 w-5" aria-hidden="true" />
-                            </div>
-                            <h3 className="text-xl font-bold text-white">{title}</h3>
-                            <p className="mt-2 text-zinc-400">{description}</p>
+                            <span className="font-mono text-xs uppercase tracking-wider text-muted">
+                                {String(i + 1).padStart(2, "0")}
+                            </span>
+                            <h3 className="mt-10 text-2xl font-bold tracking-tight text-ink transition-colors group-hover:text-cobalt">
+                                {title}
+                            </h3>
+                            <p className="mt-2 max-w-sm text-muted">{description}</p>
                         </article>
                     ))}
                 </div>

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { ArrowUpRight } from "lucide-react";
 
 export type ClientLogo = {
     name: string;
@@ -16,19 +17,19 @@ export const clientLogos: ClientLogo[] = [
         name: "Logivisa",
         alt: "Logivisa logo",
         href: "https://logivisa.com",
-        wordmark: { text: "Logivisa", className: "font-extrabold tracking-tight text-indigo-600" },
+        wordmark: { text: "Logivisa", className: "font-extrabold tracking-tight" },
     },
     {
         name: "ProviderShield",
         alt: "ProviderShield logo",
         href: "https://providershield.com.au",
-        wordmark: { text: "ProviderShield", className: "font-bold tracking-tight text-emerald-600" },
+        wordmark: { text: "ProviderShield", className: "font-bold tracking-tight" },
     },
     {
         name: "FlightAgent",
         alt: "FlightAgent logo",
         href: "https://flightagent.io",
-        wordmark: { text: "FlightAgent", className: "font-semibold tracking-wide text-sky-600" },
+        wordmark: { text: "FlightAgent", className: "font-semibold tracking-wide" },
     },
 ];
 
@@ -40,31 +41,34 @@ export default function ClientsLogos({
     title?: string;
 }) {
     return (
-        <section className="bg-black text-white py-14 px-4 md:px-8">
-            <h2 className="text-center text-3xl md:text-4xl font-extrabold tracking-wide mb-8">{title}</h2>
-
-            <div className="max-w-5xl mx-auto rounded-3xl bg-gradient-to-br from-blue-600 to-purple-700 p-6 md:p-10 shadow-2xl shadow-blue-500/20">
-                <ul className="flex flex-col sm:flex-row items-stretch justify-center gap-4 md:gap-8">
+        <section className="bg-[#F4F4F5] border-b border-line py-14 px-4">
+            <div className="mx-auto max-w-7xl sm:px-2 lg:px-8">
+                <h2 className="mb-5 font-mono text-xs uppercase tracking-wider text-muted">{title}</h2>
+                <ul className="grid grid-cols-1 sm:grid-cols-3 border-t border-l border-line">
                     {logos.map((logo) => {
                         const content = logo.src ? (
-                            <span className="relative block w-full h-full">
+                            <span className="relative block h-full w-full">
                                 <Image src={logo.src} alt={logo.alt} fill className="object-contain" sizes="280px" />
                             </span>
                         ) : (
-                            <span role="img" aria-label={logo.alt} className={`text-2xl md:text-3xl ${logo.wordmark.className}`}>
+                            <span role="img" aria-label={logo.alt} className={`text-2xl md:text-3xl text-ink ${logo.wordmark.className}`}>
                                 {logo.wordmark.text}
                             </span>
                         );
-                        const box =
-                            "flex items-center justify-center w-full sm:w-64 h-28 md:h-32 rounded-2xl bg-white shadow-md p-4 transition duration-300 hover:-translate-y-1 hover:shadow-2xl hover:ring-2 hover:ring-white/70 focus-visible:-translate-y-1 focus-visible:ring-2 focus-visible:ring-white";
+                        const cell =
+                            "group relative flex h-32 w-full items-center justify-center bg-white p-4 transition-colors duration-300 hover:bg-[#FAFAFA] hover:text-cobalt";
                         return (
-                            <li key={logo.name} className="flex justify-center">
+                            <li key={logo.name} className="border-r border-b border-line">
                                 {logo.href ? (
-                                    <a href={logo.href} target="_blank" rel="noopener noreferrer" className={box}>
+                                    <a href={logo.href} target="_blank" rel="noopener noreferrer" className={cell}>
                                         {content}
+                                        <ArrowUpRight
+                                            className="absolute right-3 top-3 h-4 w-4 text-muted transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-cobalt"
+                                            aria-hidden="true"
+                                        />
                                     </a>
                                 ) : (
-                                    <div className={box}>{content}</div>
+                                    <div className={cell}>{content}</div>
                                 )}
                             </li>
                         );

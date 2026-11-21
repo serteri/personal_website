@@ -9,7 +9,6 @@ export interface CaseStudy {
     year?: string; // left out when unknown
     liveUrl: string;
     category: "Own Product";
-    gradient: string; // Tailwind gradient classes for the placeholder cover
     problem: string;
     built: string[];
     stack: string[];
@@ -23,7 +22,7 @@ export interface CaseStudy {
 //   /public/projects/logivisa.png
 //   /public/projects/providershield.png
 //   /public/projects/flightagent.png
-// Until the files exist, cards fall back to the gradient placeholder.
+// Until the files exist, cards fall back to a flat placeholder.
 
 export const caseStudies: (CaseStudy & { coverImage?: string })[] = [
     {
@@ -34,7 +33,6 @@ export const caseStudies: (CaseStudy & { coverImage?: string })[] = [
         tags: ["Compliance SaaS", "Document Review"],
         liveUrl: "https://providershield.com.au",
         category: "Own Product",
-        gradient: "from-emerald-500 via-teal-500 to-cyan-600",
         problem:
             "NDIS providers keep a lot of participant documentation: progress notes, service agreements, timesheets and service records. Gaps and inconsistencies in those files are easy to miss until they become bigger problems.",
         built: [
@@ -57,7 +55,6 @@ export const caseStudies: (CaseStudy & { coverImage?: string })[] = [
         tags: ["Assessment Tool", "Immigration", "Web App"],
         liveUrl: "https://logivisa.com",
         category: "Own Product",
-        gradient: "from-indigo-500 via-violet-500 to-fuchsia-500",
         problem:
             "Australian visa information is spread across many published sources. People need a way to research occupations, skills assessments and visa requirements, and to see where each piece of information comes from.",
         built: [
@@ -82,7 +79,6 @@ export const caseStudies: (CaseStudy & { coverImage?: string })[] = [
         tags: ["Travel", "Protection", "Web App"],
         liveUrl: "https://flightagent.io",
         category: "Own Product",
-        gradient: "from-sky-500 via-blue-600 to-indigo-700",
         problem:
             "When a flight is delayed or cancelled, travellers often find out late and don't know whether they may be owed compensation. The product began as a flight search idea and is now focused on protection when flights go wrong.",
         built: [

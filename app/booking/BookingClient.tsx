@@ -51,12 +51,12 @@ export default function BookingClient() {
     };
 
     if (isLoading) {
-        return <div className="text-center text-white">Loading Calendar...</div>;
+        return <div className="text-center text-ink">Loading Calendar...</div>;
     }
 
     // Geri butonu
     const BackButton = () => (
-        <button onClick={handleGoBack} className="mb-4 flex items-center text-lime-300 hover:text-lime-400">
+        <button onClick={handleGoBack} className="mb-4 flex items-center font-mono text-xs uppercase tracking-wider text-ink hover:text-cobalt">
             <FaArrowLeft className="mr-2" /> Go Back
         </button>
     );

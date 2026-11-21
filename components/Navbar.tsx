@@ -49,7 +49,7 @@ export default function Navbar() {
 
     return (
         <motion.nav
-            className={`fixed top-0 left-0 w-full bg-black z-50 transition-height duration-300`}
+            className={`fixed top-0 left-0 w-full bg-[#F4F4F5]/90 backdrop-blur border-b border-line z-50 transition-height duration-300`}
             // Animasyonu state'lere göre yönetiyoruz
             animate={{ 
                 y: isHidden ? -100 : 0,
@@ -68,7 +68,7 @@ export default function Navbar() {
                         className="object-contain transition-all duration-300"
                         priority
                     />
-                    <span className="ml-3 text-xl font-bold text-purple-500">ALTIQDESIGN</span>
+                    <span className="ml-3 text-lg font-bold tracking-tight text-ink">ALTIQDESIGN</span>
                 </Link>
 
                 {/* MASAÜSTÜ NAV COMPONENT'İ */}
@@ -77,7 +77,7 @@ export default function Navbar() {
                 {/* MOBİL MENÜ BUTONU */}
                 <button
                     onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                    className="md:hidden text-white p-2 focus:outline-none"
+                    className="md:hidden text-ink p-2 focus:outline-none"
                     aria-label="Toggle menu"
                 >
                     {isMobileMenuOpen ? <FiX size={28} /> : <FiMenu size={28} />}

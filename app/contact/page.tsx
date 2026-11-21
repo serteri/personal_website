@@ -2,10 +2,10 @@ import ContactForm from '@/components/ContactForm';
 
 export default function ContactPage() {
     return (
-        <div className="bg-black min-h-screen py-24 px-4">
-            <div className="container mx-auto text-center">
-                <h1 className="text-5xl font-bold text-white">Contact Us</h1>
-                <p className="mt-4 max-w-2xl mx-auto text-lg text-gray-400">
+        <div className="bg-[#F4F4F5] min-h-screen py-24 px-4">
+            <div className="mx-auto max-w-2xl">
+                <h1 className="text-5xl font-extrabold tracking-tight text-ink">Contact Us</h1>
+                <p className="mt-4 text-lg text-muted">
                     Have a project in mind or just want to say hello? Fill out the form below and we&apos;ll get back to you as soon as possible.
                 </p>
             </div>

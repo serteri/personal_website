@@ -1,19 +1,19 @@
-// components/RecentProjectsColorful.tsx
+// components/RecentProjectsColorful.tsx  (Swiss / industrial layout)
 "use client";
 
 import React, { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { ArrowUpRight } from "lucide-react";
+import SwissHeader from "./SwissHeader";
 
 export interface Project {
     id: string;
     title: string;
     description?: string;
-    imageUrl?: string; // screenshot in /public/projects/; gradient placeholder is used if missing
+    imageUrl?: string; // screenshot in /public/projects/; flat placeholder is used if missing
     link?: string; // live site
     slug?: string; // when set, a case study page exists at /case-studies/[slug]
-    gradient?: string;
     category?: string;
     tags?: string[];
     index: number;
@@ -30,27 +30,25 @@ export default function RecentProjectsColorful({ projects, subtitle }: Props) {
     const filtered = useMemo(() => filter === "All" ? projects : projects.filter(p => p.category === filter), [projects, filter]);
 
     return (
-        <section className="py-12 bg-gradient-to-b from-white via-rose-50 to-indigo-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
+        <section className="bg-[#F4F4F5] border-b border-line py-20 px-4">
+            <div className="mx-auto max-w-7xl sm:px-2 lg:px-8">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                     <div>
-                        <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900">Recent Projects</h2>
-                        <p className="mt-1 text-sm text-slate-700 max-w-xl">
-                            {subtitle ?? "Vibrant, brand-forward projects — click any card to visit the live site."}
-                        </p>
+                        <SwissHeader index="02" label="SELECTED WORK" title="Recent Projects" />
+                        {subtitle && <p className="-mt-6 mb-10 text-muted max-w-xl">{subtitle}</p>}
                     </div>
 
                     {/* Filters: only shown when there is more than one real category */}
                     {categories.length > 2 && (
-                        <div className="flex flex-wrap gap-3">
+                        <div className="mb-10 flex flex-wrap gap-2">
                             {categories.map(cat => (
                                 <button
                                     key={cat}
                                     onClick={() => setFilter(cat)}
-                                    className={`px-3 py-1.5 rounded-full text-sm font-semibold transition focus:outline-none ${
+                                    className={`px-3 py-1.5 border font-mono text-xs uppercase tracking-wider transition-colors ${
                                         filter === cat
-                                            ? "bg-gradient-to-r from-rose-500 via-orange-400 to-amber-400 text-white shadow-xl"
-                                            : "bg-white text-slate-700 border border-slate-200 hover:shadow-sm"
+                                            ? "border-[#0047FF] bg-[#0047FF] text-white"
+                                            : "border-line bg-white text-ink hover:border-ink"
                                     }`}
                                     aria-pressed={filter === cat}
                                 >
@@ -61,16 +59,9 @@ export default function RecentProjectsColorful({ projects, subtitle }: Props) {
                     )}
                 </div>
 
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 border-t border-l border-line">
                     {filtered.map((p, idx) => (
-                        <motion.article
-                            key={p.id}
-                            layout
-                            initial={{ opacity: 0, y: 8 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.45, delay: idx * 0.03 }}
-                            className="group rounded-2xl overflow-hidden shadow-md bg-white border border-slate-100 flex flex-col transition hover:shadow-xl"
-                        >
+                        <article key={p.id} className="group flex flex-col border-r border-b border-line bg-white">
                             <a
                                 href={p.link}
                                 target="_blank"
@@ -78,38 +69,42 @@ export default function RecentProjectsColorful({ projects, subtitle }: Props) {
                                 className="block flex-1"
                                 aria-label={`Visit ${p.title} (opens in a new tab)`}
                             >
-                                <div className="relative w-full aspect-[16/10] bg-slate-100 overflow-hidden">
-                                    <Cover p={p} />
-                                    <div className="absolute left-4 bottom-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                        <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-indigo-600 to-rose-500 text-white text-sm font-semibold shadow-md">
-                                            Visit site ↗
-                                        </span>
-                                    </div>
+                                <div className="flex items-center justify-between border-b border-line px-4 py-3 font-mono text-xs uppercase tracking-wider text-muted">
+                                    <span>[{String(idx + 1).padStart(2, "0")}]</span>
+                                    <span className="flex items-center gap-3">
+                                        {p.category ?? "General"}
+                                        <ArrowUpRight
+                                            className="h-4 w-4 text-ink transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-cobalt"
+                                            aria-hidden="true"
+                                        />
+                                    </span>
                                 </div>
 
-                                <div className="p-4">
-                                    <div className="flex items-center justify-between gap-2">
-                                        <h3 className="text-base font-semibold text-slate-900">{p.title}</h3>
-                                        <span className="text-xs font-semibold text-slate-500 whitespace-nowrap">{p.category ?? "General"}</span>
-                                    </div>
-                                    <p className="mt-1 text-sm text-slate-600">{p.description}</p>
+                                {/* image stays inside its frame and scales within it */}
+                                <div className="relative aspect-[16/10] w-full overflow-hidden border-b border-line bg-[#E4E4E7]">
+                                    <Cover p={p} />
+                                </div>
+
+                                <div className="p-5">
+                                    <h3 className="text-xl font-bold tracking-tight text-ink">{p.title}</h3>
+                                    <p className="mt-2 text-sm text-muted">{p.description}</p>
                                     {p.tags && (
-                                        <div className="mt-3 flex flex-wrap gap-1.5">
+                                        <div className="mt-4 flex flex-wrap gap-2">
                                             {p.tags.map(t => (
-                                                <span key={t} className="px-2 py-0.5 rounded-full bg-slate-100 text-[11px] font-semibold text-slate-600">{t}</span>
+                                                <span key={t} className="border border-line px-2 py-0.5 font-mono text-xs uppercase tracking-wider text-muted">{t}</span>
                                             ))}
                                         </div>
                                     )}
                                 </div>
                             </a>
                             {p.slug && (
-                                <div className="px-4 pb-4">
-                                    <Link href={`/case-studies/${p.slug}`} className="text-sm font-semibold text-indigo-600 hover:text-indigo-800">
+                                <div className="border-t border-line px-5 py-3">
+                                    <Link href={`/case-studies/${p.slug}`} className="font-mono text-xs uppercase tracking-wider text-ink transition-colors hover:text-cobalt">
                                         Read case study →
                                     </Link>
                                 </div>
                             )}
-                        </motion.article>
+                        </article>
                     ))}
                 </div>
             </div>
@@ -117,7 +112,7 @@ export default function RecentProjectsColorful({ projects, subtitle }: Props) {
     );
 }
 
-/* Screenshot cover; falls back to a gradient wordmark card if the file is missing. */
+/* Screenshot cover; falls back to a flat typographic card if the file is missing. */
 function Cover({ p }: { p: Project }) {
     const [failed, setFailed] = useState(false);
     if (p.imageUrl && !failed) {
@@ -126,15 +121,15 @@ function Cover({ p }: { p: Project }) {
                 src={p.imageUrl}
                 alt={`${p.title} website screenshot`}
                 fill
-                className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                className="object-cover object-top transition-transform duration-300 group-hover:scale-[1.03]"
                 sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 33vw"
                 onError={() => setFailed(true)}
             />
         );
     }
     return (
-        <div className={`absolute inset-0 flex items-center justify-center bg-gradient-to-br ${p.gradient ?? "from-slate-700 to-slate-900"}`}>
-            <span className="text-white text-2xl font-extrabold tracking-tight px-4 text-center">{p.title}</span>
+        <div className="absolute inset-0 flex items-center justify-center bg-[#E4E4E7]">
+            <span className="px-4 text-center font-mono text-sm uppercase tracking-wider text-ink">{p.title}</span>
         </div>
     );
 }

@@ -64,42 +64,42 @@ return(
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-2xl mx-auto " noValidate>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-300">First Name</label>
+                <label htmlFor="firstName" className="block text-sm font-medium font-mono text-xs uppercase tracking-wider text-muted">First Name</label>
                 <input {...register('firstName')} id="firstName" type="text" placeholder="First Name"
-                className="mt-1 block w-full bg-gray-800 border-gray-600 rounded-md shadow-sm p-3 text-white focus:ring-lime-400 focus:border-lime-400"/>
+                className="mt-1 block w-full bg-white border border-line rounded-none p-3 text-ink focus:outline-none focus:ring-0 focus:border-cobalt"/>
                 {errors.firstName && <p className="mt-1 text-red-500 text-sm">{errors.firstName.message}</p>}
             </div>
             <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-300">Last Name</label>
+                <label htmlFor="lastName" className="block text-sm font-medium font-mono text-xs uppercase tracking-wider text-muted">Last Name</label>
                 <input {...register('lastName')} id="lastName" type="text" placeholder="Last Name"
-                       className="mt-1 block w-full bg-gray-800 border-gray-600 rounded-md shadow-sm p-3 text-white focus:ring-lime-400 focus:border-lime-400"/>
+                       className="mt-1 block w-full bg-white border border-line rounded-none p-3 text-ink focus:outline-none focus:ring-0 focus:border-cobalt"/>
                 {errors.lastName && <p className="mt-1 text-red-500 text-sm">{errors.lastName.message}</p>}
             </div>
         </div>
             <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-300">Email</label>
+                <label htmlFor="email" className="block text-sm font-medium font-mono text-xs uppercase tracking-wider text-muted">Email</label>
                 <input {...register('email')} id="email" type="email" placeholder="Email address"
-                       className="mt-1 block w-full bg-gray-800 border-gray-600 rounded-md shadow-sm p-3 text-white focus:ring-lime-400 focus:border-lime-400"/>
+                       className="mt-1 block w-full bg-white border border-line rounded-none p-3 text-ink focus:outline-none focus:ring-0 focus:border-cobalt"/>
                 {errors.email && <p className="mt-1 text-red-500 text-sm">{errors.email.message}</p>}
             </div>
             <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-300">Phone Number</label>
-                <div className="mt-1 flex flex-col sm:flex-row rounded-md shadow-sm">
-                    <select {...register('countryCode')} id="countryCode" className="block bg-gray-800 border-gray-600 rounded-l-md p-3 text-white focus:ring-lime-400 focus:border-lime-400 sm:rounded-r-none mb-2 sm:mb-0">
+                <label htmlFor="phone" className="block text-sm font-medium font-mono text-xs uppercase tracking-wider text-muted">Phone Number</label>
+                <div className="mt-1 flex flex-col sm:flex-row">
+                    <select {...register('countryCode')} id="countryCode" className="block bg-white border border-line rounded-none p-3 text-ink focus:outline-none focus:ring-0 focus:border-cobalt mb-2 sm:mb-0">
                         {countryCodes.map(c => <option key={c.code} value={c.dial_code}>{c.name} ({c.dial_code})</option>)}
                     </select>
-                    <input {...register('phone')} id="phone" placeholder="Phone Number" type="tel" className="flex-1 block w-full bg-gray-800 border-gray-600  p-3 text-white focus:ring-lime-400 focus:border-lime-400 rounded-md sm:rounded-r-md sm:rounded-l-none" />
+                    <input {...register('phone')} id="phone" placeholder="Phone Number" type="tel" className="flex-1 block w-full bg-white border border-line rounded-none p-3 text-ink focus:outline-none focus:ring-0 focus:border-cobalt" />
                 </div>
                 {errors.phone && <p className="mt-1 text-red-500 text-sm">{errors.phone.message}</p>}
             </div>
 
         <div>
-            <label htmlFor="message" className="block text-sm font-medium text-gray-300">Message</label>
-            <textarea {...register('message')} placeholder="Enter your message" id="message" rows={5} className="mt-1 block w-full bg-gray-800 border-gray-600 rounded-md shadow-sm p-3 text-white focus:ring-lime-400 focus:border-lime-400"></textarea>
+            <label htmlFor="message" className="block text-sm font-medium font-mono text-xs uppercase tracking-wider text-muted">Message</label>
+            <textarea {...register('message')} placeholder="Enter your message" id="message" rows={5} className="mt-1 block w-full bg-white border border-line rounded-none p-3 text-ink focus:outline-none focus:ring-0 focus:border-cobalt"></textarea>
             {errors.message && <p className="mt-1 text-red-500 text-sm">{errors.message.message}</p>}
         </div>
         <div>
-            <button type="submit" disabled={isSubmitting} className="w-full py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-black bg-lime-300 hover:bg-lime-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lime-500 disabled:bg-gray-500 disabled:cursor-not-allowed">
+            <button type="submit" disabled={isSubmitting} className="w-full py-3 px-4 text-lg font-semibold text-white bg-[#0047FF] hover:bg-[#0038CC] focus:outline-none disabled:bg-zinc-400 disabled:cursor-not-allowed">
                 {isSubmitting ? 'Sending...' : 'Send Message'}
             </button>
         </div>
