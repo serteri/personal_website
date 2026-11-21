@@ -5,7 +5,7 @@ import { useLayoutEffect, useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import ScrollTrigger from "gsap/dist/ScrollTrigger";
 
-import ClientsBigMarquee from "@/components/ClientsBigMarquee";
+import ClientsLogos from "@/components/ClientsLogos";
 import WhatWeDo from "@/components/WhatWeDo"; // Yeni component'i import et
 import FaqAccordion from "@/components/FaqAccordion";
 import CallToAction from "@/components/CallToAction";
@@ -47,20 +47,6 @@ export default function Home() {
     })),
   ];
 
-  const logos = [
-    { src: "/alkon_logo.jpeg", alt: "Alkon" },
-    { src: "/bal_logo.png", alt: "Bal" },
-    { src: "/cw_logo.png", alt: "CW" },
-    { src: "/guneysan_logo.jpeg", alt: "Guneysan" },
-    { src: "/termo_logo.png", alt: "Termo" },
-    { src: "/balpetek_logo.jpeg", alt: "Bal Petek" },
-
-    { src: "/resim_logo.png", alt: "Resim" },
-    { src: "/fizik_logo.png", alt: "Fizik" },
-    { src: "/kimya_logo.png", alt: "Kimya" },
-
-
-  ]
 
   // 1) Intersection Observer for section‐based background colors
   useLayoutEffect(() => {
@@ -216,15 +202,7 @@ export default function Home() {
 
         {/* YENİ BÖLÜM BURADA */}
         <section ref={clientsRef} className="py-10">
-          <ClientsBigMarquee
-            logos={logos}
-            title="OUR CLIENTS"
-            pps={28}         // px/sn — daha yavaş için 20–24
-            itemWidth={300}  // büyük kart
-            itemHeight={150}
-            gap={40}
-            pauseOnHover
-          />
+          <ClientsLogos />
         </section>
 
 
