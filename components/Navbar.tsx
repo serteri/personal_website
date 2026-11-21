@@ -2,7 +2,6 @@
 
 import { useState, useRef } from 'react';
 import Link from "next/link"
-import Image from 'next/image'
 import { FiMenu, FiX } from "react-icons/fi";
 import { motion, useScroll, useMotionValueEvent } from "framer-motion";
 
@@ -60,15 +59,8 @@ export default function Navbar() {
             <div className="w-full h-full px-4 flex justify-between items-center">
                 {/* Logo */}
                 <Link href="/" className="flex items-center">
-                    <Image
-                        src="/ALTIQDESIGN.png"
-                        alt="ALTIQDESIGN"
-                        width={isShrunk ? 50 : 60}
-                        height={isShrunk ? 50 : 60}
-                        className="object-contain transition-all duration-300"
-                        priority
-                    />
-                    <span className="ml-3 text-lg font-bold tracking-tight text-ink">ALTIQDESIGN</span>
+                    <span aria-hidden="true" className="mr-3 inline-block h-3 w-3 bg-[#0047FF]" />
+                    <span className="text-lg font-extrabold uppercase tracking-tight text-ink">ALTIQDESIGN</span>
                 </Link>
 
                 {/* MASAÜSTÜ NAV COMPONENT'İ */}
