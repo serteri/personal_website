@@ -29,7 +29,7 @@ export async function POST(req: Request) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 15000);
     try {
-        const res = await fetch('https://api.retellai.com/v2/create-web-call', {
+        const res = await fetch('https://api.retellai.com/v3/create-web-call', {
             method: 'POST',
             headers: { 'content-type': 'application/json', Authorization: `Bearer ${apiKey}` },
             body: JSON.stringify({ agent_id: agentId }),
@@ -41,7 +41,10 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Could not start the voice call right now. Please try again shortly.' }, { status: 502 });
         }
         const data = await res.json();
-        if (!data.access_token) throw new Error('No access_token in Retell response');
+        if (!data.access_token) {
+            console.error('Retell response had no access_token; keys:', Object.keys(data ?? {}));
+            throw new Error('No access_token in Retell response');
+        }
         return NextResponse.json({ access_token: data.access_token });
     } catch (error) {
         console.error('Voice token error:', error);
