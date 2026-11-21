@@ -15,11 +15,13 @@ export const clientLogos: ClientLogo[] = [
     {
         name: "Logivisa",
         alt: "Logivisa logo",
+        href: "https://logivisa.com",
         wordmark: { text: "Logivisa", className: "font-extrabold tracking-tight text-indigo-600" },
     },
     {
         name: "ProviderShield",
         alt: "ProviderShield logo",
+        href: "https://providershield.com.au",
         wordmark: { text: "ProviderShield", className: "font-bold tracking-tight text-emerald-600" },
     },
     {
@@ -32,7 +34,7 @@ export const clientLogos: ClientLogo[] = [
 
 export default function ClientsLogos({
     logos = clientLogos,
-    title = "OUR CLIENTS",
+    title = "PRODUCTS WE BUILT & RUN",
 }: {
     logos?: ClientLogo[];
     title?: string;

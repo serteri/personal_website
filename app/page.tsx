@@ -194,9 +194,9 @@ export default function Home() {
         <section ref={contentRef} className="h-screen flex items-center">
           <div className="max-w-3xl mx-auto text-white space-y-6 text-lg px-6">
             <p>
-              We work with innovative thought leaders in all industries. Our clients value design as a potent business tool, and trust us to bring their stories to life.
+              We design for innovative thought leaders in all industries, and we don&apos;t stop at design: we also develop and run our own digital products.
             </p>
-            <p>This alignment is crucial — we do great work for great clients.</p>
+            <p>Building and operating them ourselves keeps our client work grounded in what actually ships.</p>
           </div>
         </section>
 
