@@ -1,20 +1,20 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+import prisma from '@/lib/prisma';
 
+// Public, read-only. Returns only the blocked time ranges: no reason/notes.
 export async function GET() {
-    const blocks = await prisma.availability.findMany();
-    return NextResponse.json(blocks);
+    const blocks = await prisma.availability.findMany({
+        select: { start: true, end: true },
+        orderBy: { start: 'asc' },
+    });
+    return NextResponse.json(blocks, { headers: { 'Cache-Control': 'no-store' } });
 }
 
-export async function POST(request: Request) {
-    const data = await request.json();
-    const block = await prisma.availability.create({
-        data: {
-            start: new Date(data.start),  // e.g. "2025-05-10T14:00"
-            end: new Date(data.end),      // e.g. "2025-05-10T15:00"
-            reason: data.reason || null
-        }
-    });
-    return NextResponse.json(block, { status: 201 });
-}
+// Nothing in the app writes availability blocks, so write methods are closed.
+const methodNotAllowed = () =>
+    NextResponse.json({ message: 'Method Not Allowed' }, { status: 405, headers: { Allow: 'GET' } });
+
+export const POST = methodNotAllowed;
+export const PUT = methodNotAllowed;
+export const PATCH = methodNotAllowed;
+export const DELETE = methodNotAllowed;

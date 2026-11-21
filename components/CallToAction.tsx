@@ -1,95 +1,30 @@
-"use client";
-
-import { useEffect, useRef } from 'react';
-import Link from 'next/link';
-import { gsap } from 'gsap';
+import Link from "next/link";
 
 export default function CallToAction() {
-    const torusRef = useRef<HTMLDivElement>(null);
-    const buttonRef = useRef<HTMLAnchorElement>(null);
-
-    // 1. Mouse ile hareket eden obje (Parallax) animasyonu
-    useEffect(() => {
-        const handleMouseMove = (event: MouseEvent) => {
-            const { clientX, clientY } = event;
-            const x = clientX / window.innerWidth - 0.5;
-            const y = clientY / window.innerHeight - 0.5;
-
-            // Objenin mouse'un tersi yönünde ve limitli hareket etmesi için
-            // değeri küçük bir sayıyla çarpıyoruz (örn: 50).
-            gsap.to(torusRef.current, {
-                x: x * 250,
-                y: y * 250,
-                duration: 0.5,
-                ease: 'power1.out',
-            });
-        };
-
-        window.addEventListener('mousemove', handleMouseMove);
-
-        // Component kaldırıldığında event listener'ı temizle
-        return () => {
-            window.removeEventListener('mousemove', handleMouseMove);
-        };
-    }, []);
-
-    // 2. "Let's Chat" butonu için sallanma animasyonu
-    useEffect(() => {
-        if (!buttonRef.current) return;
-
-        const tl = gsap.timeline({
-            repeat: -1,
-            repeatDelay: 0.8,
-        });
-
-        tl.to(buttonRef.current, {
-            rotation: 15,
-            duration: 0.4,
-            ease: "sine.inOut",
-            transformOrigin: "center center",
-        })
-        .to(buttonRef.current, {
-            rotation: -15,
-            duration: 0.8,
-            ease: "sine.inOut",
-        })
-        .to(buttonRef.current, {
-            rotation: 0,
-            duration: 0.4,
-            ease: "sine.inOut",
-        });
-
-        return () => {
-            tl.kill(); // Timeline'ı temizle
-        };
-    }, []);
-
     return (
-        <section className="relative h-screen w-full bg-black flex flex-col items-center justify-center overflow-hidden">
-            
-            {/* Arka plandaki hareketli mavi halka */}
-            <div
-                ref={torusRef}
-                className="absolute w-80 h-80 md:w-96 md:h-96 border-[60px] border-cyan-400 rounded-full z-10"
-                style={{ opacity: 1,
-                    boxShadow: 
-                        `0 0 60px 10px #22d3ee, 
-                         inset 0 0 40px 10px #22d3ee` }}
-            ></div>
-
-            {/* Ön plandaki içerik */}
-            <div className="relative z-20 text-center text-white px-4">
-                <h1 className="text-4xl md:text-6xl font-bold">
-                    We are ready to tell <span className="text-lime-300">your story!</span>
-                </h1>
-                <p className="mt-4 text-lg text-gray-300">
-                    Book an appointment and let&apos;s make something amazing!
-                </p>
-                <div className="mt-8">
-                    <Link href="/booking" ref={buttonRef} >
-                        <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 text-[#00ff88] font-bold py-4 px-10 rounded-full transition-colors duration-300 hover:bg-gray-700">
-                            let&apos;s chat
-                        </div>
+        <section className="bg-black px-4 py-20">
+            <div className="relative mx-auto max-w-4xl overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/60 px-6 py-14 text-center sm:px-12">
+                {/* soft top glow */}
+                <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-0"
+                    style={{
+                        background:
+                            "radial-gradient(ellipse 60% 70% at 50% 0%, rgba(99,102,241,0.22), transparent 70%)",
+                    }}
+                />
+                <div className="relative">
+                    <h2 className="text-3xl font-extrabold tracking-tight text-white md:text-4xl">
+                        Ready to build a system that converts?
+                    </h2>
+                    <p className="mx-auto mt-4 max-w-xl text-lg text-zinc-400">
+                        Book a quick call to discuss your website, AI workflow, or custom web app.
+                    </p>
+                    <Link
+                        href="/booking"
+                        className="mt-8 inline-flex items-center justify-center rounded-full bg-white px-8 py-3.5 text-base font-semibold text-black transition hover:bg-zinc-200"
+                    >
+                        Book a Call
                     </Link>
                 </div>
             </div>

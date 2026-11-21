@@ -18,6 +18,7 @@ const BookingFormSchema = z.object({
     lastName: z.string().min(1, "Last name is required."),
     email: z.string().min(1, "Email is required.").email("Invalid email address."),
     phone: z.string().min(5, "A valid phone number is required."),
+    website: z.string().optional(), // honeypot
 });
 // Zod şemasından TypeScript tipini otomatik olarak türetiyoruz
 type FormValues = z.infer<typeof BookingFormSchema>;
@@ -78,6 +79,10 @@ export default function BookingForm({date, time, onSuccess}: BookingFormProps) {
 
 return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 max-w-lg mx-auto text-white" noValidate>
+            {/* Honeypot: hidden from people, bots tend to fill it */}
+            <div aria-hidden="true" style={{ position: 'absolute', left: '-10000px', width: 1, height: 1, overflow: 'hidden' }}>
+                <label>Website <input type="text" tabIndex={-1} autoComplete="off" {...register('website')} /></label>
+            </div>
         <div className="bg-gray-800 p-4 rounded-lg text-center">
             <p>You are booking an appointment for:</p>
             <p className="font-bold text-lime-300 text-lg">
