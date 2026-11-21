@@ -286,13 +286,14 @@ function ChatTab({ industry }: { industry: Industry }) {
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
     const [limitReached, setLimitReached] = useState(false);
-    const endRef = useRef<HTMLDivElement>(null);
+    const messagesContainerRef = useRef<HTMLDivElement>(null);
 
     const userCount = messages.filter((m) => m.role === "user").length;
     const atLimit = limitReached || userCount >= MAX_USER_MESSAGES;
 
     useEffect(() => {
-        endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+        const el = messagesContainerRef.current;
+        if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
     }, [messages, loading]);
 
     async function send(text: string) {
@@ -358,6 +359,7 @@ function ChatTab({ industry }: { industry: Industry }) {
             </div>
 
             <div
+                ref={messagesContainerRef}
                 role="log"
                 aria-live="polite"
                 aria-label={`Conversation with ${cfg.agent}`}
@@ -385,24 +387,26 @@ function ChatTab({ industry }: { industry: Industry }) {
                     </div>
                 )}
                 {atLimit && !loading && !cfg.demo && !messages[messages.length - 1]?.showBooking && <BookingPicker />}
-                <div ref={endRef} className="h-2" />
             </div>
 
             <div className="border-t border-slate-200 px-4 pb-4 pt-3 sm:px-6">
-                {showChips && (
-                    <div className="mb-3 flex flex-wrap gap-2">
+                {/* fixed-height slot so hiding the chips never changes the card height */}
+                <div className="mb-3 h-9">
+                    {showChips && (
+                    <div className="flex flex-nowrap gap-2 overflow-x-auto pb-1">
                         {cfg.prompts.map((q) => (
                             <button
                                 key={q}
                                 onClick={() => send(q)}
                                 disabled={atLimit}
-                                className="rounded-full border border-slate-200 bg-white px-4 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:border-slate-900 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
+                                className="shrink-0 whitespace-nowrap rounded-full border border-slate-200 bg-white px-4 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:border-slate-900 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 {q}
                             </button>
                         ))}
                     </div>
-                )}
+                    )}
+                </div>
                 <form
                     onSubmit={(e) => {
                         e.preventDefault();
