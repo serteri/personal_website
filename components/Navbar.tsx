@@ -11,7 +11,6 @@ import DesktopNav from './DesktopNav';
 import MobileNav from './MobileNav';
 
 export default function Navbar() {
-    const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     
     // Küçülme ve gizlenme state'leri
@@ -20,7 +19,6 @@ export default function Navbar() {
     
     // Scroll durduğunda göstermek için zamanlayıcı
     const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     
     // Framer Motion hook'ları
     const { scrollY } = useScroll();
@@ -49,15 +47,6 @@ export default function Navbar() {
         }, 300); // 300ms scroll edilmezse navbar geri gelsin
     });
 
-    // Dropdown menü için mouse hover mantığı
-    const handleMouseEnter = (menu: string) => {
-        if (dropdownTimeoutRef.current) clearTimeout(dropdownTimeoutRef.current);
-        setOpenDropdown(menu);
-    };
-    const handleMouseLeave = () => {
-        dropdownTimeoutRef.current = setTimeout(() => setOpenDropdown(null), 200);
-    };
-
     return (
         <motion.nav
             className={`fixed top-0 left-0 w-full bg-black z-50 transition-height duration-300`}
@@ -83,12 +72,7 @@ export default function Navbar() {
                 </Link>
 
                 {/* MASAÜSTÜ NAV COMPONENT'İ */}
-                <DesktopNav 
-                    openDropdown={openDropdown}
-                    handleMouseEnter={handleMouseEnter}
-                    handleMouseLeave={handleMouseLeave}
-                    setOpenDropdown={setOpenDropdown}
-                />
+                <DesktopNav />
 
                 {/* MOBİL MENÜ BUTONU */}
                 <button
