@@ -4,13 +4,13 @@ import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Send, Phone } from "lucide-react";
+import type { RetellWebClient } from "retell-client-js-sdk";
 import SectionHeader from "./SectionHeader";
 import { services } from "@/lib/services";
 
 const MAX_USER_MESSAGES = 12;
 const SLOTS = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"];
 const QUICK_PROMPTS = ["I need an MVP built", "My Lovable app is stuck", "Book a 15-min call"];
-const BUSINESS_TYPES = ["Clinic", "Tradie", "NDIS", "SaaS", "Other"];
 
 type ApiReply = {
     reply: string;
@@ -442,111 +442,161 @@ function ChatTab({ industry }: { industry: Industry }) {
     );
 }
 
-/* ---------- Tab 2: voice (lead-gated) ---------- */
+/* ---------- Tab 2: live voice demo (Retell WebRTC) ---------- */
+
+const MAX_CALL_SECONDS = 85;
+type CallState = "idle" | "connecting" | "listening" | "speaking";
 
 function VoiceTab() {
-    const [state, setState] = useState<"idle" | "sending" | "done" | "error">("idle");
+    const [state, setState] = useState<CallState>("idle");
     const [error, setError] = useState("");
+    const [seconds, setSeconds] = useState(0);
+    const clientRef = useRef<RetellWebClient | null>(null);
+    const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-    async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-        e.preventDefault();
-        const f = new FormData(e.currentTarget);
-        setState("sending");
-        setError("");
+    function clearTimer() {
+        if (timerRef.current) clearInterval(timerRef.current);
+        timerRef.current = null;
+    }
+
+    function endCall() {
+        clearTimer();
         try {
-            const res = await fetch("/api/receptionist/lead", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    name: f.get("name"),
-                    email: f.get("email"),
-                    businessType: f.get("businessType"),
-                    website: f.get("website"),
-                }),
-            });
-            if (!res.ok) {
-                const data = await res.json().catch(() => ({}));
-                throw new Error(res.status === 400 ? "Please check your details and try again." : data.message || "Something went wrong.");
+            clientRef.current?.stopCall();
+        } catch {
+            /* already stopped */
+        }
+        clientRef.current?.removeAllListeners();
+        clientRef.current = null;
+        setState("idle");
+    }
+
+    // Close any active call when leaving the tab / unmounting
+    useEffect(() => {
+        return () => {
+            clearTimer();
+            try {
+                clientRef.current?.stopCall();
+            } catch {
+                /* ignore */
             }
-            setState("done");
+            clientRef.current?.removeAllListeners();
+            clientRef.current = null;
+        };
+    }, []);
+
+    async function startCall() {
+        if (state !== "idle") return;
+        setError("");
+        setSeconds(0);
+        setState("connecting");
+        try {
+            const res = await fetch("/api/receptionist/voice-token", { method: "POST" });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok || !data.access_token) {
+                throw new Error(
+                    res.status === 429
+                        ? "You've reached the demo call limit. Please try again in about 10 minutes."
+                        : data.error || "Could not start the call. Please try again."
+                );
+            }
+
+            const { RetellWebClient } = await import("retell-client-js-sdk");
+            const client = new RetellWebClient();
+            clientRef.current = client;
+            client.on("call_started", () => {
+                setState("listening");
+                clearTimer();
+                const started = Date.now();
+                timerRef.current = setInterval(() => {
+                    const s = Math.floor((Date.now() - started) / 1000);
+                    setSeconds(s);
+                    if (s >= MAX_CALL_SECONDS) endCall();
+                }, 500);
+            });
+            client.on("call_ended", () => endCall());
+            client.on("agent_start_talking", () => setState("speaking"));
+            client.on("agent_stop_talking", () => setState("listening"));
+            client.on("error", () => {
+                setError("The call was interrupted. Please try again.");
+                endCall();
+            });
+
+            await client.startCall({ accessToken: data.access_token });
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Something went wrong.");
-            setState("error");
+            const name = err instanceof Error ? err.name : "";
+            const msg = err instanceof Error ? err.message : "";
+            endCall();
+            setError(
+                name === "NotAllowedError" || /permission|denied|notallowed/i.test(msg)
+                    ? "Microphone access was blocked. Allow the microphone in your browser and try again."
+                    : msg || "Could not start the call. Please try again."
+            );
         }
     }
 
-    const field =
-        "w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-colors focus:border-blue-600";
+    const active = state !== "idle";
+    const statusLabel =
+        state === "connecting" ? "Connecting..." : state === "listening" ? "Listening..." : state === "speaking" ? "Sam is speaking..." : "";
+    const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
+    const ss = String(seconds % 60).padStart(2, "0");
 
     return (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            {/* preview card */}
-            <div className="rounded-3xl border border-slate-200/80 bg-slate-900 p-8 text-white shadow-sm">
-                <div className="flex flex-wrap gap-2">
-                    <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold">90-sec live call demo</span>
-                    <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold">+61 AU Number</span>
-                </div>
-                <div className="mt-10 flex h-24 items-center justify-center gap-1" aria-hidden="true">
-                    {Array.from({ length: 28 }).map((_, i) => (
-                        <span
-                            key={i}
-                            className="wave-bar w-1 rounded-full bg-blue-400"
-                            style={{ height: `${28 + ((i * 37) % 60)}%`, animationDelay: `${(i % 9) * 0.12}s` }}
-                        />
-                    ))}
-                </div>
-                <div className="mt-10 flex items-start gap-3">
-                    <Phone className="mt-1 h-5 w-5 shrink-0 text-blue-300" aria-hidden="true" />
-                    <p className="text-lg font-semibold leading-snug">
-                        A receptionist that answers your business line 24/7, qualifies the caller, and books the appointment.
-                    </p>
-                </div>
-                <p className="mt-4 text-sm text-slate-400">Phase 2. Test calls are limited, so access is by request.</p>
+        <div className="mx-auto max-w-4xl rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-10">
+            <div className="flex flex-wrap gap-2">
+                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">Live voice demo</span>
+                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">Fictional business</span>
             </div>
+            <h3 className="mt-4 text-xl font-semibold text-slate-900 sm:text-2xl">Live Voice Demo — Brisbane Flow Plumbing (Sam)</h3>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600">
+                Talk live with Sam, our 24/7 AI plumbing receptionist. Try reporting a burst pipe in Newstead or asking about after-hours
+                availability. (Max 85s demo limit)
+            </p>
 
-            {/* gated form */}
-            <div className="rounded-3xl border border-slate-200/80 bg-white p-8 shadow-sm">
-                <p className="text-sm font-semibold text-slate-900">Request access to the test line</p>
-                {state === "done" ? (
-                    <div role="status" className="mt-6 rounded-2xl bg-emerald-50 p-5 text-sm text-emerald-900">
-                        Request received. We&apos;ll email you when test calls are available.
-                    </div>
-                ) : (
-                    <form onSubmit={onSubmit} className="mt-5 space-y-4">
-                        {/* honeypot */}
-                        <div aria-hidden="true" style={{ position: "absolute", left: "-10000px", width: 1, height: 1, overflow: "hidden" }}>
-                            <label>
-                                Website <input type="text" name="website" tabIndex={-1} autoComplete="off" />
-                            </label>
+            <div className="mt-8 flex min-h-[7rem] flex-col items-center justify-center gap-4 rounded-2xl bg-slate-50 p-6">
+                {active ? (
+                    <>
+                        <div className="flex h-12 items-center justify-center gap-1" aria-hidden="true">
+                            {Array.from({ length: 20 }).map((_, i) => (
+                                <span
+                                    key={i}
+                                    className={`w-1 rounded-full ${state === "speaking" ? "wave-bar bg-blue-500" : "bg-slate-300"}`}
+                                    style={{ height: `${28 + ((i * 37) % 60)}%`, animationDelay: `${(i % 9) * 0.12}s` }}
+                                />
+                            ))}
                         </div>
-                        <div>
-                            <label htmlFor="v-name" className="mb-1 block text-xs font-semibold text-slate-600">Name</label>
-                            <input id="v-name" name="name" required minLength={2} maxLength={80} autoComplete="name" className={field} />
-                        </div>
-                        <div>
-                            <label htmlFor="v-email" className="mb-1 block text-xs font-semibold text-slate-600">Email</label>
-                            <input id="v-email" name="email" type="email" required maxLength={254} autoComplete="email" className={field} />
-                        </div>
-                        <div>
-                            <label htmlFor="v-type" className="mb-1 block text-xs font-semibold text-slate-600">Business type</label>
-                            <select id="v-type" name="businessType" required defaultValue="" className={field}>
-                                <option value="" disabled>Select…</option>
-                                {BUSINESS_TYPES.map((t) => (
-                                    <option key={t} value={t}>{t}</option>
-                                ))}
-                            </select>
-                        </div>
-                        {state === "error" && <p role="alert" className="text-sm text-red-600">{error}</p>}
+                        <p role="status" className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+                            <span className={`h-2.5 w-2.5 rounded-full ${state === "connecting" ? "bg-amber-400" : "animate-pulse bg-emerald-500"}`} />
+                            {statusLabel}
+                            <span className="font-mono text-slate-500">
+                                {mm}:{ss} / 01:25
+                            </span>
+                        </p>
                         <button
-                            type="submit"
-                            disabled={state === "sending"}
-                            className="w-full rounded-full bg-slate-900 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md disabled:opacity-60"
+                            onClick={endCall}
+                            className="inline-flex items-center gap-2 rounded-full bg-red-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-red-700"
                         >
-                            {state === "sending" ? "Sending…" : "Request access"}
+                            <Phone className="h-4 w-4 rotate-[135deg]" aria-hidden="true" />
+                            End Call
                         </button>
-                    </form>
+                    </>
+                ) : (
+                    <button
+                        onClick={startCall}
+                        className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+                    >
+                        <Phone className="h-4 w-4" aria-hidden="true" />
+                        Start Voice Call
+                    </button>
                 )}
             </div>
+
+            {error && (
+                <p role="alert" className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+                    {error}
+                </p>
+            )}
+            <p className="mt-4 text-xs text-slate-500">Sam is an AI. Calls use your browser microphone and aren&apos;t connected to a real phone line.</p>
         </div>
     );
 }
