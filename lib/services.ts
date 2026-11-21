@@ -6,6 +6,13 @@ export interface ProcessStep {
     text: string;
 }
 
+// An in-house product shown as live proof on a service page.
+export interface RelatedProduct {
+    name: string;
+    url: string;
+    benefit: string; // one factual sentence
+}
+
 export interface Service {
     slug: string;
     number: string; // "01".."04"
@@ -16,6 +23,7 @@ export interface Service {
     whoFor: string[];
     included: string[];
     process: ProcessStep[];
+    relatedProducts?: RelatedProduct[];
 }
 
 export const services: Service[] = [
@@ -39,6 +47,18 @@ export const services: Service[] = [
             "Billing for subscriptions or one-off payments",
             "Deployment to your own hosting accounts",
             "Source code in your repository, with setup notes",
+        ],
+        relatedProducts: [
+            {
+                name: "FlightAgent",
+                url: "https://flightagent.io",
+                benefit: "Monitors booked flights and flags possible EU261/UK261 delay compensation.",
+            },
+            {
+                name: "Logivisa",
+                url: "https://logivisa.com",
+                benefit: "Research tools and a structured assessment for Australian visa and occupation information.",
+            },
         ],
         process: [
             { title: "Audit / Scope", text: "Define the smallest version that proves the idea. Agree scope, data model, and timeline." },
@@ -66,6 +86,13 @@ export const services: Service[] = [
             "AI-assisted checks with a human review step for anything uncertain",
             "Internal web tool for staff to review, approve, and export",
             "Logging, so every automated decision can be traced",
+        ],
+        relatedProducts: [
+            {
+                name: "ProviderShield",
+                url: "https://providershield.com.au",
+                benefit: "Reviews NDIS participant documentation and service records to flag missing information and inconsistencies.",
+            },
         ],
         process: [
             { title: "Audit / Scope", text: "Walk through the real workflow and sample documents. Decide what to automate and what stays human." },

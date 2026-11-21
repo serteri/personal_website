@@ -67,6 +67,38 @@ export default async function ServicePage({ params }: { params: Params }) {
                         </ul>
                     </section>
 
+                    {s.relatedProducts && s.relatedProducts.length > 0 && (
+                        <section className="grid grid-cols-1 gap-4 border-b border-line py-8 md:grid-cols-12">
+                            <h2 className={`md:col-span-3 ${label}`}>BUILT IN-HOUSE / LIVE EXAMPLE</h2>
+                            <ul className="md:col-span-9 border-t border-l border-line">
+                                {s.relatedProducts.map((prod) => (
+                                    <li
+                                        key={prod.name}
+                                        className="flex flex-col gap-3 border-r border-b border-line bg-white p-5 sm:flex-row sm:items-center sm:justify-between"
+                                    >
+                                        <div>
+                                            <div className="flex items-center gap-3">
+                                                <h3 className="text-lg font-bold tracking-tight">{prod.name}</h3>
+                                                <span className="border border-cobalt px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-cobalt">
+                                                    LIVE
+                                                </span>
+                                            </div>
+                                            <p className="mt-1 text-sm text-muted">{prod.benefit}</p>
+                                        </div>
+                                        <a
+                                            href={prod.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="shrink-0 font-mono text-xs uppercase tracking-wider text-ink transition-colors hover:text-cobalt"
+                                        >
+                                            VISIT PRODUCT ↗
+                                        </a>
+                                    </li>
+                                ))}
+                            </ul>
+                        </section>
+                    )}
+
                     <section className="grid grid-cols-1 gap-4 border-b border-line py-8 md:grid-cols-12">
                         <h2 className={`md:col-span-3 ${label}`}>PROCESS</h2>
                         <ol className="md:col-span-9 grid grid-cols-1 border-t border-l border-line sm:grid-cols-3">
