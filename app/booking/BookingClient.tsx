@@ -5,7 +5,8 @@ import BookingCalendar from '@/components/BookingCalendar';
 import TimeSlots     from '@/components/TimeSlots';
 import BookingForm   from '@/components/BookingForm';
 import { FaArrowLeft } from 'react-icons/fa';
-interface Event{title:string;start:string}
+// Only date + time slot of existing bookings; no personal data is ever received.
+interface BookedSlot{date:string;time:string}
 
 
 export default function BookingClient() {
@@ -14,21 +15,16 @@ export default function BookingClient() {
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
 
     // Rezervasyonları tutmak için yeni state
-    const [events, setEvents] = useState<Event[]>([]);
+    const [booked, setBooked] = useState<BookedSlot[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 // Verileri çekecek fonksiyon
     const fetchBookings = async () => {
         setIsLoading(true);
         try {
-            const response = await fetch('/api/bookings');
-            const bookings = await response.json();
-
-            // API'den gelen veriyi FullCalendar'ın anlayacağı formata çeviriyoruz
-            const formattedEvents = bookings.map((b: any) => ({
-                title: `${b.firstName} ${b.lastName}`,
-                start: b.date,
-            }));
-            setEvents(formattedEvents);
+            const response = await fetch('/api/booking', { cache: 'no-store' });
+            if (!response.ok) throw new Error(`Bookings request failed: ${response.status}`);
+            const slots: BookedSlot[] = await response.json();
+            setBooked(slots);
         } catch (error) {
             console.error("Error fetching bookings:", error);
         } finally {
@@ -66,13 +62,15 @@ export default function BookingClient() {
     );
 
     if (step === 'calendar') {
-        return <BookingCalendar events={events} onDateClick={handleDateClick} />;
+        return <BookingCalendar events={[]} onDateClick={handleDateClick} />;
     }
 
     if (step === 'timeslots' && selectedDate) {
-        const bookedTimes = events
-            .filter(e => new Date(e.start).toDateString() === selectedDate.toDateString())
-            .map(e => new Date(e.start).toTimeString().slice(0, 5));
+        // A booking's stored UTC date matches the clicked day's UTC date (see POST handler)
+        const dayKey = selectedDate.toISOString().slice(0, 10);
+        const bookedTimes = booked
+            .filter(b => b.date.slice(0, 10) === dayKey)
+            .map(b => b.time);
 
         return (
             <div>

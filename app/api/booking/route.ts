@@ -13,25 +13,22 @@ const bookingSchema = z.object({
     time: z.string(),
 });
 
-// YENİ EKLENEN GET FONKSİYONU
+// Public endpoint: returns ONLY the date and time slot of upcoming bookings.
+// Never select or return personal data (name, email, phone, ids) here.
 export async function GET() {
     try {
+        // 48h buffer so slots stored as UTC are not dropped early in far-ahead timezones
+        const since = new Date(Date.now() - 48 * 60 * 60 * 1000);
         const bookings = await prisma.booking.findMany({
-            orderBy: {
-                date: 'asc',
-            },
+            where: { date: { gte: since } },
+            select: { date: true, time: true },
+            orderBy: { date: 'asc' },
         });
 
-        // BigInt ve Date tiplerini JSON uyumlu hale getiriyoruz
-        const safeBookings = bookings.map(booking => ({
-            ...booking,
-            id: booking.id.toString(),
-            createdAt: booking.createdAt.toISOString(),
-            date: booking.date.toISOString(),
-        }));
-
-        return NextResponse.json(safeBookings);
-
+        return NextResponse.json(
+            bookings.map(b => ({ date: b.date.toISOString(), time: b.time })),
+            { headers: { 'Cache-Control': 'no-store' } }
+        );
     } catch (error) {
         console.error("Failed to fetch bookings:", error);
         return NextResponse.json({ message: "Failed to fetch bookings" }, { status: 500 });

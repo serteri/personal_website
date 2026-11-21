@@ -6,7 +6,13 @@ const nextConfig: NextConfig = {
     // Uyarı: Bu ayar ESLint hatalarını üretim (production) yapısında yok sayar.
     ignoreDuringBuilds: true,
   },
-  /* config options here */
+  // Old service pages were removed; keep indexed URLs from 404ing.
+  async redirects() {
+    return [
+      { source: "/whatwedo", destination: "/#services", permanent: true },
+      { source: "/whatwedo/:path*", destination: "/#services", permanent: true },
+    ];
+  },
 };
 
 export default nextConfig;

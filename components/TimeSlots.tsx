@@ -12,9 +12,6 @@ export default function TimeSlots({date,bookedTimes,onSelect}:{
         now.toDateString() === date.toDateString();
 
     const available = allSlots.filter(slot => {
-        // 1) Exclude already-booked times
-        if (bookedTimes.includes(slot)) return false;
-
         // 2) If it’s today, exclude any slot ≤ current time
         if (isToday) {
             const [h, m] = slot.split(':').map(Number);
@@ -32,12 +29,16 @@ export default function TimeSlots({date,bookedTimes,onSelect}:{
         <div>
             <h3 className="font-semibold text-white">Select a time for {date.toDateString()} :</h3>
             <div className="grid grid-cols-4 gap-4 mt-2">
-                {available.map(time => (
-                    <button key={time} onClick={() => onSelect(time)}
-                            className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-                        {time}
-                    </button>
-                ))}
+                {available.map(time => {
+                    const taken = bookedTimes.includes(time);
+                    return (
+                        <button key={time} onClick={() => onSelect(time)} disabled={taken}
+                                title={taken ? 'Not available' : undefined}
+                                className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-700 disabled:text-gray-400 disabled:line-through disabled:cursor-not-allowed">
+                            {time}
+                        </button>
+                    );
+                })}
 
             </div>
         </div>

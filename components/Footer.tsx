@@ -4,15 +4,14 @@ import Link from 'next/link';
 // Linkleri daha kolay yönetmek için bir veri yapısı oluşturalım
 const footerLinks = {
     whatWeDo: [
-        { name: 'High-Converting Websites', href: '/whatwedo/webdesign' },
-        { name: 'AI & Lead Automation', href: '/whatwedo' },
-        { name: 'Custom Web Apps & SaaS', href: '/whatwedo' },
-        { name: 'Speed & Technical SEO', href: '/whatwedo/seo' },
+        { name: 'High-Converting Websites', href: '/#services' },
+        { name: 'AI & Lead Automation', href: '/#services' },
+        { name: 'Custom Web Apps & SaaS', href: '/#services' },
+        { name: 'Speed & Technical SEO', href: '/#services' },
     ],
     about: [
         { name: 'Serter Iyigunlu', href: '/about' },
-        { name: 'Case Studies', href: '/whatwedo' }, // Örnek link
-        { name: 'Insights', href: '/whatwedo' }, // News sayfasına yönlendirilebilir
+        { name: 'Case Studies', href: '/#recent-projects' },
     ]
 };
 
