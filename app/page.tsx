@@ -1,7 +1,8 @@
 "use client";
 
-import { useLayoutEffect, useEffect, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 
+import Link from "next/link";
 import { gsap } from "gsap";
 import ScrollTrigger from "gsap/dist/ScrollTrigger";
 
@@ -20,7 +21,6 @@ export default function Home() {
 
   // Referanslar
   const mainContainerRef = useRef<HTMLDivElement>(null);
-  const hiRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLElement>(null);
   const contentRef = useRef<HTMLElement>(null);
   const recentProjectsContainerRef = useRef<HTMLDivElement>(null);
@@ -54,7 +54,7 @@ export default function Home() {
 
     const ctx = gsap.context(() => {
       // 0) Varsayılan arka planı tanımla
-      gsap.set(main, { backgroundColor: "#EFEEEA" });
+      gsap.set(main, { backgroundColor: "#000000" });
 
       // 1) Açık → Siyah
       gsap.to(main, {
@@ -136,56 +136,68 @@ export default function Home() {
   }, []);
 
 
-  // 2️⃣ GSAP rotation for the `.hi-text` element inside the Navbar
-  useEffect(() => {
-    if (!hiRef.current) return;
-
-    // 1️⃣ Timeline’ı oluştur, sonsuz tekrar ve durakta bekleme
-    const tl = gsap.timeline({
-      repeat: -1,       // sonsuz döngü
-      repeatDelay: 0.8, // her tam turdan sonra 0.8 saniye ortada bekle
-    });
-
-    // 2️⃣ Sağ kısma hızlı yönel → sola geçiş → ortaya dönüş
-    tl
-      .to(hiRef.current, {
-        rotation: 15,
-        duration: 0.4,
-        ease: "sine.inOut",
-        transformOrigin: "center center",
-      })
-      .to(hiRef.current, {
-        rotation: -15,
-        duration: 0.8,
-        ease: "sine.inOut",
-      })
-      .to(hiRef.current, {
-        rotation: 0,
-        duration: 0.4,
-        ease: "sine.inOut",
-      });
-  }, []);
-
-
   return (
-    <div ref={mainContainerRef} style={{ backgroundColor: "#EFEEEA" }}>
+    <div ref={mainContainerRef} style={{ backgroundColor: "#000000" }}>
 
 
       <main>
 
 
-        {/* Hero Bölümü */}
-        <section ref={heroRef} className="h-screen flex flex-col items-center justify-center text-gray-800">
-          <h1 className="text-4xl text-center font-bold px-4">
-            Your branding and website<br />
-            deserves a specialist who’s 100% invested in making them stand out.
-          </h1>
+        {/* Hero */}
+        <section
+          ref={heroRef}
+          className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-black px-4 pt-28 pb-16 text-white"
+        >
+          {/* radial glow + subtle grid, blended into the black navbar */}
           <div
-            ref={hiRef}
-            className="mt-8 border-2 rounded-full px-12 py-6 border-[#c9ff30]"
-            style={{ boxShadow: '0 0 30px rgba(0,255,136,0.6)' }}
-          >
-            <h2 className="text-[#00ff88] text-5xl font-semibold">Hi</h2>
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background:
+                "radial-gradient(ellipse 70% 55% at 50% 0%, rgba(99,102,241,0.28), transparent 70%), radial-gradient(ellipse 50% 40% at 80% 90%, rgba(236,72,153,0.14), transparent 70%)",
+            }}
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 opacity-[0.07]"
+            style={{
+              backgroundImage:
+                "linear-gradient(to right, #fff 1px, transparent 1px), linear-gradient(to bottom, #fff 1px, transparent 1px)",
+              backgroundSize: "56px 56px",
+              maskImage: "radial-gradient(ellipse 70% 60% at 50% 40%, black, transparent 75%)",
+              WebkitMaskImage: "radial-gradient(ellipse 70% 60% at 50% 40%, black, transparent 75%)",
+            }}
+          />
+
+          <div className="relative z-10 max-w-4xl text-center">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-[1.1]">
+              Websites, AI Workflows &amp; SaaS Products{" "}
+              <span className="bg-gradient-to-r from-indigo-400 via-fuchsia-400 to-amber-300 bg-clip-text text-transparent">
+                Built to Convert.
+              </span>
+            </h1>
+            <p className="mt-6 text-lg md:text-xl text-zinc-300 max-w-2xl mx-auto">
+              We don&apos;t just design pages. We build modern web systems that win you customers and take repetitive work off your plate.
+            </p>
+
+            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Link
+                href="/booking"
+                className="inline-flex items-center justify-center rounded-full bg-white px-8 py-3.5 text-base font-semibold text-black transition hover:bg-zinc-200"
+              >
+                Book a Call
+              </Link>
+              <a
+                href="#recent-projects"
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById("recent-projects")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+                className="inline-flex items-center justify-center rounded-full border border-white/25 px-8 py-3.5 text-base font-semibold text-white transition hover:border-white/60 hover:bg-white/5"
+              >
+                View Projects
+              </a>
+            </div>
           </div>
         </section>
 
@@ -206,7 +218,7 @@ export default function Home() {
 
 
         {/* RECENT PROJECTS BÖLÜMÜ */}
-        <div ref={recentProjectsContainerRef}>
+        <div ref={recentProjectsContainerRef} id="recent-projects">
           <RecentProjectsColorful projects={projects} subtitle="Colorful, brand-led cases — crafted to convert." />;
         </div>
 

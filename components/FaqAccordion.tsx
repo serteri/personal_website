@@ -15,7 +15,7 @@ const faqData: FaqItemData[] = [
     },
     {
         question: "How long does a typical website project take?",
-        answer: "Timelines vary based on complexity. A simple landing page can take 1-2 weeks, while a full custom website with multiple features typically takes between 6 to 12 weeks from kickoff to launch."
+        answer: "Timelines vary based on complexity. Typical timelines are 1–2 weeks for landing pages, and 2–4 weeks for full websites & automations, from kickoff to launch. Larger custom web apps are scoped separately."
     },
     {
         question: "How much will my new website cost?",
@@ -39,7 +39,7 @@ const faqData: FaqItemData[] = [
     },
     {
         question: "What technology do you use to build websites?",
-        answer: "We use modern, robust, and scalable technologies like Next.js and React for most of our projects. This allows us to build extremely fast and flexible websites. We always choose the best technology for the job based on the project's requirements."
+        answer: "We pick technology for what it does for you: speed (pages that load fast and hold up under Core Web Vitals), security (modern, well-maintained tooling and managed hosting), and scalability (a foundation that grows from a landing page to a full web app without a rebuild). For most projects that means Next.js and React, but we choose what fits the job."
     }
 ];
 

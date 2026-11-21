@@ -4,10 +4,10 @@ import Link from 'next/link';
 // Linkleri daha kolay yönetmek için bir veri yapısı oluşturalım
 const footerLinks = {
     whatWeDo: [
-        { name: 'Brand Strategy', href: '/whatwedo/branding' },
-        { name: 'Content Strategy', href: '/whatwedo/contentstrategy' },
-        { name: 'Website Design', href: '/whatwedo/webdesign' },
-        { name: 'SEO', href: '/whatwedo/seo' },
+        { name: 'High-Converting Websites', href: '/whatwedo/webdesign' },
+        { name: 'AI & Lead Automation', href: '/whatwedo' },
+        { name: 'Custom Web Apps & SaaS', href: '/whatwedo' },
+        { name: 'Speed & Technical SEO', href: '/whatwedo/seo' },
     ],
     about: [
         { name: 'Serter Iyigunlu', href: '/about' },
@@ -63,7 +63,7 @@ const Footer = () => {
                     <div className="lg:col-span-2 lg:border-l lg:border-gray-700 lg:pl-12">
                          <ul className="space-y-3">
                             <li><Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
-                            <li className="pt-4">© 2025 All Rights Reserved by Serter Iyigunlu.</li>
+                            <li className="pt-4">© {new Date().getFullYear()} All Rights Reserved by Serter Iyigunlu.</li>
 
                         </ul>
                     </div>

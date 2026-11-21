@@ -36,15 +36,16 @@ export const caseStudies: (CaseStudy & { coverImage?: string })[] = [
         category: "Own Product",
         gradient: "from-emerald-500 via-teal-500 to-cyan-600",
         problem:
-            "Registered NDIS providers have to follow a large set of rules and keep their compliance work organised. Finding the relevant rule and tracking what has been done is time-consuming.",
+            "NDIS providers keep a lot of participant documentation: progress notes, service agreements, timesheets and service records. Gaps and inconsistencies in those files are easy to miss until they become bigger problems.",
         built: [
-            "A RAG-based assistant that answers questions over NDIS rules.",
-            "A compliance workflow for registered providers.",
+            "A document review tool that checks participant documentation, progress notes and service records and flags missing information and inconsistencies, without replacing existing NDIS software.",
+            "A free document check that needs no sign-up. It makes suggestions; the provider's team reviews and decides.",
+            // TODO(serter): confirm the RAG-based assistant over NDIS rules is live on the site, then add it back here. It is not mentioned on the public homepage.
         ],
         stack: ["Next.js", "TypeScript", "Tailwind", "Prisma", "Neon PostgreSQL", "Vercel"],
         outcome: [
             "Shipped and live at providershield.com.au.",
-            "Includes the RAG assistant and the compliance workflow described above.",
+            "Offers a free document check and a signed-in product for providers.",
         ],
         // TODO(serter): add real metric
     },
@@ -58,13 +59,19 @@ export const caseStudies: (CaseStudy & { coverImage?: string })[] = [
         category: "Own Product",
         gradient: "from-indigo-500 via-violet-500 to-fuchsia-500",
         problem:
-            "People often start a visa or immigration process without knowing how ready they are. They need a clear picture of where they stand before they apply.",
-        built: ["A readiness assessment tool that helps people understand where they stand before applying."],
+            "Australian visa information is spread across many published sources. People need a way to research occupations, skills assessments and visa requirements, and to see where each piece of information comes from.",
+        built: [
+            "Research tools for Australian visa and occupation information: occupation and ANZSCO search, points calculation and visa comparison.",
+            "A structured LogiVisa Assessment for people who want a guided review of where they stand.",
+        ],
         // TODO(serter): confirm the exact stack for LogiVisa and list it here.
         stack: [],
-        outcome: ["Shipped and live at logivisa.com.", "An assessment product that helps users understand their readiness."],
+        outcome: [
+            "Shipped and live at logivisa.com.",
+            "Provides information and research tools, not personalised immigration advice.",
+        ],
         disclaimer:
-            "LogiVisa is an assessment tool. It is not migration advice and is not a registered migration agent service.",
+            "LogiVisa provides information and research tools. It is not personalised immigration advice and is not a registered migration agent service.",
         // TODO(serter): add real metric
     },
     {
@@ -77,11 +84,17 @@ export const caseStudies: (CaseStudy & { coverImage?: string })[] = [
         category: "Own Product",
         gradient: "from-sky-500 via-blue-600 to-indigo-700",
         problem:
-            "When a flight is delayed or cancelled, travellers are left to sort it out themselves. The product began as a flight search idea and is now focused on protection when flights go wrong.",
-        built: ["A flight disruption protection stack for travellers."],
+            "When a flight is delayed or cancelled, travellers often find out late and don't know whether they may be owed compensation. The product began as a flight search idea and is now focused on protection when flights go wrong.",
+        built: [
+            "Flight disruption monitoring: it watches booked flights and emails the traveller when they are delayed or cancelled.",
+            "A check of whether the traveller may be eligible for EU261 or UK261 compensation.",
+        ],
         // TODO(serter): confirm the exact stack for FlightAgent.io and list it here.
         stack: [],
-        outcome: ["Shipped and live at flightagent.io.", "Focused on traveller protection during flight disruption."],
+        outcome: [
+            "Shipped and live at flightagent.io.",
+            "Monitors bookings and tells travellers about disruption and possible compensation eligibility.",
+        ],
         // TODO(serter): add real metric
     },
 ];
