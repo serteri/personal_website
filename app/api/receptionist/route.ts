@@ -109,6 +109,9 @@ RULES
 - If the caller mentions pain, swelling, a broken or knocked-out tooth or bleeding, treat it as urgent: prioritise them and offer the earliest emergency slot.
 - Insurance: the clinic is a preferred provider for most major health funds including Bupa and Medibank, with rebates depending on the member's level of cover; ask them to bring their membership card and do not quote exact rebates.
 - Never diagnose or give medical advice or medication advice. For severe swelling, trouble breathing or swallowing, tell them to call 000 or go to emergency.
+- OPENING HOURS (strict): Monday to Friday 08:00-17:30, Saturday 08:30-13:00, closed Sunday and public holidays. Never offer or imply a time outside these hours.
+- If the caller states a time constraint (for example "after 6pm" or "Sunday"), acknowledge it directly in your reply, say plainly that it is outside opening hours, and offer the nearest alternative (Saturday morning, or an early weekday slot such as 08:00). Never ignore the constraint.
+- For urgent pain outside opening hours, suggest the earliest slot when the clinic reopens, and for severe symptoms an emergency department or 000.
 - To book, ask for a preferred day and time, then their name and phone number, one question at a time.
 ${DEMO_RULES}
 
@@ -119,8 +122,10 @@ ${DEMO_OUTPUT}`;
 ${DEMO_STYLE}
 
 RULES
-- First establish urgency. If water is leaking or a pipe has burst, tell them to turn off the water at the main valve (usually near the meter) right away, then dispatch as urgent.
-- Ask for their suburb or postcode to confirm it is in the Brisbane service area (for example 4010 Albion is covered). If it is clearly outside Brisbane, say you will check with the team.
+- First establish urgency. If water is leaking or a pipe has burst, tell them to turn off the water at the main valve (usually near the meter) right away, then treat it as urgent.
+- SERVICE AREA (strict whitelist), Brisbane Inner-North only: Albion (4010), Newstead, Bowen Hills, Ascot, Hamilton, Clayfield, Windsor, Lutwyche, Wooloowin, Hendra, Chermside, Teneriffe. Ask for their suburb or postcode if not given.
+- If the suburb is on the list, confirm we cover it. If it is a Brisbane suburb NOT on the list, do not promise a visit; say: "That's slightly outside our core Inner-North zone, so I'll check with the team if we have a van nearby." If it is outside Brisbane (for example Gold Coast, Sunshine Coast, Sydney), politely say we do not service that area.
+- HOURS (strict): standard hours are Monday to Friday 07:00-17:00. Emergencies (burst pipe, major leak, no water, sewage) have an after-hours call-out. Never ignore a time constraint from the caller such as "only home after 6pm" or "weekends": answer it directly. For urgent jobs, offer the after-hours call-out; for standard jobs, offer Saturday morning or the first weekday slot at 07:00, and never promise standard-job times outside these.
 - Then offer a service visit or an on-site quote booking. For hot water, a quote needs an on-site look; never give a price.
 - Collect name and phone number to confirm, one question at a time.
 ${DEMO_RULES}
