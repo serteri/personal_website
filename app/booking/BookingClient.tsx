@@ -1,6 +1,6 @@
 'use client'
 
-import { useState ,useEffect} from 'react';
+import { useState ,useEffect, useRef} from 'react';
 import BookingCalendar from '@/components/BookingCalendar';
 import TimeSlots     from '@/components/TimeSlots';
 import BookingForm   from '@/components/BookingForm';
@@ -9,10 +9,13 @@ import { FaArrowLeft } from 'react-icons/fa';
 interface BookedSlot{date:string;time:string}
 
 
-export default function BookingClient() {
-    const [step, setStep] = useState<'calendar'|'timeslots'|'form'>('calendar');
-    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-    const [selectedTime, setSelectedTime] = useState<string | null>(null);
+export default function BookingClient({ initialDate, initialTime }: { initialDate?: string; initialTime?: string }) {
+    const fromLink = Boolean(initialDate && initialTime);
+    const [step, setStep] = useState<'calendar'|'timeslots'|'form'>(fromLink ? 'form' : 'calendar');
+    // Local midnight, same value a calendar click produces
+    const [selectedDate, setSelectedDate] = useState<Date | null>(fromLink ? new Date(`${initialDate}T00:00:00`) : null);
+    const [selectedTime, setSelectedTime] = useState<string | null>(fromLink ? (initialTime as string) : null);
+    const linkChecked = useRef(false);
 
     // Rezervasyonları tutmak için yeni state
     const [booked, setBooked] = useState<BookedSlot[]>([]);
@@ -36,6 +39,17 @@ export default function BookingClient() {
     useEffect(() => {
         fetchBookings();
     }, []);
+    // Deep link: if the pre-selected slot turns out to be taken, fall back to the time slot list
+    useEffect(() => {
+        if (!fromLink || isLoading || linkChecked.current || !selectedDate) return;
+        linkChecked.current = true;
+        const dayKey = selectedDate.toISOString().slice(0, 10);
+        if (booked.some(b => b.date.slice(0, 10) === dayKey && b.time === selectedTime)) {
+            setSelectedTime(null);
+            setStep('timeslots');
+        }
+    }, [fromLink, isLoading, booked, selectedDate, selectedTime]);
+
     const handleDateClick = (info: { date: Date }) => {
         setSelectedDate(info.date);
         setStep('timeslots');

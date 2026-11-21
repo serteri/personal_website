@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import ProductShowcase from "@/components/ProductShowcase";
 import WhatWeDo from "@/components/WhatWeDo";
+import ReceptionistDemo from "@/components/ReceptionistDemo";
 import FaqAccordion from "@/components/FaqAccordion";
 import CallToAction from "@/components/CallToAction";
 
@@ -54,6 +55,8 @@ export default function Home() {
         <ProductShowcase />
 
         <WhatWeDo />
+
+        <ReceptionistDemo />
 
         {/* Statement */}
         <section className="bg-white px-4 py-20">

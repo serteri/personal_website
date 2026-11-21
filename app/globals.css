@@ -92,3 +92,16 @@ html {
 @media (prefers-reduced-motion: reduce) {
   .reveal-line { animation: none; }
 }
+
+/* Voice demo preview: animated waveform bars */
+@keyframes wave {
+  0%, 100% { transform: scaleY(0.25); }
+  50% { transform: scaleY(1); }
+}
+.wave-bar {
+  transform-origin: center;
+  animation: wave 1.2s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wave-bar { animation: none; transform: scaleY(0.6); }
+}
