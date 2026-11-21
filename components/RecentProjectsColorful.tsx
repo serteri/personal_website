@@ -3,17 +3,22 @@
 
 import React, { useMemo, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 
 export interface Project {
     id: string;
     title: string;
     description?: string;
-    imageUrl: string;
+    imageUrl?: string;
     link?: string;
+    slug?: string; // when set, a case study page exists at /case-studies/[slug]
+    gradient?: string; // placeholder cover when there is no imageUrl
     category?: string;
     index: number;
 }
+
+const OWN = "Own Product";
 
 /* uniq helper */
 const uniq = (arr: (string | undefined)[]) => Array.from(new Set(arr.filter(Boolean) as string[]));
@@ -26,48 +31,20 @@ export default function RecentProjectsColorful({ projects, subtitle }: Props) {
     const categories = useMemo(() => ["All", ...uniq(projects.map(p => p.category))], [projects]);
     const filtered = useMemo(() => filter === "All" ? projects : projects.filter(p => p.category === filter), [projects, filter]);
 
+    const clientItems = filtered.filter(p => p.category !== OWN);
+    const ownItems = filtered.filter(p => p.category === OWN);
+
     // prefers-reduced-motion
     const prefersReduced = typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     // Palette notes: we use Tailwind built-in utility colors and gradients.
     // If you want brand-specific colors, add them to tailwind.config.js and replace classes.
-    return (
-        <section className="py-12 bg-gradient-to-b from-white via-rose-50 to-indigo-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                {/* Header */}
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
-                    <div>
-                        <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900">Recent Projects</h2>
-                        <p className="mt-1 text-sm text-slate-700 max-w-xl">
-                            {subtitle ?? "Vibrant, brand-forward projects — click any card to explore the full case."}
-                        </p>
-                    </div>
-
-                    {/* Filters */}
-                    <div className="flex flex-wrap gap-3">
-                        {categories.map(cat => (
-                            <button
-                                key={cat}
-                                onClick={() => setFilter(cat)}
-                                className={`px-3 py-1.5 rounded-full text-sm font-semibold transition focus:outline-none ${
-                                    filter === cat
-                                        ? "bg-gradient-to-r from-rose-500 via-orange-400 to-amber-400 text-white shadow-xl"
-                                        : "bg-white text-slate-700 border border-slate-200 hover:shadow-sm"
-                                }`}
-                                aria-pressed={filter === cat}
-                            >
-                                {cat}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Grid */}
-                <div
+    const renderGrid = (items: Project[]) => (
+        <div
                     className="grid gap-6"
                     style={{ gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))" }}
                 >
-                    {filtered.map((p, idx) => (
+                    {items.map((p, idx) => (
                         <motion.article
                             key={p.id}
                             layout
@@ -86,15 +63,7 @@ export default function RecentProjectsColorful({ projects, subtitle }: Props) {
                             >
                                 {/* Thumb area */}
                                 <div className="relative w-full aspect-[4/3] bg-gradient-to-tr from-purple-100 via-pink-50 to-amber-50">
-                                    <Image
-                                        src={p.imageUrl}                // örn: /images/guneysan-thumb.jpg (küçük)
-                                        alt={p.title}
-                                        fill
-                                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                                        sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 33vw"
-                                        priority={false}
-                                        // optional: quality, e.g. quality={75}
-                                    />
+                                    <Cover p={p} className="object-cover transition-transform duration-500 group-hover:scale-105" />
 
                                     {/* Colorful overlay - appears on hover */}
                                     <div className="absolute inset-0 pointer-events-none">
@@ -129,6 +98,47 @@ export default function RecentProjectsColorful({ projects, subtitle }: Props) {
                         </motion.article>
                     ))}
                 </div>
+    );
+
+    return (
+        <section className="py-12 bg-gradient-to-b from-white via-rose-50 to-indigo-50">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                {/* Header */}
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
+                    <div>
+                        <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900">Recent Projects</h2>
+                        <p className="mt-1 text-sm text-slate-700 max-w-xl">
+                            {subtitle ?? "Vibrant, brand-forward projects — click any card to explore the full case."}
+                        </p>
+                    </div>
+
+                    {/* Filters */}
+                    <div className="flex flex-wrap gap-3">
+                        {categories.map(cat => (
+                            <button
+                                key={cat}
+                                onClick={() => setFilter(cat)}
+                                className={`px-3 py-1.5 rounded-full text-sm font-semibold transition focus:outline-none ${
+                                    filter === cat
+                                        ? "bg-gradient-to-r from-rose-500 via-orange-400 to-amber-400 text-white shadow-xl"
+                                        : "bg-white text-slate-700 border border-slate-200 hover:shadow-sm"
+                                }`}
+                                aria-pressed={filter === cat}
+                            >
+                                {cat}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {clientItems.length > 0 && renderGrid(clientItems)}
+
+                {ownItems.length > 0 && (
+                    <div className="mt-14">
+                        <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900">Products we built and run ourselves</h3>
+                        <div className="mt-5">{renderGrid(ownItems)}</div>
+                    </div>
+                )}
             </div>
 
             {/* Modal */}
@@ -150,12 +160,7 @@ export default function RecentProjectsColorful({ projects, subtitle }: Props) {
                             onClick={(e) => e.stopPropagation()}
                         >
                             <div className="relative w-full aspect-[16/9] bg-slate-100">
-                                <Image
-                                    src={modalProject.imageUrl}
-                                    alt={modalProject.title}
-                                    fill
-                                    className="object-cover"
-                                />
+                                <Cover p={modalProject} className="object-cover" />
                                 {/* modal overlay accent */}
                                 <div className="absolute inset-0 pointer-events-none"
                                      style={{ background: "linear-gradient(180deg, rgba(8,145,178,0.06), rgba(236,72,153,0.03))" }} />
@@ -168,6 +173,14 @@ export default function RecentProjectsColorful({ projects, subtitle }: Props) {
                                         {modalProject.category && <p className="text-sm text-slate-500 mt-1">{modalProject.category}</p>}
                                     </div>
                                     <div className="ml-auto flex items-center gap-3">
+                                        {modalProject.slug && (
+                                            <Link
+                                                href={`/case-studies/${modalProject.slug}`}
+                                                className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-slate-300 text-slate-800 text-sm font-semibold"
+                                            >
+                                                Read case study
+                                            </Link>
+                                        )}
                                         {modalProject.link && (
                                             <a
                                                 href={modalProject.link}
@@ -191,5 +204,25 @@ export default function RecentProjectsColorful({ projects, subtitle }: Props) {
                 )}
             </AnimatePresence>
         </section>
+    );
+}
+
+function Cover({ p, className }: { p: Project; className?: string }) {
+    if (p.imageUrl) {
+        return (
+            <Image
+                src={p.imageUrl}
+                alt={p.title}
+                fill
+                className={className}
+                sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 33vw"
+                priority={false}
+            />
+        );
+    }
+    return (
+        <div className={`absolute inset-0 flex items-center justify-center bg-gradient-to-br ${p.gradient ?? "from-slate-700 to-slate-900"}`}>
+            <span className="text-white text-2xl font-extrabold tracking-tight px-4 text-center">{p.title}</span>
+        </div>
     );
 }

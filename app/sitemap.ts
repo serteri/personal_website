@@ -1,4 +1,5 @@
 import { MetadataRoute } from 'next';
+import { caseStudies } from '@/lib/caseStudies';
 
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -15,5 +16,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
         // ... diğer statik sayfalarınız ...
     ];
 
-    return [...staticUrls];
+    // Case study pages use the canonical www host
+    const caseUrls = caseStudies.map((c) => ({
+        url: `https://www.altiqdesign.com/case-studies/${c.slug}`,
+        lastModified: new Date(),
+    }));
+
+    return [...staticUrls, ...caseUrls];
 }

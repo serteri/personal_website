@@ -10,6 +10,7 @@ import WhatWeDo from "@/components/WhatWeDo"; // Yeni component'i import et
 import FaqAccordion from "@/components/FaqAccordion";
 import CallToAction from "@/components/CallToAction";
 
+import { caseStudies } from "@/lib/caseStudies";
 import RecentProjectsColorful, { Project } from "@/components/RecentProjectsColorful";
 gsap.registerPlugin(ScrollTrigger);
 
@@ -34,7 +35,16 @@ export default function Home() {
     { id: '1', title: 'Project Alkon', description: 'Alkon Energy', imageUrl: '/alkon_logo.jpeg', link: 'https://alkonenerji.com/', category: 'Web Design', index: 0 },
     { id: '2', title: 'Project Guneysan', description: 'Guneysan', imageUrl: '/guneysan_logo.jpeg', link: '', category: 'Branding', index: 1 },
     { id: '3', title: 'Project Petek Bal', description: 'Petek Bal', imageUrl: '/balpetek_logo.jpeg', link: 'https://www.balpetek.com.tr/', category: 'Mobile App', index: 2 },
-    // ... more projects
+    ...caseStudies.map((c, i) => ({
+      id: `own-${c.slug}`,
+      title: c.title,
+      description: c.summary,
+      link: c.liveUrl,
+      slug: c.slug,
+      gradient: c.gradient,
+      category: c.category,
+      index: 3 + i,
+    })),
   ];
 
   const logos = [
