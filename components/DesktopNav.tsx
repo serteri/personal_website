@@ -16,6 +16,11 @@ export default function DesktopNav() {
                 </Link>
             </li>
             <li>
+                <Link href="/ai-receptionist" className="rounded-full bg-blue-50 px-3.5 py-1.5 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100">
+                    AI Receptionist
+                </Link>
+            </li>
+            <li>
                 <Link href="/booking" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
                     Contact
                 </Link>

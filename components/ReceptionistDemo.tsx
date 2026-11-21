@@ -444,7 +444,7 @@ function ChatTab({ industry }: { industry: Industry }) {
 
 /* ---------- Tab 2: live voice demo (Retell WebRTC) ---------- */
 
-const MAX_CALL_SECONDS = 85;
+const MAX_CALL_SECONDS = 180;
 type CallState = "idle" | "connecting" | "listening" | "speaking";
 
 function VoiceTab() {
@@ -549,8 +549,7 @@ function VoiceTab() {
             </div>
             <h3 className="mt-4 text-xl font-semibold text-slate-900 sm:text-2xl">Live Voice Demo — Brisbane Flow Plumbing (Sam)</h3>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600">
-                Talk live with Sam, our 24/7 AI plumbing receptionist. Try reporting a burst pipe in Newstead or asking about after-hours
-                availability. (Max 85s demo limit)
+                Talk live with Sam (max 3 min). Try reporting a burst pipe in Newstead or asking about after-hours availability.
             </p>
 
             <div className="mt-8 flex min-h-[7rem] flex-col items-center justify-center gap-4 rounded-2xl bg-slate-50 p-6">
@@ -569,7 +568,7 @@ function VoiceTab() {
                             <span className={`h-2.5 w-2.5 rounded-full ${state === "connecting" ? "bg-amber-400" : "animate-pulse bg-emerald-500"}`} />
                             {statusLabel}
                             <span className="font-mono text-slate-500">
-                                {mm}:{ss} / 01:25
+                                {mm}:{ss} / 03:00
                             </span>
                         </p>
                         <button
@@ -603,8 +602,8 @@ function VoiceTab() {
 
 /* ---------- section ---------- */
 
-export default function ReceptionistDemo() {
-    const [tab, setTab] = useState<"chat" | "voice">("chat");
+export default function ReceptionistDemo({ defaultTab = "chat" }: { defaultTab?: "chat" | "voice" }) {
+    const [tab, setTab] = useState<"chat" | "voice">(defaultTab);
     const [industry, setIndustry] = useState<Industry>("altiqdesign");
 
     const tabClass = (active: boolean) =>

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createRateLimiter, clientIp } from '@/lib/rateLimit';
 
-const isLimited = createRateLimiter(3, 10 * 60 * 1000); // 3 calls / 10 min / IP
+const isLimited = createRateLimiter(2, 10 * 60 * 1000); // 2 calls / 10 min / IP
 
 export async function POST(req: Request) {
     const apiKey = process.env.RETELL_API_KEY;
