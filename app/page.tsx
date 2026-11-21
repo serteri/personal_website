@@ -47,7 +47,7 @@ export default function Home() {
                 ))}
               </h1>
               <p className="mt-8 max-w-xl text-lg text-muted">
-                We don&apos;t just design pages. We build modern web systems that win you customers and take repetitive work off your plate.
+                We build MVPs and SaaS products, document and workflow automations, AI-app rescues, and conversion websites that win you customers and take repetitive work off your plate.
               </p>
               <div className="mt-10 flex flex-col sm:flex-row gap-4">
                 <Link

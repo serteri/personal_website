@@ -15,13 +15,13 @@ import ChatWidget from '@/components/ChatWidget';
 export const metadata: Metadata = {
     title: {
         template: '%s | ALTIQDESIGN', // Her sayfa başlığının sonuna bunu ekler
-        default: 'ALTIQDESIGN - Modern Web & Brand Experiences', // Ana sayfa başlığı
+        default: 'ALTIQDESIGN — SaaS, AI Workflows & Conversion Websites', // Ana sayfa başlığı
     },
-    description: 'ALTIQDESIGN is a creative studio dedicated to building powerful, engaging, and future-proof digital experiences that elevate brands.',
+    description: 'Product & automation studio building MVPs, document workflows, AI-app rescues, and high-converting web systems.',
     // Open Graph etiketleri (Sosyal Medya Paylaşımları İçin)
     openGraph: {
-        title: 'ALTIQDESIGN',
-        description: 'Creative studio for modern digital experiences.',
+        title: 'ALTIQDESIGN — SaaS, AI Workflows & Conversion Websites',
+        description: 'Product & automation studio building MVPs, document workflows, AI-app rescues, and high-converting web systems.',
         url: 'https://sizin-domaininiz.com', // Buraya kendi domaininizi yazın
         siteName: 'ALTIQDESIGN',
         images: [
@@ -34,6 +34,11 @@ export const metadata: Metadata = {
         locale: 'en_US',
         type: 'website',
         // Vercel cache temizleme denemesi v1
+    },
+    twitter: {
+        card: 'summary_large_image',
+        title: 'ALTIQDESIGN — SaaS, AI Workflows & Conversion Websites',
+        description: 'Product & automation studio building MVPs, document workflows, AI-app rescues, and high-converting web systems.',
     },
 };
 

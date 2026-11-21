@@ -4,10 +4,10 @@ import Link from 'next/link';
 // Linkleri daha kolay yönetmek için bir veri yapısı oluşturalım
 const footerLinks = {
     whatWeDo: [
-        { name: 'High-Converting Websites', href: '/#services' },
-        { name: 'AI & Lead Automation', href: '/#services' },
-        { name: 'Custom Web Apps & SaaS', href: '/#services' },
-        { name: 'Speed & Technical SEO', href: '/#services' },
+        { name: 'MVP & SaaS Engineering', href: '/#services' },
+        { name: 'Document & Workflow Automation', href: '/#services' },
+        { name: 'AI-App Rescue & Hardening', href: '/#services' },
+        { name: 'Conversion Websites & Lead Systems', href: '/#services' },
     ],
     about: [
         { name: 'Serter Iyigunlu', href: '/about' },
