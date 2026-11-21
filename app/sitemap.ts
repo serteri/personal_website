@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next';
 import { caseStudies } from '@/lib/caseStudies';
+import { services } from '@/lib/services';
 
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -22,5 +23,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
         lastModified: new Date(),
     }));
 
-    return [...staticUrls, ...caseUrls];
+    const serviceUrls = services.map((sv) => ({
+        url: `https://www.altiqdesign.com/services/${sv.slug}`,
+        lastModified: new Date(),
+    }));
+
+    return [...staticUrls, ...caseUrls, ...serviceUrls];
 }

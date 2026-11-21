@@ -16,7 +16,7 @@ const faqData: FaqItemData[] = [
     },
     {
         question: "How long does a typical website project take?",
-        answer: "Timelines vary based on complexity. Typical timelines are 1–2 weeks for landing pages, and 2–4 weeks for full websites & automations, from kickoff to launch. Larger custom web apps are scoped separately."
+        answer: "Timelines depend on the service, from kickoff to launch: conversion websites and AI-app rescues take 1–2 weeks, MVP & SaaS builds take 3–5 weeks, and custom document & workflow automations are scoped based on complexity (typically 2–4 weeks). We confirm the timeline in writing after the scoping call."
     },
     {
         question: "How much will my new website cost?",

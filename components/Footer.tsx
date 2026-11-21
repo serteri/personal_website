@@ -1,14 +1,10 @@
 import React from 'react';
 import Link from 'next/link';
+import { services } from '@/lib/services';
 
 // Linkleri daha kolay yönetmek için bir veri yapısı oluşturalım
 const footerLinks = {
-    whatWeDo: [
-        { name: 'MVP & SaaS Engineering', href: '/#services' },
-        { name: 'Document & Workflow Automation', href: '/#services' },
-        { name: 'AI-App Rescue & Hardening', href: '/#services' },
-        { name: 'Conversion Websites & Lead Systems', href: '/#services' },
-    ],
+    whatWeDo: services.map((sv) => ({ name: sv.title, href: `/services/${sv.slug}` })),
     about: [
         { name: 'Serter Iyigunlu', href: '/about' },
         { name: 'Case Studies', href: '/#recent-projects' },

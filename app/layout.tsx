@@ -13,6 +13,7 @@ import { GoogleAnalytics } from '@next/third-parties/google'
 import ChatWidget from '@/components/ChatWidget';
 
 export const metadata: Metadata = {
+    metadataBase: new URL('https://www.altiqdesign.com'),
     title: {
         template: '%s | ALTIQDESIGN', // Her sayfa başlığının sonuna bunu ekler
         default: 'ALTIQDESIGN — SaaS, AI Workflows & Conversion Websites', // Ana sayfa başlığı
@@ -22,15 +23,8 @@ export const metadata: Metadata = {
     openGraph: {
         title: 'ALTIQDESIGN — SaaS, AI Workflows & Conversion Websites',
         description: 'Product & automation studio building MVPs, document workflows, AI-app rescues, and high-converting web systems.',
-        url: 'https://sizin-domaininiz.com', // Buraya kendi domaininizi yazın
+        url: 'https://www.altiqdesign.com',
         siteName: 'ALTIQDESIGN',
-        images: [
-            {
-                url: '/images/og-image.jpg', // /public/images/og-image.jpg altına bir paylaşım resmi koyun
-                width: 1200,
-                height: 630,
-            },
-        ],
         locale: 'en_US',
         type: 'website',
         // Vercel cache temizleme denemesi v1
