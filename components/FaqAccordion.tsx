@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import SwissHeader from './SwissHeader';
+import SectionHeader from './SectionHeader';
 
 // ÇÖZÜM: 'any' yerine kullanılacak olan tip arayüzünü tanımlıyoruz.
 interface FaqItemData {
@@ -47,7 +47,7 @@ const faqData: FaqItemData[] = [
 // Tek bir SSS öğesini yönetecek alt component
 const FaqItem = ({ item, isOpen, onClick }: { item: FaqItemData, isOpen: boolean, onClick: () => void }) => {
     return (
-        <div className="border-b border-line">
+        <div className="border-b border-slate-200/80 last:border-b-0">
             <button
                 className="w-full flex justify-between items-center text-left py-5 hover:text-cobalt transition-colors"
                 aria-expanded={isOpen}
@@ -92,10 +92,10 @@ export default function FaqAccordion() {
     };
 
     return (
-        <section id="faq" className="bg-[#F4F4F5] border-b border-line py-20 px-4 scroll-mt-24">
-            <div className="mx-auto max-w-7xl sm:px-2 lg:px-8">
-                <SwissHeader index="03" label="FAQ" title="Frequently asked questions" />
-                <div className="border-t border-line bg-white px-6">
+        <section id="faq" className="bg-white py-20 px-4 scroll-mt-24">
+            <div className="mx-auto max-w-4xl">
+                <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />
+                <div className="rounded-2xl border border-slate-200/80 bg-white px-6 shadow-sm">
                     {faqData.map((item, index) => (
                         <FaqItem
                             key={index}

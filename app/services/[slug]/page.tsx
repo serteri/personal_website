@@ -30,7 +30,7 @@ export default async function ServicePage({ params }: { params: Params }) {
     if (!s) notFound();
 
     return (
-        <main className="bg-[#F4F4F5] text-ink">
+        <main className="bg-white text-slate-900">
             <div className="mx-auto max-w-4xl px-4 sm:px-6 pt-12 pb-20">
                 <Link href="/#services" className={`${label} hover:text-cobalt`}>
                     ← ALL SERVICES
@@ -38,7 +38,7 @@ export default async function ServicePage({ params }: { params: Params }) {
 
                 <div className="mt-10 flex items-center gap-4">
                     <span className={label}>{s.number}</span>
-                    <span className="border border-line bg-white px-2 py-0.5 font-mono text-xs uppercase tracking-wider text-ink">
+                    <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-0.5 font-mono text-xs uppercase tracking-wider text-slate-700">
                         {s.scope}
                     </span>
                 </div>
@@ -57,9 +57,9 @@ export default async function ServicePage({ params }: { params: Params }) {
 
                     <section className="grid grid-cols-1 gap-4 border-b border-line py-8 md:grid-cols-12">
                         <h2 className={`md:col-span-3 ${label}`}>WHAT&apos;S INCLUDED</h2>
-                        <ul className="md:col-span-9 border-t border-l border-line">
+                        <ul className="md:col-span-9 space-y-3">
                             {s.included.map((item, i) => (
-                                <li key={item} className="flex gap-4 border-r border-b border-line bg-white px-4 py-3">
+                                <li key={item} className="flex gap-4 rounded-xl border border-slate-200/80 bg-white px-4 py-3 shadow-sm">
                                     <span className={label}>{String(i + 1).padStart(2, "0")}</span>
                                     <span>{item}</span>
                                 </li>
@@ -70,16 +70,16 @@ export default async function ServicePage({ params }: { params: Params }) {
                     {s.relatedProducts && s.relatedProducts.length > 0 && (
                         <section className="grid grid-cols-1 gap-4 border-b border-line py-8 md:grid-cols-12">
                             <h2 className={`md:col-span-3 ${label}`}>BUILT IN-HOUSE / LIVE EXAMPLE</h2>
-                            <ul className="md:col-span-9 border-t border-l border-line">
+                            <ul className="md:col-span-9 space-y-3">
                                 {s.relatedProducts.map((prod) => (
                                     <li
                                         key={prod.name}
-                                        className="flex flex-col gap-3 border-r border-b border-line bg-white p-5 sm:flex-row sm:items-center sm:justify-between"
+                                        className="flex flex-col gap-3 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between"
                                     >
                                         <div>
                                             <div className="flex items-center gap-3">
                                                 <h3 className="text-lg font-bold tracking-tight">{prod.name}</h3>
-                                                <span className="border border-cobalt px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-cobalt">
+                                                <span className="rounded-full border border-cobalt px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-cobalt">
                                                     LIVE
                                                 </span>
                                             </div>
@@ -101,9 +101,9 @@ export default async function ServicePage({ params }: { params: Params }) {
 
                     <section className="grid grid-cols-1 gap-4 border-b border-line py-8 md:grid-cols-12">
                         <h2 className={`md:col-span-3 ${label}`}>PROCESS</h2>
-                        <ol className="md:col-span-9 grid grid-cols-1 border-t border-l border-line sm:grid-cols-3">
+                        <ol className="md:col-span-9 grid grid-cols-1 gap-4 sm:grid-cols-3">
                             {s.process.map((step, i) => (
-                                <li key={step.title} className="border-r border-b border-line bg-white p-5">
+                                <li key={step.title} className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
                                     <span className={label}>{String(i + 1).padStart(2, "0")}</span>
                                     <h3 className="mt-3 text-lg font-bold tracking-tight">{step.title}</h3>
                                     <p className="mt-2 text-sm text-muted">{step.text}</p>
@@ -113,11 +113,11 @@ export default async function ServicePage({ params }: { params: Params }) {
                     </section>
                 </div>
 
-                <div className="mt-12 flex flex-col gap-6 bg-[#18181B] p-8 text-[#FAFAFA] md:flex-row md:items-center md:justify-between">
+                <div className="mt-12 flex flex-col gap-6 rounded-3xl bg-slate-900 p-8 text-white md:flex-row md:items-center md:justify-between">
                     <p className="text-2xl font-extrabold tracking-tight">Want this for your project?</p>
                     <Link
                         href="/booking"
-                        className="inline-flex items-center justify-center bg-[#0047FF] px-8 py-4 text-base font-semibold text-white transition hover:bg-[#0038CC]"
+                        className="inline-flex items-center justify-center rounded-full bg-blue-600 px-8 py-3.5 text-base font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-blue-500"
                     >
                         Book a Call
                     </Link>

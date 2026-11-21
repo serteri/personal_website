@@ -5,7 +5,7 @@ import CallToAction from '@/components/CallToAction'
 
 export default function About() {
     return (
-       <div className="bg-[#F4F4F5] text-ink">
+       <div className="bg-[#F8FAFC] text-ink">
              <AboutHero />
               <PhilosophySection />
               <ValuesSection />

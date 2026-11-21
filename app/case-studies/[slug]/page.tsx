@@ -31,13 +31,13 @@ export default async function CaseStudyPage({ params }: { params: Params }) {
     if (!cs) notFound();
 
     return (
-        <main className="bg-[#F4F4F5] text-ink pt-12 pb-20">
+        <main className="bg-white text-slate-900 pt-12 pb-20">
             <div className="mx-auto max-w-4xl px-4 sm:px-6">
-                <Link href="/#recent-projects" className={`${label} hover:text-cobalt`}>
+                <Link href="/#products" className={`${label} hover:text-cobalt`}>
                     ← Back to projects
                 </Link>
 
-                <div className="relative mt-6 aspect-[16/10] w-full overflow-hidden border border-line bg-[#E4E4E7]">
+                <div className="relative mt-6 aspect-[16/10] w-full overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-100 shadow-sm">
                     {cs.coverImage ? (
                         <Image
                             src={cs.coverImage}
@@ -64,7 +64,7 @@ export default async function CaseStudyPage({ params }: { params: Params }) {
 
                 <div className="mt-5 flex flex-wrap gap-2">
                     {cs.tags.map((t) => (
-                        <span key={t} className="border border-line bg-white px-2 py-0.5 font-mono text-xs uppercase tracking-wider text-muted">
+                        <span key={t} className="rounded-full border border-slate-200 bg-slate-50 px-3 py-0.5 font-mono text-xs uppercase tracking-wider text-slate-700">
                             {t}
                         </span>
                     ))}
@@ -74,13 +74,13 @@ export default async function CaseStudyPage({ params }: { params: Params }) {
                     href={cs.liveUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-8 inline-flex bg-[#0047FF] px-8 py-4 text-base font-semibold text-white transition hover:bg-[#0038CC]"
+                    className="mt-8 inline-flex rounded-full bg-slate-900 px-8 py-3.5 text-base font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
                 >
                     Visit live site ↗
                 </a>
 
                 {cs.disclaimer && (
-                    <p className="mt-8 border-l-2 border-ink bg-white px-4 py-3 text-sm text-muted">{cs.disclaimer}</p>
+                    <p className="mt-8 rounded-xl border border-slate-200/80 bg-slate-50 px-4 py-3 text-sm text-muted">{cs.disclaimer}</p>
                 )}
 
                 <div className="mt-12 border-t border-ink/15">
@@ -103,7 +103,7 @@ export default async function CaseStudyPage({ params }: { params: Params }) {
                             <h2 className={`md:col-span-3 ${label}`}>03 / Stack</h2>
                             <div className="md:col-span-9 flex flex-wrap gap-2">
                                 {cs.stack.map((s) => (
-                                    <span key={s} className="border border-line bg-white px-3 py-1 font-mono text-xs uppercase tracking-wider">
+                                    <span key={s} className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 font-mono text-xs uppercase tracking-wider">
                                         {s}
                                     </span>
                                 ))}

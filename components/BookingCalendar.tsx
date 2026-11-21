@@ -44,7 +44,7 @@ export default function BookingCalendar({
                 const base = ['border','border-line','text-ink'];
                 if (day === 0) {
                     // Sunday → no bookings
-                    return [...base, 'bg-[#E4E4E7]', 'opacity-50', 'pointer-events-none'];
+                    return [...base, 'bg-[#F1F5F9]', 'opacity-50', 'pointer-events-none'];
                 }
                 if (arg.date.toDateString() === new Date().toDateString()) {
                     // Today
@@ -93,7 +93,7 @@ export default function BookingCalendar({
                 },
             }}
             eventClassNames={() => [
-                'bg-cobalt text-white rounded-none p-1',
+                'bg-cobalt text-white rounded-md p-1',
                 'transition-colors duration-150',
                 'cursor-pointer',
             ]}
@@ -127,7 +127,7 @@ export default function BookingCalendar({
                         Sorry, we don&apos;t take bookings on Sundays.
                     </Dialog.Description>
                     <button
-                        className="mt-2 px-4 py-2 bg-cobalt text-white rounded-none hover:bg-[#0038CC]"
+                        className="mt-2 px-4 py-2 bg-cobalt text-white rounded-full hover:bg-[#1D4ED8]"
                         onClick={() => setShowModal(false)}
                     >
                         Got it

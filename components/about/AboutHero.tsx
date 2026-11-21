@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 
 const AboutHero = () => {
     return (
-        <section className="relative flex items-center border-b border-line px-4 py-24 md:py-32">
+        <section className="relative flex items-center bg-white px-4 py-24 md:py-32">
             <motion.div
                 className="relative z-20 mx-auto w-full max-w-7xl sm:px-2 lg:px-8"
                 initial={{ opacity: 0, y: 20 }}

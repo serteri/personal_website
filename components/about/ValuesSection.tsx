@@ -36,11 +36,11 @@ const ValuesSection = () => {
         >
             <div className="mx-auto max-w-7xl">
                 <h2 className="text-4xl font-extrabold tracking-tight mb-12">Our Core Values</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border-t border-l border-line">
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
                     {values.map((value, index) => {
                         const Icon = value.icon;
                         return (
-                            <div key={index} className="flex flex-col items-start border-r border-b border-line bg-white p-6">
+                            <div key={index} className="flex flex-col items-start rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
                                 <Icon className="w-8 h-8 text-ink mb-4"/>
                                 <h3 className="text-xl font-bold tracking-tight mb-2">{value.title}</h3>
                                 <p className="text-muted">{value.description}</p>

@@ -83,7 +83,7 @@ return (
             <div aria-hidden="true" style={{ position: 'absolute', left: '-10000px', width: 1, height: 1, overflow: 'hidden' }}>
                 <label>Website <input type="text" tabIndex={-1} autoComplete="off" {...register('website')} /></label>
             </div>
-        <div className="bg-white border border-line p-4 text-center">
+        <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm p-4 text-center">
             <p>You are booking an appointment for:</p>
             <p className="font-bold text-cobalt text-lg">
                 {date.toDateString()} at {time}
@@ -93,14 +93,14 @@ return (
         <input
             {...register('firstName')}
             placeholder="First Name"
-            className="w-full p-3 bg-white border border-line rounded-none text-ink focus:outline-none focus:ring-0 focus:border-cobalt"
+            className="w-full p-3 bg-white border border-line rounded-xl text-ink focus:outline-none focus:ring-0 focus:border-cobalt"
         />
         {errors.firstName && <p className="text-red-500 text-sm mt-1">{errors.firstName.message}</p>}
 
         <input
             {...register('lastName')}
             placeholder="Last Name"
-            className="w-full p-3 bg-white border border-line rounded-none text-ink focus:outline-none focus:ring-0 focus:border-cobalt"
+            className="w-full p-3 bg-white border border-line rounded-xl text-ink focus:outline-none focus:ring-0 focus:border-cobalt"
         />
         {errors.lastName && <p className="text-red-500 text-sm mt-1">{errors.lastName.message}</p>}
 
@@ -108,7 +108,7 @@ return (
             {...register('email')}
             type="email"
             placeholder="Email"
-            className="w-full p-3 bg-white border border-line rounded-none text-ink focus:outline-none focus:ring-0 focus:border-cobalt"
+            className="w-full p-3 bg-white border border-line rounded-xl text-ink focus:outline-none focus:ring-0 focus:border-cobalt"
         />
         {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
 
@@ -116,11 +116,11 @@ return (
             {...register('phone')}
             type="tel"
             placeholder="Phone"
-            className="w-full p-3 bg-white border border-line rounded-none text-ink focus:outline-none focus:ring-0 focus:border-cobalt"
+            className="w-full p-3 bg-white border border-line rounded-xl text-ink focus:outline-none focus:ring-0 focus:border-cobalt"
         />
         {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>}
 
-        <button type="submit" disabled={isSubmitting} className="w-full py-3 px-4 text-lg font-semibold text-white bg-[#0047FF] hover:bg-[#0038CC] focus:outline-none disabled:bg-zinc-400 disabled:cursor-not-allowed">
+        <button type="submit" disabled={isSubmitting} className="w-full rounded-full py-3 px-4 text-lg font-semibold text-white bg-slate-900 hover:bg-slate-800 focus:outline-none disabled:bg-zinc-400 disabled:cursor-not-allowed">
             {isSubmitting ? 'Booking...' : 'Book Appointment'}
         </button>
 

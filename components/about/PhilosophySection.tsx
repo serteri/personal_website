@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 const PhilosophySection = () => {
     return (
         <motion.section
-            className="border-b border-line bg-white py-24 px-6"
+            className="bg-slate-50 py-24 px-6"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true, amount: 0.3 }}

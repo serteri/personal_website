@@ -15,18 +15,18 @@ export default function OpengraphImage() {
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'space-between',
-                    background: '#F4F4F5',
-                    color: '#18181B',
+                    background: '#F8FAFC',
+                    color: '#0F172A',
                     padding: 72,
-                    borderTop: '16px solid #18181B',
+                    borderTop: '16px solid #0F172A',
                 }}
             >
                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <div style={{ width: 40, height: 40, background: '#0047FF', marginRight: 24 }} />
+                    <div style={{ width: 40, height: 40, background: '#2563EB', marginRight: 24 }} />
                     <div style={{ fontSize: 72, fontWeight: 700, letterSpacing: -2 }}>ALTIQDESIGN</div>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ fontSize: 28, color: '#52525B', letterSpacing: 4, marginBottom: 20 }}>
+                    <div style={{ fontSize: 28, color: '#475569', letterSpacing: 4, marginBottom: 20 }}>
                         PRODUCT & AUTOMATION STUDIO
                     </div>
                     <div style={{ fontSize: 60, fontWeight: 700, letterSpacing: -1.5, lineHeight: 1.1 }}>

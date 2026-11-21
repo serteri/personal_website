@@ -34,7 +34,7 @@ export default function TimeSlots({date,bookedTimes,onSelect}:{
                     return (
                         <button key={time} onClick={() => onSelect(time)} disabled={taken}
                                 title={taken ? 'Not available' : undefined}
-                                className="p-2 bg-white border border-line text-ink font-mono text-sm hover:border-cobalt hover:text-cobalt disabled:bg-[#E4E4E7] disabled:text-zinc-400 disabled:line-through disabled:cursor-not-allowed disabled:hover:border-line disabled:hover:text-zinc-400">
+                                className="p-2 rounded-lg bg-white border border-slate-200 text-ink font-mono text-sm hover:border-cobalt hover:text-cobalt disabled:bg-[#F1F5F9] disabled:text-zinc-400 disabled:line-through disabled:cursor-not-allowed disabled:hover:border-line disabled:hover:text-zinc-400">
                             {time}
                         </button>
                     );

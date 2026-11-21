@@ -48,7 +48,7 @@ export default function Navbar() {
 
     return (
         <motion.nav
-            className={`fixed top-0 left-0 w-full bg-[#F4F4F5]/90 backdrop-blur border-b border-line z-50 transition-height duration-300`}
+            className={`fixed top-0 left-0 w-full bg-white/80 backdrop-blur border-b border-slate-200/80 z-50 transition-height duration-300`}
             // Animasyonu state'lere göre yönetiyoruz
             animate={{ 
                 y: isHidden ? -100 : 0,
@@ -59,8 +59,8 @@ export default function Navbar() {
             <div className="w-full h-full px-4 flex justify-between items-center">
                 {/* Logo */}
                 <Link href="/" className="flex items-center">
-                    <span aria-hidden="true" className="mr-3 inline-block h-3 w-3 bg-[#0047FF]" />
-                    <span className="text-lg font-extrabold uppercase tracking-tight text-ink">ALTIQDESIGN</span>
+                    <span aria-hidden="true" className="mr-3 inline-block h-3 w-3 rounded-[3px] bg-[#2563EB]" />
+                    <span className="text-lg font-bold uppercase tracking-tight text-slate-900">ALTIQDESIGN</span>
                 </Link>
 
                 {/* MASAÜSTÜ NAV COMPONENT'İ */}

@@ -66,40 +66,40 @@ return(
             <div>
                 <label htmlFor="firstName" className="block text-sm font-medium font-mono text-xs uppercase tracking-wider text-muted">First Name</label>
                 <input {...register('firstName')} id="firstName" type="text" placeholder="First Name"
-                className="mt-1 block w-full bg-white border border-line rounded-none p-3 text-ink focus:outline-none focus:ring-0 focus:border-cobalt"/>
+                className="mt-1 block w-full bg-white border border-line rounded-xl p-3 text-ink focus:outline-none focus:ring-0 focus:border-cobalt"/>
                 {errors.firstName && <p className="mt-1 text-red-500 text-sm">{errors.firstName.message}</p>}
             </div>
             <div>
                 <label htmlFor="lastName" className="block text-sm font-medium font-mono text-xs uppercase tracking-wider text-muted">Last Name</label>
                 <input {...register('lastName')} id="lastName" type="text" placeholder="Last Name"
-                       className="mt-1 block w-full bg-white border border-line rounded-none p-3 text-ink focus:outline-none focus:ring-0 focus:border-cobalt"/>
+                       className="mt-1 block w-full bg-white border border-line rounded-xl p-3 text-ink focus:outline-none focus:ring-0 focus:border-cobalt"/>
                 {errors.lastName && <p className="mt-1 text-red-500 text-sm">{errors.lastName.message}</p>}
             </div>
         </div>
             <div>
                 <label htmlFor="email" className="block text-sm font-medium font-mono text-xs uppercase tracking-wider text-muted">Email</label>
                 <input {...register('email')} id="email" type="email" placeholder="Email address"
-                       className="mt-1 block w-full bg-white border border-line rounded-none p-3 text-ink focus:outline-none focus:ring-0 focus:border-cobalt"/>
+                       className="mt-1 block w-full bg-white border border-line rounded-xl p-3 text-ink focus:outline-none focus:ring-0 focus:border-cobalt"/>
                 {errors.email && <p className="mt-1 text-red-500 text-sm">{errors.email.message}</p>}
             </div>
             <div>
                 <label htmlFor="phone" className="block text-sm font-medium font-mono text-xs uppercase tracking-wider text-muted">Phone Number</label>
                 <div className="mt-1 flex flex-col sm:flex-row">
-                    <select {...register('countryCode')} id="countryCode" className="block bg-white border border-line rounded-none p-3 text-ink focus:outline-none focus:ring-0 focus:border-cobalt mb-2 sm:mb-0">
+                    <select {...register('countryCode')} id="countryCode" className="block bg-white border border-line rounded-xl p-3 text-ink focus:outline-none focus:ring-0 focus:border-cobalt mb-2 sm:mb-0">
                         {countryCodes.map(c => <option key={c.code} value={c.dial_code}>{c.name} ({c.dial_code})</option>)}
                     </select>
-                    <input {...register('phone')} id="phone" placeholder="Phone Number" type="tel" className="flex-1 block w-full bg-white border border-line rounded-none p-3 text-ink focus:outline-none focus:ring-0 focus:border-cobalt" />
+                    <input {...register('phone')} id="phone" placeholder="Phone Number" type="tel" className="flex-1 block w-full bg-white border border-line rounded-xl p-3 text-ink focus:outline-none focus:ring-0 focus:border-cobalt" />
                 </div>
                 {errors.phone && <p className="mt-1 text-red-500 text-sm">{errors.phone.message}</p>}
             </div>
 
         <div>
             <label htmlFor="message" className="block text-sm font-medium font-mono text-xs uppercase tracking-wider text-muted">Message</label>
-            <textarea {...register('message')} placeholder="Enter your message" id="message" rows={5} className="mt-1 block w-full bg-white border border-line rounded-none p-3 text-ink focus:outline-none focus:ring-0 focus:border-cobalt"></textarea>
+            <textarea {...register('message')} placeholder="Enter your message" id="message" rows={5} className="mt-1 block w-full bg-white border border-line rounded-xl p-3 text-ink focus:outline-none focus:ring-0 focus:border-cobalt"></textarea>
             {errors.message && <p className="mt-1 text-red-500 text-sm">{errors.message.message}</p>}
         </div>
         <div>
-            <button type="submit" disabled={isSubmitting} className="w-full py-3 px-4 text-lg font-semibold text-white bg-[#0047FF] hover:bg-[#0038CC] focus:outline-none disabled:bg-zinc-400 disabled:cursor-not-allowed">
+            <button type="submit" disabled={isSubmitting} className="w-full rounded-full py-3 px-4 text-lg font-semibold text-white bg-slate-900 hover:bg-slate-800 focus:outline-none disabled:bg-zinc-400 disabled:cursor-not-allowed">
                 {isSubmitting ? 'Sending...' : 'Send Message'}
             </button>
         </div>
