@@ -12,23 +12,12 @@ const SLOTS = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "1
 const QUICK_PROMPTS = ["I need an MVP built", "My Lovable app is stuck", "Book a 15-min call"];
 const BUSINESS_TYPES = ["Clinic", "Tradie", "NDIS", "SaaS", "Other"];
 
-type ChatMessage = {
-    role: "user" | "assistant";
-    content: string;
-    serviceSlug?: string | null;
-    showBooking?: boolean;
-};
-
 type ApiReply = {
     reply: string;
     suggestedServiceSlug?: string | null;
     showBookingCard?: boolean;
+    leadSummary?: { urgency: string; issue: string; nextStep: string } | null;
     limitReached?: boolean;
-};
-
-const INTRO: ChatMessage = {
-    role: "assistant",
-    content: "Hi, I'm Alex, the AI receptionist for ALTIQDESIGN. What are you looking to build or fix?",
 };
 
 /* ---------- visual components rendered inside the chat ---------- */
@@ -156,20 +145,154 @@ function BookingPicker() {
     );
 }
 
+/* ---------- industry demo configs ---------- */
+
+type Industry = "altiqdesign" | "dental" | "plumbing";
+type LeadSummary = { urgency: string; issue: string; nextStep: string };
+
+const INDUSTRIES: Record<
+    Industry,
+    { tab: string; business: string; agent: string; demo: boolean; intro: string; prompts: string[] }
+> = {
+    altiqdesign: {
+        tab: "ALTIQDESIGN (Studio)",
+        business: "ALTIQDESIGN",
+        agent: "Alex",
+        demo: false,
+        intro: "Hi, I'm Alex, the AI receptionist for ALTIQDESIGN. What are you looking to build or fix?",
+        prompts: QUICK_PROMPTS,
+    },
+    dental: {
+        tab: "Dental Clinic (Demo)",
+        business: "Albion Dental Care",
+        agent: "Mia",
+        demo: true,
+        intro: "Hi, I'm Mia, the AI receptionist for Albion Dental Care. How can I help you today?",
+        prompts: ["I have a sharp toothache", "Do you accept Bupa/Medibank?", "Book a check-up"],
+    },
+    plumbing: {
+        tab: "Plumbing / Tradie (Demo)",
+        business: "Brisbane Flow Plumbing",
+        agent: "Sam",
+        demo: true,
+        intro: "G'day, I'm Sam, the AI receptionist for Brisbane Flow Plumbing. What's going on?",
+        prompts: ["Burst pipe under my sink!", "Do you service 4010 Albion?", "Need a hot water quote"],
+    },
+};
+
+type Handoff = { when: string; summary: LeadSummary | null };
+
+/* Demo-only slot picker: never touches /api/booking or the database. */
+function DemoSlotPicker({ summary, onPick }: { summary: LeadSummary | null; onPick: (h: Handoff) => void }) {
+    const [days] = useState(upcomingDays);
+    const [day, setDay] = useState<string | null>(null);
+    const [picked, setPicked] = useState(false);
+
+    const slotsFor = (value: string) => {
+        const n = Number(value.slice(-2));
+        return SLOTS.filter((_, i) => (i + n) % 3 !== 0).slice(0, 6);
+    };
+
+    return (
+        <div className="mt-2 max-w-md rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm">
+            <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Pick a time</p>
+                <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-700">
+                    Demo slot picker
+                </span>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+                {days.map((d) => (
+                    <button
+                        key={d.value}
+                        disabled={picked}
+                        onClick={() => setDay(d.value)}
+                        aria-pressed={day === d.value}
+                        className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
+                            day === d.value ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 bg-white text-slate-700 hover:border-slate-400"
+                        }`}
+                    >
+                        {d.label}
+                    </button>
+                ))}
+            </div>
+            {day && (
+                <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-6">
+                    {slotsFor(day).map((t) => (
+                        <button
+                            key={t}
+                            disabled={picked}
+                            onClick={() => {
+                                setPicked(true);
+                                const label = days.find((d) => d.value === day)?.label ?? day;
+                                onPick({ when: `${label} · ${t}`, summary });
+                            }}
+                            className="rounded-lg border border-slate-200 bg-white py-1.5 font-mono text-xs text-slate-800 transition-colors hover:border-blue-600 hover:text-blue-600 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            {t}
+                        </button>
+                    ))}
+                </div>
+            )}
+            <p className="mt-3 text-[11px] text-slate-500">Demo only. Nothing is saved or booked.</p>
+        </div>
+    );
+}
+
+function HandoffCard({ h }: { h: Handoff }) {
+    const rows: [string, string][] = [
+        ["Urgency", h.summary?.urgency || "Routine"],
+        ["Request summary", h.summary?.issue || "General enquiry"],
+        ["Selected time", h.when],
+    ];
+    return (
+        <div className="mt-2 max-w-md rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-wider text-emerald-800">What the Business Owner Receives (Auto-Handoff)</p>
+            <dl className="mt-3 space-y-2">
+                {rows.map(([k, v]) => (
+                    <div key={k} className="flex gap-3 text-sm">
+                        <dt className="w-28 shrink-0 text-slate-500">{k}</dt>
+                        <dd className="font-medium text-slate-900">{v}</dd>
+                    </div>
+                ))}
+                {h.summary?.nextStep && (
+                    <div className="flex gap-3 text-sm">
+                        <dt className="w-28 shrink-0 text-slate-500">Next step</dt>
+                        <dd className="font-medium text-slate-900">{h.summary.nextStep}</dd>
+                    </div>
+                )}
+            </dl>
+            <span className="mt-3 inline-flex items-center rounded-full bg-emerald-600 px-2.5 py-1 text-[11px] font-semibold text-white">
+                ✓ SMS / Email sent
+            </span>
+        </div>
+    );
+}
+
 /* ---------- Tab 1: chat ---------- */
 
-function ChatTab() {
-    const [messages, setMessages] = useState<ChatMessage[]>([INTRO]);
+type ChatMessage = {
+    role: "user" | "assistant";
+    content: string;
+    serviceSlug?: string | null;
+    showBooking?: boolean;
+    leadSummary?: LeadSummary | null;
+    handoff?: Handoff;
+};
+
+function ChatTab({ industry }: { industry: Industry }) {
+    const cfg = INDUSTRIES[industry];
+    const [messages, setMessages] = useState<ChatMessage[]>([{ role: "assistant", content: cfg.intro }]);
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
     const [limitReached, setLimitReached] = useState(false);
-    const logRef = useRef<HTMLDivElement>(null);
+    const endRef = useRef<HTMLDivElement>(null);
 
     const userCount = messages.filter((m) => m.role === "user").length;
     const atLimit = limitReached || userCount >= MAX_USER_MESSAGES;
 
     useEffect(() => {
-        logRef.current?.scrollTo({ top: logRef.current.scrollHeight, behavior: "smooth" });
+        endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
     }, [messages, loading]);
 
     async function send(text: string) {
@@ -180,12 +303,15 @@ function ChatTab() {
         setInput("");
         setLoading(true);
         try {
-            // The intro greeting is local only; send the real conversation
-            const history = next.slice(1).map((m) => ({ role: m.role, content: m.content }));
+            // The intro greeting and local handoff cards are not sent to the model
+            const history = next
+                .slice(1)
+                .filter((m) => !m.handoff)
+                .map((m) => ({ role: m.role, content: m.content }));
             const res = await fetch("/api/receptionist", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ messages: history }),
+                body: JSON.stringify({ messages: history, industry }),
             });
             const data: ApiReply = await res.json();
             if (data.limitReached) setLimitReached(true);
@@ -196,100 +322,117 @@ function ChatTab() {
                     content: data.reply || "Sorry, something went wrong.",
                     serviceSlug: data.suggestedServiceSlug,
                     showBooking: data.showBookingCard,
+                    leadSummary: data.leadSummary,
                 },
             ]);
         } catch {
             setMessages((m) => [
                 ...m,
-                { role: "assistant", content: "Sorry, I lost the connection. You can book a 15-minute call instead.", showBooking: true },
+                { role: "assistant", content: "Sorry, I lost the connection. Please try again in a moment.", showBooking: !cfg.demo },
             ]);
         } finally {
             setLoading(false);
         }
     }
 
+    function onHandoff(h: Handoff) {
+        setMessages((m) => [
+            ...m,
+            { role: "assistant", content: `Done, I've locked in ${h.when} and passed the details to the team.`, handoff: h },
+        ]);
+    }
+
+    const showChips = userCount === 0 && !loading;
+
     return (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-            <div className="lg:col-span-4">
-                <p className="text-sm font-semibold text-slate-900">Try asking</p>
-                <div className="mt-3 flex flex-wrap gap-2 lg:flex-col lg:items-stretch">
-                    {QUICK_PROMPTS.map((q) => (
-                        <button
-                            key={q}
-                            onClick={() => send(q)}
-                            disabled={loading || atLimit}
-                            className="rounded-2xl border border-slate-200/80 bg-white px-4 py-3 text-left text-sm font-medium text-slate-800 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                            {q}
-                        </button>
-                    ))}
+        <div className="mx-auto max-w-4xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+            <div className="flex items-center gap-3 border-b border-slate-200 px-5 py-3 sm:px-6">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white">{cfg.agent[0]}</span>
+                <div>
+                    <p className="text-sm font-semibold text-slate-900">{cfg.agent}</p>
+                    <p className="text-xs text-slate-500">
+                        AI receptionist · {cfg.business}
+                        {cfg.demo && " (fictional demo business)"}
+                    </p>
                 </div>
-                <p className="mt-4 text-xs text-slate-500">Alex is an AI. It only knows our services and products, and won&apos;t quote prices.</p>
             </div>
 
-            <div className="lg:col-span-8">
-                <div className="flex h-[480px] flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm">
-                    <div className="flex items-center gap-3 border-b border-slate-200/80 px-5 py-3">
-                        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white">A</span>
-                        <div>
-                            <p className="text-sm font-semibold text-slate-900">Alex</p>
-                            <p className="text-xs text-slate-500">AI receptionist · ALTIQDESIGN</p>
+            <div
+                role="log"
+                aria-live="polite"
+                aria-label={`Conversation with ${cfg.agent}`}
+                className="h-[440px] space-y-4 overflow-y-auto px-5 py-5 sm:h-[480px] sm:px-6"
+            >
+                {messages.map((m, i) => (
+                    <div key={i} className={m.role === "user" ? "flex justify-end" : "flex justify-start"}>
+                        <div className="max-w-[88%] sm:max-w-[80%]">
+                            <div
+                                className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
+                                    m.role === "user" ? "rounded-br-md bg-slate-900 text-white" : "rounded-bl-md bg-slate-100 text-slate-900"
+                                }`}
+                            >
+                                {m.content}
+                            </div>
+                            {m.serviceSlug && !cfg.demo && <ServiceCard slug={m.serviceSlug} />}
+                            {m.showBooking && (cfg.demo ? <DemoSlotPicker summary={m.leadSummary ?? null} onPick={onHandoff} /> : <BookingPicker />)}
+                            {m.handoff && <HandoffCard h={m.handoff} />}
                         </div>
                     </div>
-
-                    <div ref={logRef} role="log" aria-live="polite" aria-label="Conversation with Alex" className="flex-1 space-y-4 overflow-y-auto px-5 py-4">
-                        {messages.map((m, i) => (
-                            <div key={i} className={m.role === "user" ? "flex justify-end" : "flex justify-start"}>
-                                <div className="max-w-[85%]">
-                                    <div
-                                        className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
-                                            m.role === "user" ? "rounded-br-md bg-slate-900 text-white" : "rounded-bl-md bg-slate-100 text-slate-900"
-                                        }`}
-                                    >
-                                        {m.content}
-                                    </div>
-                                    {m.serviceSlug && <ServiceCard slug={m.serviceSlug} />}
-                                    {m.showBooking && <BookingPicker />}
-                                </div>
-                            </div>
-                        ))}
-                        {loading && (
-                            <div className="flex justify-start">
-                                <div className="rounded-2xl rounded-bl-md bg-slate-100 px-4 py-2.5 text-sm text-slate-500">Alex is typing…</div>
-                            </div>
-                        )}
-                        {atLimit && !loading && !messages[messages.length - 1]?.showBooking && (
-                            <BookingPicker />
-                        )}
+                ))}
+                {loading && (
+                    <div className="flex justify-start">
+                        <div className="rounded-2xl rounded-bl-md bg-slate-100 px-4 py-2.5 text-sm text-slate-500">{cfg.agent} is typing…</div>
                     </div>
+                )}
+                {atLimit && !loading && !cfg.demo && !messages[messages.length - 1]?.showBooking && <BookingPicker />}
+                <div ref={endRef} className="h-2" />
+            </div>
 
-                    <form
-                        onSubmit={(e) => {
-                            e.preventDefault();
-                            send(input);
-                        }}
-                        className="flex items-center gap-2 border-t border-slate-200/80 p-3"
+            <div className="border-t border-slate-200 px-4 pb-4 pt-3 sm:px-6">
+                {showChips && (
+                    <div className="mb-3 flex flex-wrap gap-2">
+                        {cfg.prompts.map((q) => (
+                            <button
+                                key={q}
+                                onClick={() => send(q)}
+                                disabled={atLimit}
+                                className="rounded-full border border-slate-200 bg-white px-4 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:border-slate-900 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                {q}
+                            </button>
+                        ))}
+                    </div>
+                )}
+                <form
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        send(input);
+                    }}
+                    className="flex items-center gap-2"
+                >
+                    <label htmlFor="alex-input" className="sr-only">Message {cfg.agent}</label>
+                    <input
+                        id="alex-input"
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        maxLength={500}
+                        disabled={loading || atLimit}
+                        placeholder={atLimit ? "Demo limit reached. Book a call to continue" : "Type a message…"}
+                        className="flex-1 rounded-full border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 outline-none transition-colors focus:border-blue-600 disabled:cursor-not-allowed disabled:opacity-60"
+                    />
+                    <button
+                        type="submit"
+                        disabled={loading || atLimit || !input.trim()}
+                        aria-label="Send message"
+                        className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-white transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40"
                     >
-                        <label htmlFor="alex-input" className="sr-only">Message Alex</label>
-                        <input
-                            id="alex-input"
-                            value={input}
-                            onChange={(e) => setInput(e.target.value)}
-                            maxLength={500}
-                            disabled={loading || atLimit}
-                            placeholder={atLimit ? "Demo limit reached. Book a call to continue" : "Type a message…"}
-                            className="flex-1 rounded-full border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 outline-none transition-colors focus:border-blue-600 disabled:cursor-not-allowed disabled:opacity-60"
-                        />
-                        <button
-                            type="submit"
-                            disabled={loading || atLimit || !input.trim()}
-                            aria-label="Send message"
-                            className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-white transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40"
-                        >
-                            <Send className="h-4 w-4" aria-hidden="true" />
-                        </button>
-                    </form>
-                </div>
+                        <Send className="h-4 w-4" aria-hidden="true" />
+                    </button>
+                </form>
+                <p className="mt-2 text-center text-[11px] text-slate-500">
+                    {cfg.agent} is an AI and won&apos;t quote prices.
+                    {cfg.demo ? " Demo mode: no real bookings or messages are created." : " It only knows our services and products."}
+                </p>
             </div>
         </div>
     );
@@ -408,6 +551,7 @@ function VoiceTab() {
 
 export default function ReceptionistDemo() {
     const [tab, setTab] = useState<"chat" | "voice">("chat");
+    const [industry, setIndustry] = useState<Industry>("altiqdesign");
 
     const tabClass = (active: boolean) =>
         `rounded-full px-5 py-2 text-sm font-semibold transition-colors ${
@@ -432,7 +576,30 @@ export default function ReceptionistDemo() {
                     </button>
                 </div>
 
-                <div role="tabpanel">{tab === "chat" ? <ChatTab /> : <VoiceTab />}</div>
+                <div role="tabpanel">{tab === "chat" ? (
+                        <div>
+                            <div
+                                role="tablist"
+                                aria-label="Industry demo"
+                                className="mx-auto mb-5 flex max-w-4xl flex-wrap justify-center gap-1 rounded-2xl border border-slate-200 bg-slate-50 p-1 sm:rounded-full"
+                            >
+                                {(Object.keys(INDUSTRIES) as Industry[]).map((k) => (
+                                    <button
+                                        key={k}
+                                        role="tab"
+                                        aria-selected={industry === k}
+                                        onClick={() => setIndustry(k)}
+                                        className={`${tabClass(industry === k)} flex-1 whitespace-nowrap`}
+                                    >
+                                        {INDUSTRIES[k].tab}
+                                    </button>
+                                ))}
+                            </div>
+                            <ChatTab key={industry} industry={industry} />
+                        </div>
+                    ) : (
+                        <VoiceTab />
+                    )}</div>
             </div>
         </section>
     );
