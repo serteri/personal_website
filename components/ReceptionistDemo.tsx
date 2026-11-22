@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Send, Phone } from "lucide-react";
-import type { RetellWebClient } from "retell-client-js-sdk";
+import type { WebCallSession } from "retell-client-js-sdk";
 import SectionHeader from "./SectionHeader";
 import { services } from "@/lib/services";
 
@@ -445,13 +445,24 @@ function ChatTab({ industry }: { industry: Industry }) {
 /* ---------- Tab 2: live voice demo (Retell WebRTC) ---------- */
 
 const MAX_CALL_SECONDS = 180;
+function voiceErrorMessage(err: unknown): string {
+    const name = err instanceof Error ? err.name : "";
+    const msg = err instanceof Error ? err.message : "";
+    if (name === "NotAllowedError" || /permission|denied|notallowed/i.test(msg)) {
+        return "Microphone access was blocked. Allow the microphone in your browser and try again.";
+    }
+    if (/429|rate|limit/i.test(msg)) return "Demo call limit reached. Please try again in a few minutes.";
+    return "Could not start the call. Please try again.";
+}
+
 type CallState = "idle" | "connecting" | "listening" | "speaking";
 
 function VoiceTab() {
     const [state, setState] = useState<CallState>("idle");
     const [error, setError] = useState("");
     const [seconds, setSeconds] = useState(0);
-    const clientRef = useRef<RetellWebClient | null>(null);
+    const callRef = useRef<WebCallSession | null>(null);
+    const callIdRef = useRef(0);
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     function clearTimer() {
@@ -461,13 +472,10 @@ function VoiceTab() {
 
     function endCall() {
         clearTimer();
-        try {
-            clientRef.current?.stopCall();
-        } catch {
-            /* already stopped */
-        }
-        clientRef.current?.removeAllListeners();
-        clientRef.current = null;
+        const call = callRef.current;
+        callRef.current = null;
+        callIdRef.current++; // invalidates hooks of this call (no re-entry from onEnd / onError)
+        if (call) void call.end().catch(() => undefined);
         setState("idle");
     }
 
@@ -475,13 +483,10 @@ function VoiceTab() {
     useEffect(() => {
         return () => {
             clearTimer();
-            try {
-                clientRef.current?.stopCall();
-            } catch {
-                /* ignore */
-            }
-            clientRef.current?.removeAllListeners();
-            clientRef.current = null;
+            const call = callRef.current;
+            callRef.current = null;
+            callIdRef.current++;
+            if (call) void call.end().catch(() => undefined);
         };
     }, []);
 
@@ -489,55 +494,61 @@ function VoiceTab() {
         if (state !== "idle") return;
         setError("");
         setSeconds(0);
+
+        const publicKey = process.env.NEXT_PUBLIC_RETELL_PUBLIC_KEY?.trim();
+        const agentId = process.env.NEXT_PUBLIC_RETELL_PLUMBING_AGENT_ID?.trim();
+        if (!publicKey || !agentId) {
+            setError("The voice demo isn't configured yet (missing Retell public key or agent ID).");
+            return;
+        }
+
         setState("connecting");
         try {
-            const res = await fetch("/api/receptionist/voice-token", { method: "POST" });
-            const data = await res.json().catch(() => ({}));
-            if (!res.ok || !data.access_token) {
-                throw new Error(
-                    res.status === 429
-                        ? "You've reached the demo call limit. Please try again in about 10 minutes."
-                        : data.error || "Could not start the call. Please try again."
-                );
-            }
-
-            const { RetellWebClient } = await import("retell-client-js-sdk");
-            const client = new RetellWebClient();
-            clientRef.current = client;
-            client.on("call_started", () => {
-                setState("listening");
-                clearTimer();
-                const started = Date.now();
-                timerRef.current = setInterval(() => {
-                    const s = Math.floor((Date.now() - started) / 1000);
-                    setSeconds(s);
-                    if (s >= MAX_CALL_SECONDS) endCall();
-                }, 500);
+            const { RetellClient } = await import("retell-client-js-sdk");
+            const client = new RetellClient({ key: publicKey });
+            let talking = false;
+            const id = ++callIdRef.current; // hooks ignore events from superseded/ended calls
+            const call = client.createWebCall({
+                agent_id: agentId,
+                hooks: {
+                    onStatus: (status) => {
+                        if (callIdRef.current !== id) return;
+                        if (status === "connecting") setState("connecting");
+                        else if (status === "live" || status === "listening") {
+                            setState(talking ? "speaking" : "listening");
+                            if (!timerRef.current) {
+                                const started = Date.now();
+                                timerRef.current = setInterval(() => {
+                                    const s = Math.floor((Date.now() - started) / 1000);
+                                    setSeconds(s);
+                                    if (s >= MAX_CALL_SECONDS) endCall();
+                                }, 500);
+                            }
+                        }
+                    },
+                    onAgentStartTalking: () => {
+                        talking = true;
+                        if (callIdRef.current === id) setState("speaking");
+                    },
+                    onAgentStopTalking: () => {
+                        talking = false;
+                        if (callIdRef.current === id) setState("listening");
+                    },
+                    onEnd: () => {
+                        if (callIdRef.current === id) endCall();
+                    },
+                    onError: (err) => {
+                        if (callIdRef.current !== id) return;
+                        setError(voiceErrorMessage(err));
+                        endCall();
+                    },
+                },
             });
-            client.on("call_ended", () => endCall());
-            client.on("agent_start_talking", () => setState("speaking"));
-            client.on("agent_stop_talking", () => setState("listening"));
-            client.on("error", () => {
-                setError("The call was interrupted. Please try again.");
-                endCall();
-            });
-
-            await client.startCall({
-                accessToken: data.access_token,
-                callId: data.call_id,
-                transport: data.transport,
-                url: data.url,
-                iceServers: data.ice_servers,
-            });
+            callRef.current = call;
+            await call.ready;
         } catch (err) {
-            const name = err instanceof Error ? err.name : "";
-            const msg = err instanceof Error ? err.message : "";
             endCall();
-            setError(
-                name === "NotAllowedError" || /permission|denied|notallowed/i.test(msg)
-                    ? "Microphone access was blocked. Allow the microphone in your browser and try again."
-                    : msg || "Could not start the call. Please try again."
-            );
+            setError(voiceErrorMessage(err));
         }
     }
 
