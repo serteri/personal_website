@@ -45,7 +45,15 @@ export async function POST(req: Request) {
             console.error('Retell response had no access_token; keys:', Object.keys(data ?? {}));
             throw new Error('No access_token in Retell response');
         }
-        return NextResponse.json({ access_token: data.access_token });
+        // Forward every v3 connection field the client SDK needs (LiveKit/gateway auth + routing)
+        return NextResponse.json({
+            access_token: data.access_token,
+            call_id: data.call_id,
+            transport: data.transport,
+            url: data.url,
+            ice_servers: data.ice_servers,
+            expires_at: data.expires_at,
+        });
     } catch (error) {
         console.error('Voice token error:', error);
         return NextResponse.json({ error: 'Could not start the voice call right now. Please try again shortly.' }, { status: 502 });

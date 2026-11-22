@@ -522,7 +522,13 @@ function VoiceTab() {
                 endCall();
             });
 
-            await client.startCall({ accessToken: data.access_token });
+            await client.startCall({
+                accessToken: data.access_token,
+                callId: data.call_id,
+                transport: data.transport,
+                url: data.url,
+                iceServers: data.ice_servers,
+            });
         } catch (err) {
             const name = err instanceof Error ? err.name : "";
             const msg = err instanceof Error ? err.message : "";
