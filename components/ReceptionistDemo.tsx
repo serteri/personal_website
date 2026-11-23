@@ -562,8 +562,6 @@ function VoiceTab() {
             return;
         }
 
-        const t0 = performance.now(); // click time
-        const since = () => `${Math.round(performance.now() - t0)}ms`;
         setState("connecting"); // instant UI feedback, before any async work
         stopRing();
         stopRingRef.current = startRingback(); // AudioContext is unlocked by this click
@@ -571,17 +569,14 @@ function VoiceTab() {
         try {
             let talking = false;
             const id = ++callIdRef.current; // hooks ignore events from superseded/ended calls
-            console.info(`[voice] click -> createWebCall start: ${since()}`);
             const call = client.createWebCall({
                 agent_id: agentId,
                 hooks: {
                     onStatus: (status) => {
                         if (callIdRef.current !== id) return;
                         if (status === "connecting") {
-                            console.info(`[voice] status "connecting": ${since()} after click`);
                             setState("connecting");
                         } else if (status === "live" || status === "listening") {
-                            console.info(`[voice] status "${status}" (audio channel active): ${since()} after click`);
                             setState(talking ? "speaking" : "listening");
                             if (!timerRef.current) {
                                 const started = Date.now();
@@ -594,9 +589,6 @@ function VoiceTab() {
                         }
                     },
                     onAgentStartTalking: () => {
-                        if (callIdRef.current === id && stopRingRef.current) {
-                            console.info(`[voice] first audio started (agent speaking): ${since()} after click`);
-                        }
                         stopRing(); // ringback ends exactly when Sam starts talking
                         talking = true;
                         if (callIdRef.current === id) setState("speaking");
