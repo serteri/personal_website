@@ -46,13 +46,27 @@ export async function POST(req: Request) {
     } catch {
         return NextResponse.json({ error: 'Bad payload' }, { status: 400 });
     }
-    if (payload.event !== 'call_ended') return NextResponse.json({ ignored: true });
+    if (payload.event !== 'call_ended' && payload.event !== 'call_analyzed') return NextResponse.json({ ignored: true });
 
     const { call } = payload;
     const client = await prisma.client.findUnique({ where: { retellAgentId: call.agent_id } });
     if (!client) {
         // Not one of our paying clients (e.g. the public demo agent): acknowledge so Retell doesn't retry
         return NextResponse.json({ ignored: true });
+    }
+
+    if (payload.event === 'call_analyzed') {
+        const analyzed = call.call_analysis;
+        const { count } = await prisma.callLog.updateMany({
+            where: { retellCallId: call.call_id },
+            data: {
+                summary: analyzed?.call_summary ?? null,
+                isEmergency: analyzed?.custom_analysis_data?.is_emergency === true,
+            },
+        });
+        // call_analyzed can race ahead of call_ended: a non-2xx makes Retell retry once the CallLog exists
+        if (count === 0) return NextResponse.json({ error: 'Call not logged yet' }, { status: 503 });
+        return NextResponse.json({ ok: true, updated: count });
     }
 
     const durationMs =

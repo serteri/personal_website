@@ -4,6 +4,33 @@ import prisma from '@/lib/prisma';
 import { getStripe } from '@/lib/stripe';
 import { MINUTE_LIMITS, PILOT_DAYS } from '@/lib/receptionistPlans';
 import type { ClientPlan } from '@prisma/client';
+import { Resend } from 'resend';
+
+const escapeHtml = (v: string) =>
+    v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+// Best-effort admin alert so the retellAgentId can be assigned right away. Never fails the webhook.
+async function notifyNewClient(c: { email: string; businessName: string; phone: string | null; plan: ClientPlan }) {
+    const apiKey = process.env.RESEND_API_KEY?.trim();
+    if (!apiKey) return;
+    try {
+        const { error } = await new Resend(apiKey).emails.send({
+            from: 'AI Receptionist <onboarding@resend.dev>',
+            to: [process.env.ADMIN_NOTIFY_EMAIL?.trim() || 'serteri@hotmail.com'],
+            subject: 'Yeni Müşteri Ödeme Yaptı — Retell Agent ID Ata',
+            html: `<p>A new AI Receptionist customer just paid. Create their Retell agent and set <strong>retellAgentId</strong> on the Client row (Neon / Prisma Studio).</p>
+<ul>
+<li><strong>Business:</strong> ${escapeHtml(c.businessName)}</li>
+<li><strong>Email:</strong> ${escapeHtml(c.email)}</li>
+<li><strong>Phone:</strong> ${escapeHtml(c.phone ?? '-')}</li>
+<li><strong>Plan:</strong> ${c.plan}</li>
+</ul>`,
+        });
+        if (error) console.error('New-client notification failed:', error);
+    } catch (error) {
+        console.error('New-client notification failed:', error);
+    }
+}
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -65,6 +92,7 @@ async function onCheckoutCompleted(session: Stripe.Checkout.Session) {
     };
     // Email is unique: a pilot customer who later subscribes (new Stripe customer) updates the same Client.
     await prisma.client.upsert({ where: { email }, create: { email, ...data }, update: data });
+    await notifyNewClient({ email, businessName, phone, plan });
 }
 
 async function onInvoicePaid(invoice: Stripe.Invoice) {

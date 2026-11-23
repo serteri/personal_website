@@ -60,12 +60,12 @@ export default function AiReceptionistPage() {
               >
                 Test Live Voice Demo
               </a>
-              <Link
-                href="/booking"
+              <PlanCheckoutButton
+                plan="pilot"
                 className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-8 py-3.5 text-base font-semibold text-slate-900 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
               >
                 Start 30-Day Pilot
-              </Link>
+              </PlanCheckoutButton>
             </div>
           </div>
         </section>
