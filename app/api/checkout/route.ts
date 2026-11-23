@@ -46,7 +46,7 @@ export async function POST(req: Request) {
             ],
             metadata: { plan },
             ...(config.mode === 'subscription' ? { subscription_data: { metadata: { plan } } } : {}),
-            success_url: `${origin}/ai-receptionist?checkout=success`,
+            success_url: `${origin}/dashboard?checkout=success`,
             cancel_url: `${origin}/ai-receptionist?checkout=cancelled#pricing`,
         });
         if (!session.url) throw new Error('No session URL');

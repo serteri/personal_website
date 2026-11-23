@@ -31,6 +31,7 @@ export default function MobileNav({ isOpen, closeMenu }: MobileNavProps) {
                         <li><Link href="/about" className="block py-3 text-base font-medium hover:text-blue-600" onClick={closeMenu}>About</Link></li>
                         <li><Link href="/#services" className="block py-3 text-base font-medium hover:text-blue-600" onClick={closeMenu}>What We Do</Link></li>
                         <li><Link href="/ai-receptionist" className="block py-3 text-base font-semibold text-blue-600" onClick={closeMenu}>AI Receptionist</Link></li>
+                        <li><Link href="/dashboard" className="block py-3 text-base font-medium hover:text-blue-600" onClick={closeMenu}>Client Login</Link></li>
                         <li><Link href="/contact" className="block py-3 text-base font-medium hover:text-blue-600" onClick={closeMenu}>Contact</Link></li>
                     </ul>
                 </motion.div>

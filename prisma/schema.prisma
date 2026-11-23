@@ -139,3 +139,15 @@ model CallLog {
 
   @@index([clientId, createdAt])
 }
+
+// Passwordless client login. `token` stores the SHA-256 hash of the emailed token, never the raw value.
+model MagicLinkToken {
+  id        String    @id @default(uuid())
+  email     String
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([email])
+}

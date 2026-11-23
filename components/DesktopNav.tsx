@@ -21,6 +21,11 @@ export default function DesktopNav() {
                 </Link>
             </li>
             <li>
+                <Link href="/dashboard" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+                    Client Login
+                </Link>
+            </li>
+            <li>
                 <Link href="/booking" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
                     Contact
                 </Link>
