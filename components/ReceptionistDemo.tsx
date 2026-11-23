@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Send, Phone } from "lucide-react";
-import type { WebCallSession } from "retell-client-js-sdk";
+import { RetellClient, type WebCallSession } from "retell-client-js-sdk";
 import SectionHeader from "./SectionHeader";
 import { services } from "@/lib/services";
 
@@ -461,6 +461,10 @@ function VoiceTab() {
     const [state, setState] = useState<CallState>("idle");
     const [error, setError] = useState("");
     const [seconds, setSeconds] = useState(0);
+    const publicKey = process.env.NEXT_PUBLIC_RETELL_PUBLIC_KEY?.trim();
+    const agentId = process.env.NEXT_PUBLIC_RETELL_PLUMBING_AGENT_ID?.trim();
+    // Created once on mount so "Start Voice Call" has no setup delay
+    const client = useMemo(() => (publicKey ? new RetellClient({ key: publicKey }) : null), [publicKey]);
     const callRef = useRef<WebCallSession | null>(null);
     const callIdRef = useRef(0);
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -495,17 +499,13 @@ function VoiceTab() {
         setError("");
         setSeconds(0);
 
-        const publicKey = process.env.NEXT_PUBLIC_RETELL_PUBLIC_KEY?.trim();
-        const agentId = process.env.NEXT_PUBLIC_RETELL_PLUMBING_AGENT_ID?.trim();
-        if (!publicKey || !agentId) {
+        if (!client || !agentId) {
             setError("The voice demo isn't configured yet (missing Retell public key or agent ID).");
             return;
         }
 
-        setState("connecting");
+        setState("connecting"); // instant UI feedback, before any async work
         try {
-            const { RetellClient } = await import("retell-client-js-sdk");
-            const client = new RetellClient({ key: publicKey });
             let talking = false;
             const id = ++callIdRef.current; // hooks ignore events from superseded/ended calls
             const call = client.createWebCall({
@@ -554,7 +554,7 @@ function VoiceTab() {
 
     const active = state !== "idle";
     const statusLabel =
-        state === "connecting" ? "Connecting..." : state === "listening" ? "Listening..." : state === "speaking" ? "Sam is speaking..." : "";
+        state === "connecting" ? "Connecting to Sam..." : state === "listening" ? "Listening..." : state === "speaking" ? "Sam is speaking..." : "";
     const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
     const ss = String(seconds % 60).padStart(2, "0");
 
