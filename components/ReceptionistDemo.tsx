@@ -516,7 +516,11 @@ function VoiceTab() {
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const stopRingRef = useRef<(() => void) | null>(null);
 
+    const ringFallbackRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
     function stopRing() {
+        if (ringFallbackRef.current) clearTimeout(ringFallbackRef.current);
+        ringFallbackRef.current = null;
         stopRingRef.current?.();
         stopRingRef.current = null;
     }
@@ -563,6 +567,7 @@ function VoiceTab() {
         setState("connecting"); // instant UI feedback, before any async work
         stopRing();
         stopRingRef.current = startRingback(); // AudioContext is unlocked by this click
+        ringFallbackRef.current = setTimeout(stopRing, 8000); // safety: never ring longer than 8s
         try {
             let talking = false;
             const id = ++callIdRef.current; // hooks ignore events from superseded/ended calls
@@ -577,7 +582,6 @@ function VoiceTab() {
                             setState("connecting");
                         } else if (status === "live" || status === "listening") {
                             console.info(`[voice] status "${status}" (audio channel active): ${since()} after click`);
-                            stopRing();
                             setState(talking ? "speaking" : "listening");
                             if (!timerRef.current) {
                                 const started = Date.now();
@@ -590,6 +594,10 @@ function VoiceTab() {
                         }
                     },
                     onAgentStartTalking: () => {
+                        if (callIdRef.current === id && stopRingRef.current) {
+                            console.info(`[voice] first audio started (agent speaking): ${since()} after click`);
+                        }
+                        stopRing(); // ringback ends exactly when Sam starts talking
                         talking = true;
                         if (callIdRef.current === id) setState("speaking");
                     },
