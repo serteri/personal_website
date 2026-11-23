@@ -455,6 +455,52 @@ function voiceErrorMessage(err: unknown): string {
     return "Could not start the call. Please try again.";
 }
 
+/* Australian ringback (400Hz + 425Hz; 0.4s on, 0.2s off, 0.4s on, 2s off) generated with Web Audio, no audio files. */
+function startRingback(): () => void {
+    try {
+        const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+        if (!Ctx) return () => undefined;
+        const ctx = new Ctx();
+        void ctx.resume(); // created inside the click handler, so the browser allows it
+        const gain = ctx.createGain();
+        gain.gain.value = 0;
+        gain.connect(ctx.destination);
+        const oscs = [400, 425].map((f) => {
+            const o = ctx.createOscillator();
+            o.type = "sine";
+            o.frequency.value = f;
+            o.connect(gain);
+            o.start();
+            return o;
+        });
+        const LEVEL = 0.04;
+        const t0 = ctx.currentTime + 0.02;
+        const CYCLE = 3; // seconds
+        for (let c = 0; c < Math.ceil(MAX_CALL_SECONDS / CYCLE) + 1; c++) {
+            const t = t0 + c * CYCLE;
+            for (const [on, off] of [[0, 0.4], [0.6, 1.0]]) {
+                gain.gain.setValueAtTime(LEVEL, t + on);
+                gain.gain.setValueAtTime(0, t + off);
+            }
+        }
+        let stopped = false;
+        return () => {
+            if (stopped) return;
+            stopped = true;
+            try {
+                gain.gain.cancelScheduledValues(ctx.currentTime);
+                gain.gain.setValueAtTime(0, ctx.currentTime);
+                oscs.forEach((o) => o.stop());
+                void ctx.close();
+            } catch {
+                /* already closed */
+            }
+        };
+    } catch {
+        return () => undefined;
+    }
+}
+
 type CallState = "idle" | "connecting" | "listening" | "speaking";
 
 function VoiceTab() {
@@ -468,6 +514,12 @@ function VoiceTab() {
     const callRef = useRef<WebCallSession | null>(null);
     const callIdRef = useRef(0);
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const stopRingRef = useRef<(() => void) | null>(null);
+
+    function stopRing() {
+        stopRingRef.current?.();
+        stopRingRef.current = null;
+    }
 
     function clearTimer() {
         if (timerRef.current) clearInterval(timerRef.current);
@@ -476,6 +528,7 @@ function VoiceTab() {
 
     function endCall() {
         clearTimer();
+        stopRing();
         const call = callRef.current;
         callRef.current = null;
         callIdRef.current++; // invalidates hooks of this call (no re-entry from onEnd / onError)
@@ -487,6 +540,7 @@ function VoiceTab() {
     useEffect(() => {
         return () => {
             clearTimer();
+            stopRing();
             const call = callRef.current;
             callRef.current = null;
             callIdRef.current++;
@@ -504,17 +558,26 @@ function VoiceTab() {
             return;
         }
 
+        const t0 = performance.now(); // click time
+        const since = () => `${Math.round(performance.now() - t0)}ms`;
         setState("connecting"); // instant UI feedback, before any async work
+        stopRing();
+        stopRingRef.current = startRingback(); // AudioContext is unlocked by this click
         try {
             let talking = false;
             const id = ++callIdRef.current; // hooks ignore events from superseded/ended calls
+            console.info(`[voice] click -> createWebCall start: ${since()}`);
             const call = client.createWebCall({
                 agent_id: agentId,
                 hooks: {
                     onStatus: (status) => {
                         if (callIdRef.current !== id) return;
-                        if (status === "connecting") setState("connecting");
-                        else if (status === "live" || status === "listening") {
+                        if (status === "connecting") {
+                            console.info(`[voice] status "connecting": ${since()} after click`);
+                            setState("connecting");
+                        } else if (status === "live" || status === "listening") {
+                            console.info(`[voice] status "${status}" (audio channel active): ${since()} after click`);
+                            stopRing();
                             setState(talking ? "speaking" : "listening");
                             if (!timerRef.current) {
                                 const started = Date.now();
