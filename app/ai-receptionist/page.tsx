@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import ReceptionistDemo from "@/components/ReceptionistDemo";
 import SectionHeader from "@/components/SectionHeader";
+import PlanCheckoutButton from "@/components/PlanCheckoutButton";
 
 export const metadata: Metadata = {
   title: "AI Receptionist for Brisbane Tradies & Clinics | ALTIQDESIGN",
@@ -19,11 +20,13 @@ const pilotFeatures = ["$0 setup fee", "150 voice minutes", "24/7 Web Chat inclu
 
 const plans = [
   {
+    key: "starter" as const,
     name: "Starter",
     price: "$149",
     features: ["150 voice minutes / month", "24/7 Web Chat", "Instant job summaries", "$0.60/min overage"],
   },
   {
+    key: "growth" as const,
     name: "Growth",
     price: "$249",
     features: ["400 voice minutes / month", "24/7 Web Chat", "Calendar integration", "Custom suburb rules", "$0.50/min overage"],
@@ -87,7 +90,7 @@ export default function AiReceptionistPage() {
         </section>
 
         {/* Pricing */}
-        <section className="bg-white px-4 py-20">
+        <section id="pricing" className="scroll-mt-24 bg-white px-4 py-20">
           <div className="mx-auto max-w-6xl">
             <SectionHeader eyebrow="Pricing" title="Start with a 30-day pilot" description="All prices in AUD. Try it on real calls before you commit." />
 
@@ -108,12 +111,12 @@ export default function AiReceptionistPage() {
                     ))}
                   </ul>
                 </div>
-                <Link
-                  href="/booking"
+                <PlanCheckoutButton
+                  plan="pilot"
                   className="inline-flex items-center justify-center rounded-full bg-white px-8 py-3.5 text-base font-semibold text-slate-900 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
                 >
-                  Start 30-Day Pilot
-                </Link>
+                  Start 30-Day Pilot — $149
+                </PlanCheckoutButton>
               </div>
             </div>
 
@@ -134,6 +137,12 @@ export default function AiReceptionistPage() {
                       </li>
                     ))}
                   </ul>
+                  <PlanCheckoutButton
+                    plan={p.key}
+                    className="mt-8 inline-flex w-full items-center justify-center rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+                  >
+                    Choose {p.name}
+                  </PlanCheckoutButton>
                 </div>
               ))}
             </div>

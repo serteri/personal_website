@@ -92,3 +92,50 @@ model Contact {
   // karşılık geldiğini söylüyoruz.
   @@map("contacts")
 }
+
+enum ClientPlan {
+  PILOT
+  STARTER
+  GROWTH
+}
+
+enum ClientStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+}
+
+// AI Receptionist SaaS customer (created from a completed Stripe Checkout)
+model Client {
+  id                       String       @id @default(uuid())
+  email                    String       @unique
+  businessName             String
+  phone                    String?
+  stripeCustomerId         String       @unique
+  retellAgentId            String?      @unique // assigned manually once the agent is provisioned
+  plan                     ClientPlan
+  status                   ClientStatus @default(ACTIVE)
+  monthlyMinuteLimit       Int
+  minutesUsedCurrentPeriod Int          @default(0)
+  currentPeriodStart       DateTime
+  currentPeriodEnd         DateTime
+  createdAt                DateTime     @default(now())
+  updatedAt                DateTime     @updatedAt
+  callLogs                 CallLog[]
+}
+
+model CallLog {
+  id              String   @id @default(uuid())
+  clientId        String
+  retellCallId    String   @unique
+  callerNumber    String?
+  durationSeconds Int
+  billedMinutes   Int
+  summary         String?
+  isEmergency     Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId, createdAt])
+}

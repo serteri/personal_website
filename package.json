@@ -38,7 +38,9 @@
     "react-scroll-parallax": "^3.4.5",
     "resend": "^3.5.0",
     "retell-client-js-sdk": "^3.0.4",
+    "retell-sdk": "^6.2.23",
     "smooth-scrollbar": "^8.8.4",
+    "stripe": "^23.2.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
