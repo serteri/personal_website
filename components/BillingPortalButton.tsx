@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export default function BillingPortalButton() {
+export default function BillingPortalButton({ variant = "primary" }: { variant?: "primary" | "link" }) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
@@ -21,6 +21,21 @@ export default function BillingPortalButton() {
         }
     }
 
+    if (variant === "link") {
+        return (
+            <div>
+                <button type="button" onClick={open} disabled={loading} className="text-sm font-semibold text-slate-600 underline-offset-4 hover:text-slate-900 hover:underline disabled:opacity-60">
+                    {loading ? "Opening…" : "Cancel or Change Plan"}
+                </button>
+                {error && (
+                    <p role="alert" className="mt-1 text-sm text-red-600">
+                        {error}
+                    </p>
+                )}
+            </div>
+        );
+    }
+
     return (
         <div>
             <button
@@ -29,7 +44,7 @@ export default function BillingPortalButton() {
                 disabled={loading}
                 className="rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md disabled:opacity-60"
             >
-                {loading ? "Opening…" : "Manage Billing & Invoices"}
+                {loading ? "Opening…" : "Upgrade / Manage Subscription"}
             </button>
             {error && (
                 <p role="alert" className="mt-2 text-sm text-red-600">
