@@ -2,7 +2,6 @@ import Link from "next/link";
 
 import ProductShowcase from "@/components/ProductShowcase";
 import WhatWeDo from "@/components/WhatWeDo";
-import ReceptionistDemo from "@/components/ReceptionistDemo";
 import FaqAccordion from "@/components/FaqAccordion";
 import CallToAction from "@/components/CallToAction";
 
@@ -56,7 +55,22 @@ export default function Home() {
 
         <WhatWeDo />
 
-        <ReceptionistDemo />
+        {/* AI Receptionist CTA (live demo lives on its own gated page) */}
+        <section className="bg-white px-4 py-20">
+          <div className="mx-auto max-w-3xl rounded-3xl border border-slate-200/80 bg-slate-50 p-10 text-center shadow-sm">
+            <p className="text-sm font-semibold text-blue-600">Try Our AI Receptionist</p>
+            <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">Never miss another customer call</h2>
+            <p className="mx-auto mt-4 max-w-xl text-lg text-slate-600">
+              A 24/7 AI voice and chat receptionist for Brisbane tradies and local clinics. See it in action, then start a 30-day pilot.
+            </p>
+            <Link
+              href="/ai-receptionist"
+              className="mt-8 inline-flex items-center justify-center rounded-full bg-slate-900 px-8 py-3.5 text-base font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+            >
+              Explore the AI Receptionist
+            </Link>
+          </div>
+        </section>
 
         {/* Statement */}
         <section className="bg-white px-4 py-20">

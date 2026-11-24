@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Send, Phone } from "lucide-react";
-import { RetellClient, type WebCallSession } from "retell-client-js-sdk";
+import type { RetellWebClient } from "retell-client-js-sdk";
 import SectionHeader from "./SectionHeader";
 import { services } from "@/lib/services";
 
@@ -503,20 +503,141 @@ function startRingback(): () => void {
 
 type CallState = "idle" | "connecting" | "listening" | "speaking";
 
+class DemoApiError extends Error {}
+
+type InviteInfo =
+    | { status: "checking" }
+    | { status: "none" }
+    | { status: "invalid" }
+    | { status: "valid"; businessName: string; remaining: number; max: number };
+
+function DemoRequestForm({ invalid }: { invalid: boolean }) {
+    const [state, setState] = useState<"idle" | "sending" | "done" | "error">("idle");
+    const [error, setError] = useState("");
+
+    async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+        e.preventDefault();
+        const f = new FormData(e.currentTarget);
+        setState("sending");
+        setError("");
+        try {
+            const res = await fetch("/api/demo-invite/request", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(Object.fromEntries(f)),
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(data.error || "Something went wrong. Please try again.");
+            setState("done");
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Something went wrong.");
+            setState("error");
+        }
+    }
+
+    const field =
+        "w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-colors focus:border-blue-600";
+
+    if (state === "done") {
+        return (
+            <div role="status" className="mt-8 rounded-2xl bg-emerald-50 p-6 text-sm text-emerald-900">
+                <p className="font-semibold">Check your inbox.</p>
+                <p className="mt-1">We&apos;ve emailed you a personal link to your live voice demo. It includes 3 calls and is valid for 7 days.</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="mt-8">
+            {invalid && (
+                <p role="alert" className="mb-4 rounded-2xl bg-amber-50 p-4 text-sm text-amber-900">
+                    This demo link is invalid, expired, or has no calls left. Request a fresh one below.
+                </p>
+            )}
+            <h4 className="text-lg font-semibold text-slate-900">Request Live Voice Demo</h4>
+            <p className="mt-1 text-sm text-slate-600">Tell us where to send your personal demo link. You&apos;ll get 3 live calls with Sam.</p>
+            <form onSubmit={onSubmit} className="mt-5 grid gap-4 sm:grid-cols-2">
+                {/* honeypot */}
+                <div aria-hidden="true" style={{ position: "absolute", left: "-10000px", width: 1, height: 1, overflow: "hidden" }}>
+                    <label>
+                        Website <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+                    </label>
+                </div>
+                <div>
+                    <label htmlFor="d-name" className="mb-1 block text-xs font-semibold text-slate-600">Full name</label>
+                    <input id="d-name" name="contactName" required minLength={2} maxLength={100} autoComplete="name" className={field} />
+                </div>
+                <div>
+                    <label htmlFor="d-biz" className="mb-1 block text-xs font-semibold text-slate-600">Business name</label>
+                    <input id="d-biz" name="businessName" required minLength={2} maxLength={120} autoComplete="organization" className={field} />
+                </div>
+                <div>
+                    <label htmlFor="d-email" className="mb-1 block text-xs font-semibold text-slate-600">Work email</label>
+                    <input id="d-email" name="email" type="email" required maxLength={254} autoComplete="email" className={field} />
+                </div>
+                <div>
+                    <label htmlFor="d-phone" className="mb-1 block text-xs font-semibold text-slate-600">Phone (optional)</label>
+                    <input id="d-phone" name="phone" type="tel" maxLength={30} autoComplete="tel" className={field} />
+                </div>
+                {state === "error" && (
+                    <p role="alert" className="text-sm text-red-600 sm:col-span-2">
+                        {error}
+                    </p>
+                )}
+                <div className="sm:col-span-2">
+                    <button
+                        type="submit"
+                        disabled={state === "sending"}
+                        className="w-full rounded-full bg-slate-900 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md disabled:opacity-60 sm:w-auto sm:px-8"
+                    >
+                        {state === "sending" ? "Sending…" : "Email me my demo link"}
+                    </button>
+                </div>
+            </form>
+        </div>
+    );
+}
+
 function VoiceTab() {
     const [state, setState] = useState<CallState>("idle");
     const [error, setError] = useState("");
     const [seconds, setSeconds] = useState(0);
-    const publicKey = process.env.NEXT_PUBLIC_RETELL_PUBLIC_KEY?.trim();
-    const agentId = process.env.NEXT_PUBLIC_RETELL_PLUMBING_AGENT_ID?.trim();
-    // Created once on mount so "Start Voice Call" has no setup delay
-    const client = useMemo(() => (publicKey ? new RetellClient({ key: publicKey }) : null), [publicKey]);
-    const callRef = useRef<WebCallSession | null>(null);
+    const [invite, setInvite] = useState<InviteInfo>({ status: "checking" });
+    const tokenRef = useRef<string | null>(null);
+    const clientRef = useRef<RetellWebClient | null>(null);
     const callIdRef = useRef(0);
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const stopRingRef = useRef<(() => void) | null>(null);
-
     const ringFallbackRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Validate ?invite=TOKEN once (server marks first open + notifies us)
+    useEffect(() => {
+        const token = new URLSearchParams(window.location.search).get("invite");
+        if (!token) {
+            setInvite({ status: "none" });
+            return;
+        }
+        tokenRef.current = token;
+        let cancelled = false;
+        fetch("/api/demo-invite/validate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token }),
+        })
+            .then((r) => r.json())
+            .then((d) => {
+                if (cancelled) return;
+                setInvite(
+                    d.valid && d.callsRemaining > 0
+                        ? { status: "valid", businessName: d.businessName, remaining: d.callsRemaining, max: d.maxCalls }
+                        : { status: "invalid" }
+                );
+            })
+            .catch(() => !cancelled && setInvite({ status: "invalid" }));
+        return () => {
+            cancelled = true;
+        };
+    }, []);
 
     function stopRing() {
         if (ringFallbackRef.current) clearTimeout(ringFallbackRef.current);
@@ -530,88 +651,94 @@ function VoiceTab() {
         timerRef.current = null;
     }
 
-    function endCall() {
+    function teardown() {
         clearTimer();
         stopRing();
-        const call = callRef.current;
-        callRef.current = null;
-        callIdRef.current++; // invalidates hooks of this call (no re-entry from onEnd / onError)
-        if (call) void call.end().catch(() => undefined);
+        const client = clientRef.current;
+        clientRef.current = null;
+        callIdRef.current++; // ignore late events from the old call
+        if (client) {
+            try {
+                client.stopCall();
+            } catch {
+                /* already stopped */
+            }
+            client.removeAllListeners();
+        }
+    }
+
+    function endCall() {
+        teardown();
         setState("idle");
     }
 
     // Close any active call when leaving the tab / unmounting
-    useEffect(() => {
-        return () => {
-            clearTimer();
-            stopRing();
-            const call = callRef.current;
-            callRef.current = null;
-            callIdRef.current++;
-            if (call) void call.end().catch(() => undefined);
-        };
-    }, []);
+    useEffect(() => teardown, []);
 
     async function startCall() {
-        if (state !== "idle") return;
+        if (state !== "idle" || invite.status !== "valid" || !tokenRef.current) return;
         setError("");
         setSeconds(0);
-
-        if (!client || !agentId) {
-            setError("The voice demo isn't configured yet (missing Retell public key or agent ID).");
-            return;
-        }
-
-        setState("connecting"); // instant UI feedback, before any async work
+        setState("connecting"); // instant UI feedback
         stopRing();
         stopRingRef.current = startRingback(); // AudioContext is unlocked by this click
         ringFallbackRef.current = setTimeout(stopRing, 8000); // safety: never ring longer than 8s
+        const id = ++callIdRef.current;
         try {
-            let talking = false;
-            const id = ++callIdRef.current; // hooks ignore events from superseded/ended calls
-            const call = client.createWebCall({
-                agent_id: agentId,
-                hooks: {
-                    onStatus: (status) => {
-                        if (callIdRef.current !== id) return;
-                        if (status === "connecting") {
-                            setState("connecting");
-                        } else if (status === "live" || status === "listening") {
-                            setState(talking ? "speaking" : "listening");
-                            if (!timerRef.current) {
-                                const started = Date.now();
-                                timerRef.current = setInterval(() => {
-                                    const s = Math.floor((Date.now() - started) / 1000);
-                                    setSeconds(s);
-                                    if (s >= MAX_CALL_SECONDS) endCall();
-                                }, 500);
-                            }
-                        }
-                    },
-                    onAgentStartTalking: () => {
-                        stopRing(); // ringback ends exactly when Sam starts talking
-                        talking = true;
-                        if (callIdRef.current === id) setState("speaking");
-                    },
-                    onAgentStopTalking: () => {
-                        talking = false;
-                        if (callIdRef.current === id) setState("listening");
-                    },
-                    onEnd: () => {
-                        if (callIdRef.current === id) endCall();
-                    },
-                    onError: (err) => {
-                        if (callIdRef.current !== id) return;
-                        setError(voiceErrorMessage(err));
-                        endCall();
-                    },
-                },
+            const res = await fetch("/api/retell/create-web-call", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ inviteToken: tokenRef.current }),
             });
-            callRef.current = call;
-            await call.ready;
+            const data = await res.json().catch(() => ({}));
+            if (callIdRef.current !== id) return; // cancelled while waiting
+            if (res.status === 403) {
+                setInvite({ status: "invalid" });
+                throw new DemoApiError(data.error || "This demo link has no calls left.");
+            }
+            if (!res.ok || !data.access_token) throw new DemoApiError(data.error || "Could not start the call. Please try again.");
+            setInvite((cur) => (cur.status === "valid" ? { ...cur, remaining: Math.max(0, data.callsRemaining ?? cur.remaining - 1) } : cur));
+
+            const { RetellWebClient } = await import("retell-client-js-sdk");
+            if (callIdRef.current !== id) return;
+            const client = new RetellWebClient();
+            clientRef.current = client;
+            client.on("call_started", () => {
+                if (callIdRef.current !== id) return;
+                setState("listening");
+                clearTimer();
+                const started = Date.now();
+                timerRef.current = setInterval(() => {
+                    const s = Math.floor((Date.now() - started) / 1000);
+                    setSeconds(s);
+                    if (s >= MAX_CALL_SECONDS) endCall();
+                }, 500);
+            });
+            client.on("agent_start_talking", () => {
+                if (callIdRef.current !== id) return;
+                stopRing(); // ringback ends exactly when Sam starts talking
+                setState("speaking");
+            });
+            client.on("agent_stop_talking", () => callIdRef.current === id && setState("listening"));
+            client.on("call_ended", () => callIdRef.current === id && endCall());
+            client.on("error", (err: unknown) => {
+                if (callIdRef.current !== id) return;
+                setError(voiceErrorMessage(err));
+                endCall();
+            });
+
+            await client.startCall({
+                accessToken: data.access_token,
+                callId: data.call_id,
+                transport: data.transport,
+                url: data.url,
+                iceServers: data.ice_servers,
+            });
         } catch (err) {
-            endCall();
-            setError(voiceErrorMessage(err));
+            if (callIdRef.current === id) {
+                endCall();
+                setError(err instanceof DemoApiError ? err.message : voiceErrorMessage(err));
+            }
         }
     }
 
@@ -620,6 +747,7 @@ function VoiceTab() {
         state === "connecting" ? "Connecting to Sam..." : state === "listening" ? "Listening..." : state === "speaking" ? "Sam is speaking..." : "";
     const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
     const ss = String(seconds % 60).padStart(2, "0");
+    const canCall = invite.status === "valid" && (invite.remaining > 0 || active);
 
     return (
         <div className="mx-auto max-w-4xl rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-10">
@@ -632,43 +760,56 @@ function VoiceTab() {
                 Talk live with Sam (max 3 min). Try reporting a burst pipe in Newstead or asking about after-hours availability.
             </p>
 
-            <div className="mt-8 flex min-h-[7rem] flex-col items-center justify-center gap-4 rounded-2xl bg-slate-50 p-6">
-                {active ? (
-                    <>
-                        <div className="flex h-12 items-center justify-center gap-1" aria-hidden="true">
-                            {Array.from({ length: 20 }).map((_, i) => (
-                                <span
-                                    key={i}
-                                    className={`w-1 rounded-full ${state === "speaking" ? "wave-bar bg-blue-500" : "bg-slate-300"}`}
-                                    style={{ height: `${28 + ((i * 37) % 60)}%`, animationDelay: `${(i % 9) * 0.12}s` }}
-                                />
-                            ))}
-                        </div>
-                        <p role="status" className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                            <span className={`h-2.5 w-2.5 rounded-full ${state === "connecting" ? "bg-amber-400" : "animate-pulse bg-emerald-500"}`} />
-                            {statusLabel}
-                            <span className="font-mono text-slate-500">
-                                {mm}:{ss} / 03:00
-                            </span>
-                        </p>
-                        <button
-                            onClick={endCall}
-                            className="inline-flex items-center gap-2 rounded-full bg-red-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-red-700"
-                        >
-                            <Phone className="h-4 w-4 rotate-[135deg]" aria-hidden="true" />
-                            End Call
-                        </button>
-                    </>
-                ) : (
-                    <button
-                        onClick={startCall}
-                        className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
-                    >
-                        <Phone className="h-4 w-4" aria-hidden="true" />
-                        Start Voice Call
-                    </button>
-                )}
-            </div>
+            {invite.status === "checking" && <p className="mt-8 text-sm text-slate-500">Checking your demo link…</p>}
+
+            {(invite.status === "none" || invite.status === "invalid" || (invite.status === "valid" && !canCall)) && (
+                <DemoRequestForm invalid={invite.status === "invalid" || invite.status === "valid"} />
+            )}
+
+            {canCall && invite.status === "valid" && (
+                <>
+                    <p className="mt-4 text-sm font-medium text-slate-700">
+                        {invite.remaining} of {invite.max} demo calls remaining
+                    </p>
+                    <div className="mt-4 flex min-h-[7rem] flex-col items-center justify-center gap-4 rounded-2xl bg-slate-50 p-6">
+                        {active ? (
+                            <>
+                                <div className="flex h-12 items-center justify-center gap-1" aria-hidden="true">
+                                    {Array.from({ length: 20 }).map((_, i) => (
+                                        <span
+                                            key={i}
+                                            className={`w-1 rounded-full ${state === "speaking" ? "wave-bar bg-blue-500" : "bg-slate-300"}`}
+                                            style={{ height: `${28 + ((i * 37) % 60)}%`, animationDelay: `${(i % 9) * 0.12}s` }}
+                                        />
+                                    ))}
+                                </div>
+                                <p role="status" className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+                                    <span className={`h-2.5 w-2.5 rounded-full ${state === "connecting" ? "bg-amber-400" : "animate-pulse bg-emerald-500"}`} />
+                                    {statusLabel}
+                                    <span className="font-mono text-slate-500">
+                                        {mm}:{ss} / 03:00
+                                    </span>
+                                </p>
+                                <button
+                                    onClick={endCall}
+                                    className="inline-flex items-center gap-2 rounded-full bg-red-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-red-700"
+                                >
+                                    <Phone className="h-4 w-4 rotate-[135deg]" aria-hidden="true" />
+                                    End Call
+                                </button>
+                            </>
+                        ) : (
+                            <button
+                                onClick={startCall}
+                                className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+                            >
+                                <Phone className="h-4 w-4" aria-hidden="true" />
+                                Start Voice Call
+                            </button>
+                        )}
+                    </div>
+                </>
+            )}
 
             {error && (
                 <p role="alert" className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">

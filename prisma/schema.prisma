@@ -151,3 +151,22 @@ model MagicLinkToken {
 
   @@index([email])
 }
+
+// Personal voice-demo invite: gates the paid Retell demo and tracks each prospect.
+model DemoInvite {
+  id           String    @id @default(cuid())
+  token        String    @unique
+  businessName String
+  contactName  String?
+  email        String
+  phone        String?
+  source       String    @default("outbound_email") // "outbound_email" | "inbound_form"
+  maxCalls     Int       @default(3)
+  callsUsed    Int       @default(0)
+  openedAt     DateTime?
+  lastCalledAt DateTime?
+  expiresAt    DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@index([email])
+}
