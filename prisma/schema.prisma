@@ -160,6 +160,7 @@ model DemoInvite {
   contactName  String?
   email        String
   phone        String?
+  notes        String?
   source       String    @default("outbound_email") // "outbound_email" | "inbound_form"
   maxCalls     Int       @default(3)
   callsUsed    Int       @default(0)
