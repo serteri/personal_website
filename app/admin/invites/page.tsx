@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import { inviteLink, isAdmin } from "@/lib/demoInvites";
-import { AdminLogin, AdminLogout, CallsCell, CreateInviteForm, InviteActions } from "@/components/AdminInvites";
+import { AdminLogout, CallsCell, CreateInviteForm, InviteActions } from "@/components/AdminInvites";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Demo Invites | Admin", robots: { index: false, follow: false } };
@@ -10,13 +11,7 @@ const fmtDay = (d: Date) => d.toLocaleDateString("en-AU", { timeZone: "Australia
 const fmt = (d: Date) => d.toLocaleString("en-AU", { timeZone: "Australia/Brisbane", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
 
 export default async function InvitesPage() {
-  if (!(await isAdmin())) {
-    return (
-      <main className="bg-slate-50 px-4 py-24">
-        <AdminLogin />
-      </main>
-    );
-  }
+  if (!(await isAdmin())) redirect("/admin");
 
   const invites = await prisma.demoInvite.findMany({ orderBy: { createdAt: "desc" }, take: 500 });
 
@@ -25,7 +20,10 @@ export default async function InvitesPage() {
       <div className="mx-auto max-w-6xl space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">Voice demo invites</h1>
-          <AdminLogout />
+          <div className="flex items-center gap-2">
+            <a href="/admin" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-slate-400">Dashboard</a>
+            <AdminLogout />
+          </div>
         </div>
 
         <CreateInviteForm />
