@@ -112,6 +112,7 @@ model Client {
   businessName             String
   phone                    String?
   stripeCustomerId         String       @unique
+  stripeSubscriptionId     String?      @unique // null for the one-off pilot
   retellAgentId            String?      @unique // assigned manually once the agent is provisioned
   plan                     ClientPlan
   status                   ClientStatus @default(ACTIVE)

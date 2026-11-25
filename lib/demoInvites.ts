@@ -47,7 +47,8 @@ export async function sendMail(opts: { to: string; subject: string; html: string
 /* ---------- admin session (ADMIN_SECRET -> signed HTTP-only cookie) ---------- */
 
 export const ADMIN_COOKIE = 'altiq_admin';
-export const ADMIN_TTL_SECONDS = 12 * 60 * 60;
+export const ADMIN_IDLE_MS = 15 * 60 * 1000;
+export const ADMIN_TTL_SECONDS = ADMIN_IDLE_MS / 1000; // 900
 
 function adminKey(): string | null {
     const s = process.env.ADMIN_SECRET?.trim();
@@ -63,22 +64,29 @@ export function adminSecretMatches(input: string): boolean {
     return timingSafeEqual(a, b);
 }
 
+// Cookie value = "<lastActivityMs>.<signature>". Re-issued on activity (sliding window).
 export function createAdminCookieValue(): string | null {
     const key = adminKey();
     if (!key) return null;
-    const exp = String(Math.floor(Date.now() / 1000) + ADMIN_TTL_SECONDS);
-    return `${exp}.${adminSign(key, exp)}`;
+    const iat = String(Date.now());
+    return `${iat}.${adminSign(key, iat)}`;
+}
+
+function validAdminValue(value: string | undefined): boolean {
+    const key = adminKey();
+    if (!key || !value) return false;
+    const [iat, sig] = value.split('.');
+    const t = Number(iat);
+    if (!iat || !sig || !Number.isFinite(t)) return false;
+    const age = Date.now() - t;
+    if (age < 0 || age > ADMIN_IDLE_MS) return false;
+    const given = Buffer.from(sig);
+    const expected = Buffer.from(adminSign(key, iat));
+    return given.length === expected.length && timingSafeEqual(given, expected);
 }
 
 export async function isAdmin(): Promise<boolean> {
-    const key = adminKey();
-    const value = (await cookies()).get(ADMIN_COOKIE)?.value;
-    if (!key || !value) return false;
-    const [exp, sig] = value.split('.');
-    if (!exp || !sig || Number(exp) < Date.now() / 1000) return false;
-    const given = Buffer.from(sig);
-    const expected = Buffer.from(adminSign(key, exp));
-    return given.length === expected.length && timingSafeEqual(given, expected);
+    return validAdminValue((await cookies()).get(ADMIN_COOKIE)?.value);
 }
 
 export const adminCookieOptions = {

@@ -30,7 +30,7 @@ export function AdminLogin() {
 
     return (
         <form onSubmit={onSubmit} className="mx-auto w-full max-w-sm space-y-4 rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-            <h1 className="text-xl font-bold text-slate-900">Admin</h1>
+            <h1 className="text-xl font-bold text-slate-900">Admin Login</h1>
             <div>
                 <label htmlFor="admin-secret" className="mb-1 block text-xs font-semibold text-slate-600">
                     Admin secret
@@ -158,7 +158,8 @@ export function AdminLogout() {
         <button
             type="button"
             onClick={async () => {
-                await fetch("/api/admin/login", { method: "DELETE" });
+                await fetch("/api/admin/logout", { method: "POST" }).catch(() => null);
+                router.replace("/admin");
                 router.refresh();
             }}
             className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-slate-400"

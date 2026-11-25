@@ -1,15 +1,14 @@
 import React from 'react';
+import AdminSessionGuard from '@/components/AdminSessionGuard';
+import { isAdmin } from '@/lib/demoInvites';
 
-// Bu layout, gelecekte oluşturacağınız /admin ile başlayan tüm sayfaları saracaktır.
-export default function AdminLayout({
-                                        children,
-                                    }: {
-    children: React.ReactNode;
-}) {
+export const dynamic = 'force-dynamic';
+
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+    const active = await isAdmin();
     return (
         <section>
-            {/* İleride buraya admin paneline özel bir navbar veya kenar çubuğu ekleyebilirsiniz */}
-            {children}
+            <AdminSessionGuard active={active}>{children}</AdminSessionGuard>
         </section>
     );
 }

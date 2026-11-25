@@ -67,8 +67,11 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
               <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusStyle[client.status]}`}>{client.status.replace("_", " ")}</span>
             </div>
           </div>
-          <div className="flex items-start gap-3">
+          <div className="flex flex-wrap items-start gap-x-4 gap-y-3">
             <BillingPortalButton />
+            <div className="py-2.5">
+              <BillingPortalButton variant="link" />
+            </div>
             <form method="post" action="/api/auth/logout">
               <button type="submit" className="rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400">
                 Log out
@@ -80,6 +83,13 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         {!client.retellAgentId && (
           <p className="rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-900">
             Your AI receptionist is currently being configured by our Brisbane team. We&apos;ll email you as soon as it&apos;s live.
+          </p>
+        )}
+
+        {pct >= 80 && client.status !== "CANCELED" && (
+          <p role="status" className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+            You&apos;ve used {pct}% of this period&apos;s minutes.{" "}
+            {client.plan === "GROWTH" ? "Extra minutes are billed as overage." : "Consider upgrading your plan to avoid overage charges."}
           </p>
         )}
 
@@ -103,12 +113,13 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           </div>
           <dl className="mt-4 grid gap-4 text-sm sm:grid-cols-3">
             <div>
-              <dt className="text-slate-500">Remaining</dt>
-              <dd className="font-semibold text-slate-900">{remaining} min</dd>
+              <dt className="text-slate-500">Remaining minutes</dt>
+              <dd className="text-2xl font-bold text-slate-900">{remaining}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">Period ends</dt>
-              <dd className="font-semibold text-slate-900">{fmtDate(client.currentPeriodEnd)}</dd>
+              <dt className="text-slate-500">Used / total monthly</dt>
+              <dd className="text-2xl font-bold text-slate-900">{used} <span className="text-base font-semibold text-slate-500">/ {limit}</span></dd>
+              <dd className="text-xs text-slate-500">{client.status === "CANCELED" ? "Ended" : "Renews"} {fmtDate(client.currentPeriodEnd)}</dd>
             </div>
             <div>
               <dt className="text-slate-500">Overage</dt>
@@ -141,7 +152,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                     <tr key={c.id}>
                       <td className="whitespace-nowrap py-3 pr-4 text-slate-700">{fmtDateTime(c.createdAt)}</td>
                       <td className="whitespace-nowrap py-3 pr-4 font-mono text-slate-700">{c.callerNumber ?? "Unknown"}</td>
-                      <td className="whitespace-nowrap py-3 pr-4 text-slate-700">{c.billedMinutes} min</td>
+                      <td className="whitespace-nowrap py-3 pr-4 text-slate-700">{Math.floor(c.durationSeconds / 60)}m {c.durationSeconds % 60}s</td>
                       <td className="py-3 text-slate-700">
                         {c.isEmergency && <span className="mr-2 rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700">Emergency</span>}
                         {c.summary ?? <span className="text-slate-400">Summary pending</span>}
