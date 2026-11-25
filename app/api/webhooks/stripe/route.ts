@@ -87,6 +87,7 @@ async function onCheckoutCompleted(session: Stripe.Checkout.Session) {
         status: 'ACTIVE' as const,
         monthlyMinuteLimit: MINUTE_LIMITS[plan],
         minutesUsedCurrentPeriod: 0,
+        limitNotifiedAt: null,
         currentPeriodStart: periodStart,
         currentPeriodEnd: periodEnd,
     };
@@ -108,6 +109,7 @@ async function onInvoicePaid(invoice: Stripe.Invoice) {
         where: { stripeCustomerId },
         data: {
             minutesUsedCurrentPeriod: 0,
+            limitNotifiedAt: null,
             status: 'ACTIVE',
             ...(period ? { currentPeriodStart: period.start, currentPeriodEnd: period.end } : {}),
         },

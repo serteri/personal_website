@@ -117,6 +117,7 @@ model Client {
   status                   ClientStatus @default(ACTIVE)
   monthlyMinuteLimit       Int
   minutesUsedCurrentPeriod Int          @default(0)
+  limitNotifiedAt          DateTime? // set once when the pilot-exhausted email is sent; cleared on a new paid period
   currentPeriodStart       DateTime
   currentPeriodEnd         DateTime
   createdAt                DateTime     @default(now())

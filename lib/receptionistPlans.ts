@@ -9,7 +9,7 @@ export const PLAN_ENUM: Record<PlanKey, ClientPlan> = {
 };
 
 export const MINUTE_LIMITS: Record<ClientPlan, number> = {
-    PILOT: 150,
+    PILOT: 100, // hard cap, see lib/pilotLimit.ts
     STARTER: 150,
     GROWTH: 400,
 };

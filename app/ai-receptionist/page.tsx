@@ -16,7 +16,7 @@ const steps = [
   { n: "3", title: "Get instant job summaries & bookings", text: "Each call becomes a short summary with urgency, issue and suburb, plus a booking request, sent to you straight away." },
 ];
 
-const pilotFeatures = ["$0 setup fee", "150 voice minutes", "24/7 Web Chat included", "Cancel anytime"];
+const pilotFeatures = ["$0 setup fee", "100 voice minutes", "24/7 Web Chat included", "Cancel anytime"];
 
 const plans = [
   {
@@ -100,7 +100,7 @@ export default function AiReceptionistPage() {
                 <div>
                   <h3 className="text-2xl font-semibold">30-Day Brisbane Pilot</h3>
                   <p className="mt-2 text-5xl font-bold tracking-tight">
-                    $149 <span className="text-lg font-medium text-slate-400">AUD</span>
+                    $99 <span className="text-lg font-medium text-slate-400">AUD</span>
                   </p>
                   <ul className="mt-6 grid gap-2 text-sm text-slate-200 sm:grid-cols-2">
                     {pilotFeatures.map((f) => (
@@ -115,7 +115,7 @@ export default function AiReceptionistPage() {
                   plan="pilot"
                   className="inline-flex items-center justify-center rounded-full bg-white px-8 py-3.5 text-base font-semibold text-slate-900 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
                 >
-                  Start 30-Day Pilot — $149
+                  Start 30-Day Pilot — $99
                 </PlanCheckoutButton>
               </div>
             </div>

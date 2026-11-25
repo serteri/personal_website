@@ -3,7 +3,9 @@ import { z } from 'zod';
 import { Prisma } from '@prisma/client';
 import { verify } from 'retell-sdk';
 import prisma from '@/lib/prisma';
+import { after as runAfterResponse } from 'next/server';
 import { getStripe } from '@/lib/stripe';
+import { notifyPilotExhaustedOnce, pilotExhausted } from '@/lib/pilotLimit';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -27,6 +29,11 @@ const payloadSchema = z.object({
     }).passthrough(),
 });
 
+const inboundSchema = z.object({
+    event: z.literal('call_inbound'),
+    call_inbound: z.object({ agent_id: z.string().min(1), from_number: z.string().nullish(), to_number: z.string().nullish() }).passthrough(),
+});
+
 export async function POST(req: Request) {
     const apiKey = process.env.RETELL_API_KEY?.trim();
     if (!apiKey) {
@@ -40,9 +47,19 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
     }
 
+    // Inbound-call webhook: Retell asks us how to handle a call BEFORE it is answered.
+    let raw: unknown;
+    try {
+        raw = JSON.parse(rawBody);
+    } catch {
+        return NextResponse.json({ error: 'Bad payload' }, { status: 400 });
+    }
+    const inbound = inboundSchema.safeParse(raw);
+    if (inbound.success) return handleInbound(inbound.data.call_inbound.agent_id);
+
     let payload;
     try {
-        payload = payloadSchema.parse(JSON.parse(rawBody));
+        payload = payloadSchema.parse(raw);
     } catch {
         return NextResponse.json({ error: 'Bad payload' }, { status: 400 });
     }
@@ -106,6 +123,11 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Handler failed' }, { status: 500 });
     }
 
+    if (client.plan === 'PILOT' && after >= client.monthlyMinuteLimit) {
+        // Pilot just used its last minutes: tell the client now, not on the next missed call
+        await notifyPilotExhaustedOnce(client);
+    }
+
     // Only the minutes that newly crossed the included allowance are reported as overage.
     const overage = Math.max(0, after - client.monthlyMinuteLimit) - Math.max(0, before - client.monthlyMinuteLimit);
     const eventName =
@@ -131,4 +153,25 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ ok: true, billedMinutes, overage });
+}
+
+// Pilot hard cap. Fails open: any lookup error lets the call through rather than dropping a paying client's call.
+async function handleInbound(agentId: string) {
+    try {
+        const client = await prisma.client.findUnique({ where: { retellAgentId: agentId } });
+        if (!client || !pilotExhausted(client)) return NextResponse.json({ call_inbound: {} });
+
+        runAfterResponse(() => notifyPilotExhaustedOnce(client));
+        const unavailableAgent = process.env.RETELL_UNAVAILABLE_AGENT_ID?.trim();
+        return NextResponse.json({
+            call_inbound: {
+                // A dedicated agent that says "line unavailable" and hangs up (preferred), plus a variable any agent prompt can branch on
+                ...(unavailableAgent ? { override_agent_id: unavailableAgent } : {}),
+                dynamic_variables: { line_unavailable: 'true' },
+            },
+        });
+    } catch (error) {
+        console.error('Retell inbound handler error:', error);
+        return NextResponse.json({ call_inbound: {} });
+    }
 }
