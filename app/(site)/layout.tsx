@@ -1,6 +1,6 @@
 
 
-import "./globals.css";
+import "../globals.css";
 import Navbar from "@/components/Navbar";
 import React from "react";
 import { Providers } from "@/components/Provider";

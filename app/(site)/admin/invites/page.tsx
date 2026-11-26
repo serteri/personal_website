@@ -21,6 +21,7 @@ export default async function InvitesPage() {
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">Voice demo invites</h1>
           <div className="flex items-center gap-2">
+            <a href="/admin/widgets" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-slate-400">Widgets</a>
             <a href="/admin" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-slate-400">Dashboard</a>
             <AdminLogout />
           </div>

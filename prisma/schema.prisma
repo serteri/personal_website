@@ -173,3 +173,43 @@ model DemoInvite {
 
   @@index([email])
 }
+
+// Embeddable multi-tenant web chat widget (one row per client website)
+model ChatWidget {
+  id                 String       @id @default(cuid())
+  slug               String       @unique // e.g. "trg-plumbing"
+  businessName       String
+  industry           String       @default("general")
+  assistantName      String       @default("Sam")
+  primaryColor       String       @default("#0f172a")
+  greetingMessage    String
+  services           String
+  serviceArea        String?
+  businessHours      String?
+  customInstructions String?
+  bookingUrl         String?
+  notifyEmail        String?
+  notifyPhone        String?
+  isActive           Boolean      @default(true)
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  leads              WidgetLead[]
+}
+
+model WidgetLead {
+  id             String     @id @default(cuid())
+  widgetId       String
+  conversationId String     @unique // one lead per chat; later turns enrich the same row
+  callerName     String?
+  phone          String?
+  email          String?
+  suburb         String?
+  issue          String?
+  urgency        String?
+  transcript     String?
+  createdAt      DateTime   @default(now())
+
+  widget ChatWidget @relation(fields: [widgetId], references: [id], onDelete: Cascade)
+
+  @@index([widgetId, createdAt])
+}

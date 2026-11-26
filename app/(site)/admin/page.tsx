@@ -54,10 +54,14 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                     ))}
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <Link href="/admin/invites" className="rounded-3xl border border-slate-900 bg-slate-900 p-6 text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
                         <div className="text-lg font-bold">Invitations &amp; Leads</div>
                         <p className="mt-1 text-sm text-slate-300">Create voice demo invites, track opens and calls.</p>
+                    </Link>
+                    <Link href="/admin/widgets" className="rounded-3xl border border-slate-900 bg-slate-900 p-6 text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+                        <div className="text-lg font-bold">Chat Widgets</div>
+                        <p className="mt-1 text-sm text-slate-300">Embeddable 24/7 web chat for client sites.</p>
                     </Link>
                     <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-6 shadow-sm">
                         <div className="text-lg font-bold text-slate-900">Clients &amp; Billing</div>
