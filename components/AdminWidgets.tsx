@@ -56,8 +56,45 @@ export default function AdminWidgets({ widgets }: { widgets: WidgetRow[] }) {
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState("");
     const [saved, setSaved] = useState("");
+    const [importUrl, setImportUrl] = useState("");
+    const [rawText, setRawText] = useState("");
+    const [showPaste, setShowPaste] = useState(false);
+    const [importing, setImporting] = useState(false);
+    const [importWarning, setImportWarning] = useState("");
+    const [importOk, setImportOk] = useState("");
 
     const set = (k: keyof typeof EMPTY, v: string | boolean) => setForm((f) => ({ ...f, [k]: v }));
+
+    // Fills the form from the extracted profile; only overwrites fields the importer actually found
+    async function runImport(body: { url?: string; rawText?: string }) {
+        setImporting(true);
+        setImportWarning("");
+        setImportOk("");
+        const res = await fetch("/api/admin/widgets/import-url", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+        }).catch(() => null);
+        const data = await res?.json().catch(() => ({}));
+        setImporting(false);
+        if (!res?.ok || !data?.profile) {
+            setImportWarning(data?.error || "Could not import from that website. Paste the website text manually below or fill in the fields.");
+            if (body.url) setShowPaste(true); // fall back to manual paste automatically
+            return;
+        }
+        const p = data.profile as Partial<Record<keyof typeof EMPTY, string | null>>;
+        setForm((f) => {
+            const next = { ...f };
+            for (const k of ["businessName", "industry", "services", "serviceArea", "businessHours", "customInstructions", "notifyEmail", "notifyPhone"] as const) {
+                if (p[k]) next[k] = p[k] as string;
+            }
+            if (!f.slug && p.businessName) {
+                next.slug = p.businessName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60);
+            }
+            return next;
+        });
+        setImportOk("Imported. Review every field below before saving.");
+    }
 
     function edit(w: WidgetRow) {
         setEditingId(w.id);
@@ -115,6 +152,54 @@ export default function AdminWidgets({ widgets }: { widgets: WidgetRow[] }) {
                         <button type="button" onClick={reset} className="text-xs font-semibold text-slate-500 hover:text-slate-900">
                             Cancel edit
                         </button>
+                    )}
+                </div>
+                <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <label htmlFor="w-import-url" className={label}>Website URL</label>
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                        <input
+                            id="w-import-url"
+                            type="url"
+                            placeholder="https://example-plumbing.com.au"
+                            value={importUrl}
+                            onChange={(e) => setImportUrl(e.target.value)}
+                            className={input}
+                        />
+                        <button
+                            type="button"
+                            disabled={importing || !importUrl.trim()}
+                            onClick={() => runImport({ url: importUrl.trim() })}
+                            className={`${pill} shrink-0`}
+                        >
+                            {importing ? "Importing…" : "Import from URL"}
+                        </button>
+                    </div>
+                    {importWarning && (
+                        <p role="alert" className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-900">
+                            {importWarning}
+                        </p>
+                    )}
+                    {importOk && (
+                        <p role="status" className="mt-3 text-sm text-emerald-700">
+                            {importOk}
+                        </p>
+                    )}
+                    <button type="button" onClick={() => setShowPaste((v) => !v)} className="mt-3 text-xs font-semibold text-blue-600 hover:underline">
+                        {showPaste ? "Hide manual text paste" : "Manual text paste"}
+                    </button>
+                    {showPaste && (
+                        <div className="mt-2">
+                            <label htmlFor="w-raw" className={label}>Paste the website text (about, services, areas, hours, contact…)</label>
+                            <textarea id="w-raw" rows={6} maxLength={60000} value={rawText} onChange={(e) => setRawText(e.target.value)} className={input} />
+                            <button
+                                type="button"
+                                disabled={importing || rawText.trim().length < 150}
+                                onClick={() => runImport({ rawText: rawText.trim() })}
+                                className={`${pill} mt-2`}
+                            >
+                                {importing ? "Extracting…" : "Extract from Pasted Text"}
+                            </button>
+                        </div>
                     )}
                 </div>
                 <div className="mt-4 grid gap-4 sm:grid-cols-2">

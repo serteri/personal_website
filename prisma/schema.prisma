@@ -206,6 +206,7 @@ model WidgetLead {
   suburb         String?
   issue          String?
   urgency        String?
+  preferredTime  String? // asked when the widget has no booking URL, e.g. "Friday afternoon"
   transcript     String?
   createdAt      DateTime   @default(now())
 
