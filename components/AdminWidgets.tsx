@@ -45,7 +45,9 @@ const EMPTY = {
     isActive: true,
 };
 
-const embedCode = (slug: string) => `<script src="https://altiqdesign.com/widget.js" data-widget="${slug}" async></script>`;
+// Canonical host (www) so widget.js never hits an apex->www redirect on its cross-origin fetch()
+const SITE = (process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://www.altiqdesign.com").replace(/\/$/, "");
+const embedCode = (slug: string) => `<script src="${SITE}/widget.js" data-widget="${slug}" async></script>`;
 
 export default function AdminWidgets({ widgets }: { widgets: WidgetRow[] }) {
     const router = useRouter();
