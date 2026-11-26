@@ -50,7 +50,7 @@ const Footer = () => {
                         <h3 className="text-sm font-semibold text-slate-900 mb-4">CONTACT US</h3>
                         <ul className="space-y-3">
                             <li><a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 transition-colors">instagram</a></li>
-                            <li><a href="tel:+61405636970" className="hover:text-blue-600 transition-colors">+61405636970</a></li>
+                            <li><a href="tel:+61432672696" className="hover:text-blue-600 transition-colors">0432 672 696</a></li>
                         </ul>
                     </div>
                     
