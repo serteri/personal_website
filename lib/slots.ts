@@ -101,3 +101,9 @@ export function freeSlots(dateStr: string, busy: Interval[], now = Date.now()): 
         return slot.start > now && !busy.some((b) => overlaps(slot, b));
     });
 }
+
+/** Brisbane YYYY-MM-DD and HH:mm of an instant (epoch ms). */
+export function brisbaneParts(ms: number): { date: string; time: string } {
+    const iso = new Date(ms + 10 * 60 * MIN).toISOString();
+    return { date: iso.slice(0, 10), time: iso.slice(11, 16) };
+}

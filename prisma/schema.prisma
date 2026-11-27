@@ -69,6 +69,12 @@ model Booking {
   createdAt DateTime @default(now())
   User      User?    @relation(fields: [userId], references: [id])
   userId    String?
+
+  // Self-service manage link (/book/manage/[token]). Null on legacy rows, which can't be self-managed.
+  manageToken   String?   @unique
+  googleEventId String?
+  status        String    @default("CONFIRMED") // "CONFIRMED" | "CANCELLED"
+  cancelledAt   DateTime?
 }
 
 model Availability {

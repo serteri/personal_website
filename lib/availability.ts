@@ -5,12 +5,16 @@ import { bookingInterval, brisbaneDayRange, freeSlots, overlaps, type Interval }
 const DAY = 24 * 60 * 60_000;
 
 /** Busy intervals from Prisma only (bookings incl. legacy hourly rows, plus manual Availability blocks). */
-export async function getDbBusy(dateStr: string, db: Pick<typeof prisma, 'booking' | 'availability'> = prisma): Promise<Interval[]> {
+export async function getDbBusy(dateStr: string, db: Pick<typeof prisma, 'booking' | 'availability'> = prisma, excludeId?: bigint): Promise<Interval[]> {
     const day = brisbaneDayRange(dateStr);
     // Legacy rows are stored on the UTC calendar day, so widen the query by a day each side, then filter exactly.
     const [bookings, blocks] = await Promise.all([
         db.booking.findMany({
-            where: { date: { gte: new Date(day.start - DAY), lt: new Date(day.end + DAY) } },
+            where: {
+                date: { gte: new Date(day.start - DAY), lt: new Date(day.end + DAY) },
+                status: { not: 'CANCELLED' }, // cancelled bookings free their slot
+                ...(excludeId !== undefined ? { id: { not: excludeId } } : {}),
+            },
             select: { date: true, time: true },
         }),
         db.availability.findMany({

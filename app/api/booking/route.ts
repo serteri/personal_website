@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { z } from 'zod';
+import { randomBytes } from 'crypto';
 import { getDbBusy, getGoogleBusy } from '@/lib/availability';
 import { createCalendarEvent } from '@/lib/googleCalendar';
-import { sendBookingEmails } from '@/lib/bookingEmail';
+import { manageUrlFor, sendBookingEmails } from '@/lib/bookingEmail';
 import { SLOT_MINUTES, brisbaneInstant, isBookableDay, isValidDateStr, isValidSlot, isWithinWindow, overlaps, slotInterval } from '@/lib/slots';
 
 // Strict server-side validation. `date` is the Brisbane calendar day (YYYY-MM-DD), `time` a slot from lib/slots.
@@ -53,7 +54,7 @@ export async function GET() {
         // 48h buffer so slots stored as UTC are not dropped early in far-ahead timezones
         const since = new Date(Date.now() - 48 * 60 * 60 * 1000);
         const bookings = await prisma.booking.findMany({
-            where: { date: { gte: since } },
+            where: { date: { gte: since }, status: { not: 'CANCELLED' } },
             select: { date: true, time: true },
             orderBy: { date: 'asc' },
         });
@@ -102,12 +103,13 @@ export async function POST(req: Request) {
 
         // Only database work runs inside the transaction; Google/Resend calls stay outside it.
         // Double-booking guard: check Bookings (incl. legacy hourly rows) + Availability blocks and insert atomically.
+        const manageToken = randomBytes(24).toString('hex'); // 192-bit, unguessable
         const created = await prisma.$transaction(async (tx) => {
             const busy = await getDbBusy(date, tx);
             if (busy.some(b => overlaps(slot, b))) return null;
             return tx.booking.create({
-                data: { firstName, lastName, email, phone, date: brisbaneInstant(date, time), time },
-                select: { date: true, time: true },
+                data: { firstName, lastName, email, phone, date: brisbaneInstant(date, time), time, manageToken, status: 'CONFIRMED' },
+                select: { id: true, date: true, time: true },
             });
         }, {
             isolationLevel: 'Serializable',
@@ -119,9 +121,12 @@ export async function POST(req: Request) {
 
         // Saved. Calendar event + emails are best-effort: a failure must never lose or fail the booking.
         const name = `${firstName} ${lastName}`;
+        const manageUrl = manageUrlFor(manageToken);
         const results = await Promise.allSettled([
-            createCalendarEvent({ date, time, durationMinutes: SLOT_MINUTES, name, email, phone, notes }),
-            sendBookingEmails({ date, time, name, email, phone, notes }),
+            createCalendarEvent({ date, time, durationMinutes: SLOT_MINUTES, name, email, phone, notes }).then(async (googleEventId) => {
+                if (googleEventId) await prisma.booking.update({ where: { id: created.id }, data: { googleEventId } });
+            }),
+            sendBookingEmails({ date, time, name, email, phone, notes, manageUrl }),
         ]);
         results.forEach(r => r.status === 'rejected' && console.error('Post-booking step failed:', r.reason));
 

@@ -107,25 +107,73 @@ export interface CalendarEventInput {
     notes?: string;
 }
 
-/** Adds the booking to the owner's calendar. No attendees (works on personal @gmail.com without delegation). */
+const brisbaneLocal = (d: Date) => new Date(d.getTime() + 10 * 3_600_000).toISOString().slice(0, 19) + BRISBANE_OFFSET;
+
+function eventTimes(date: string, time: string, durationMinutes = SLOT_MINUTES) {
+    const start = brisbaneInstant(date, time);
+    const end = new Date(start.getTime() + durationMinutes * 60_000);
+    return {
+        start: { dateTime: brisbaneLocal(start), timeZone: TIMEZONE },
+        end: { dateTime: brisbaneLocal(end), timeZone: TIMEZONE },
+    };
+}
+
+/** Adds the booking to the owner's calendar and returns the Google event id. No attendees (works on personal @gmail.com). */
 export async function createCalendarEvent(input: CalendarEventInput): Promise<string | null> {
     const cfg = config();
     if (!cfg) return null;
-    const start = brisbaneInstant(input.date, input.time);
-    const end = new Date(start.getTime() + (input.durationMinutes ?? SLOT_MINUTES) * 60_000);
-    const local = (d: Date) => new Date(d.getTime() + 10 * 3_600_000).toISOString().slice(0, 19) + BRISBANE_OFFSET;
-
     const res = await fetch(`${API}/calendars/${encodeURIComponent(cfg.calendarId)}/events`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${await accessToken(cfg)}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
             summary: `Booking: ${input.name}`,
             description: [`Name: ${input.name}`, `Email: ${input.email}`, `Phone: ${input.phone}`, input.notes ? `Notes: ${input.notes}` : ''].filter(Boolean).join('\n'),
-            start: { dateTime: local(start), timeZone: TIMEZONE },
-            end: { dateTime: local(end), timeZone: TIMEZONE },
+            ...eventTimes(input.date, input.time, input.durationMinutes),
         }),
     });
     const data = (await res.json().catch(() => ({}))) as { id?: string; error?: { message?: string } };
     if (!res.ok) throw new Error(`Google event creation failed (${res.status}): ${data.error?.message ?? 'unknown error'}`);
     return data.id ?? null;
+}
+
+/**
+ * Moves an existing event (Brisbane time).
+ * 'updated' | 'missing' (event no longer exists: caller should recreate it) | 'skipped' (Google not configured).
+ * Throws on other Google errors.
+ */
+export async function updateCalendarEvent(
+    eventId: string,
+    input: { date: string; time: string; durationMinutes?: number }
+): Promise<'updated' | 'missing' | 'skipped'> {
+    const cfg = config();
+    if (!cfg) return 'skipped';
+    const res = await fetch(`${API}/calendars/${encodeURIComponent(cfg.calendarId)}/events/${encodeURIComponent(eventId)}`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${await accessToken(cfg)}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(eventTimes(input.date, input.time, input.durationMinutes)),
+    });
+    if (res.status === 404 || res.status === 410) return 'missing';
+    if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: { message?: string } };
+        throw new Error(`Google event update failed (${res.status}): ${data.error?.message ?? 'unknown error'}`);
+    }
+    return 'updated';
+}
+
+/** Deletes an event. 404/410 count as already deleted. Never throws: failures are logged and return false. */
+export async function deleteCalendarEvent(eventId: string): Promise<boolean> {
+    try {
+        const cfg = config();
+        if (!cfg) return false;
+        const res = await fetch(`${API}/calendars/${encodeURIComponent(cfg.calendarId)}/events/${encodeURIComponent(eventId)}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${await accessToken(cfg)}` },
+        });
+        if (res.ok || res.status === 404 || res.status === 410) return true;
+        console.error(`Google event delete failed (${res.status})`);
+        return false;
+    } catch (error) {
+        console.error('Google event delete failed:', error);
+        return false;
+    }
 }
