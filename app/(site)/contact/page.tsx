@@ -1,4 +1,12 @@
+import type { Metadata } from 'next';
 import ContactForm from '@/components/ContactForm';
+
+export const metadata: Metadata = {
+    title: 'Contact',
+    description: 'Talk to Altiq Design in Brisbane about custom software, web design or an AI voice receptionist for your business.',
+    alternates: { canonical: '/contact' },
+};
+
 
 export default function ContactPage() {
     return (

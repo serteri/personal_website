@@ -5,8 +5,16 @@ export default function robots(): MetadataRoute.Robots {
         rules: {
             userAgent: '*',
             allow: '/',
-            disallow: '/private/', // Örnek olarak, taranmasını istemediğiniz bir klasör
+            disallow: [
+                '/api/',
+                '/admin/',
+                '/book/manage/', // private per-booking manage links
+                '/dashboard',
+                '/embed/',
+                '/*?invite=', // private demo invite links (token in the query string)
+            ],
         },
-        sitemap: 'https://altiqdesign.com/sitemap.xml', // Site haritanızın adresi
+        sitemap: 'https://www.altiqdesign.com/sitemap.xml',
+        host: 'https://www.altiqdesign.com',
     };
 }

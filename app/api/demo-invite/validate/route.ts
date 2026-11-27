@@ -22,7 +22,13 @@ export async function POST(req: Request) {
     }
 
     const invite = await prisma.demoInvite.findUnique({ where: { token } });
-    if (!invite || inviteState(invite) !== 'ok') return NextResponse.json({ valid: false });
+    if (!invite) return NextResponse.json({ valid: false });
+    const state = inviteState(invite);
+    // Used-up links still get a friendly "what next" screen (book a call / callback) instead of a dead end.
+    if (state === 'exhausted') {
+        return NextResponse.json({ valid: false, exhausted: true, businessName: invite.businessName, contactName: invite.contactName?.split(' ')[0] ?? null, maxCalls: invite.maxCalls });
+    }
+    if (state !== 'ok') return NextResponse.json({ valid: false });
 
     // First open: atomic flip so concurrent tabs/refreshes send only one alert
     if (!invite.openedAt) {
@@ -47,6 +53,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
         valid: true,
         businessName: invite.businessName,
+        contactName: invite.contactName?.split(' ')[0] ?? null,
         callsRemaining: invite.maxCalls - invite.callsUsed,
         maxCalls: invite.maxCalls,
     });

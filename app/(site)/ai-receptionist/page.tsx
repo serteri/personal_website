@@ -5,9 +5,10 @@ import SectionHeader from "@/components/SectionHeader";
 import PlanCheckoutButton from "@/components/PlanCheckoutButton";
 
 export const metadata: Metadata = {
-  title: "AI Receptionist for Brisbane Tradies & Clinics | ALTIQDESIGN",
+  title: "AI Voice Receptionist for Brisbane Tradies & Clinics",
   description:
     "A 24/7 AI voice and chat receptionist for Brisbane tradies and local clinics. Keep your number, forward missed calls, get instant job summaries and bookings.",
+  alternates: { canonical: "/ai-receptionist" },
 };
 
 const steps = [

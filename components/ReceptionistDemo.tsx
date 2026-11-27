@@ -3,10 +3,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Send, Phone } from "lucide-react";
+import { Send, Phone, Mic } from "lucide-react";
 import type { RetellWebClient } from "retell-client-js-sdk";
 import SectionHeader from "./SectionHeader";
 import { services } from "@/lib/services";
+import DemoFollowUp from "./DemoFollowUp";
 
 const MAX_USER_MESSAGES = 12;
 const SLOTS = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"];
@@ -513,7 +514,8 @@ type InviteInfo =
     | { status: "checking" }
     | { status: "none" }
     | { status: "invalid" }
-    | { status: "valid"; businessName: string; remaining: number; max: number };
+    | { status: "exhausted"; contactName: string | null }
+    | { status: "valid"; businessName: string; contactName: string | null; remaining: number; max: number };
 
 function DemoRequestForm({ invalid }: { invalid: boolean }) {
     const [state, setState] = useState<"idle" | "sending" | "done" | "error">("idle");
@@ -607,6 +609,8 @@ function VoiceTab() {
     const [error, setError] = useState("");
     const [seconds, setSeconds] = useState(0);
     const [invite, setInvite] = useState<InviteInfo>({ status: "checking" });
+    const [completedCall, setCompletedCall] = useState(false); // a call connected and has now ended
+    const connectedRef = useRef(false);
     const tokenRef = useRef<string | null>(null);
     const clientRef = useRef<RetellWebClient | null>(null);
     const callIdRef = useRef(0);
@@ -633,8 +637,10 @@ function VoiceTab() {
                 if (cancelled) return;
                 setInvite(
                     d.valid && d.callsRemaining > 0
-                        ? { status: "valid", businessName: d.businessName, remaining: d.callsRemaining, max: d.maxCalls }
-                        : { status: "invalid" }
+                        ? { status: "valid", businessName: d.businessName, contactName: d.contactName ?? null, remaining: d.callsRemaining, max: d.maxCalls }
+                        : d.exhausted
+                          ? { status: "exhausted", contactName: d.contactName ?? null }
+                          : { status: "invalid" }
                 );
             })
             .catch(() => !cancelled && setInvite({ status: "invalid" }));
@@ -674,6 +680,10 @@ function VoiceTab() {
     function endCall() {
         teardown();
         setState("idle");
+        if (connectedRef.current) {
+            connectedRef.current = false;
+            setCompletedCall(true); // reveal the post-demo conversion card
+        }
     }
 
     // Close any active call when leaving the tab / unmounting
@@ -683,6 +693,7 @@ function VoiceTab() {
         if (state !== "idle" || invite.status !== "valid" || !tokenRef.current) return;
         setError("");
         setSeconds(0);
+        setCompletedCall(false);
         setState("connecting"); // instant UI feedback
         stopRing();
         stopRingRef.current = startRingback(); // AudioContext is unlocked by this click
@@ -709,6 +720,7 @@ function VoiceTab() {
             clientRef.current = client;
             client.on("call_started", () => {
                 if (callIdRef.current !== id) return;
+                connectedRef.current = true;
                 setState("listening");
                 clearTimer();
                 const started = Date.now();
@@ -752,29 +764,44 @@ function VoiceTab() {
     const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
     const ss = String(seconds % 60).padStart(2, "0");
     const canCall = invite.status === "valid" && (invite.remaining > 0 || active);
+    const token = tokenRef.current;
+    const contactName = invite.status === "valid" || invite.status === "exhausted" ? invite.contactName : null;
+    const remaining = invite.status === "valid" ? invite.remaining : 0;
+    // Post-demo conversion: after a call ends, or when a used-up link is opened
+    const showFollowUp = !!token && !active && (completedCall || invite.status === "exhausted");
 
     return (
-        <div className="mx-auto max-w-4xl rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-10">
-            <div className="flex flex-wrap gap-2">
+        <div className="mx-auto max-w-2xl rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-10">
+            <div className="flex flex-wrap justify-center gap-2">
                 <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">Live voice demo</span>
                 <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">Fictional business</span>
             </div>
-            <h3 className="mt-4 text-xl font-semibold text-slate-900 sm:text-2xl">Live Voice Demo — Brisbane Flow Plumbing (Sam)</h3>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600">
+            <h3 className="mt-4 text-center text-xl font-semibold text-slate-900 sm:text-2xl">Live Voice Demo — Brisbane Flow Plumbing (Sam)</h3>
+            <p className="mx-auto mt-2 max-w-xl text-center text-sm leading-relaxed text-slate-600">
                 Talk live with Sam (max 3 min). Try reporting a burst pipe in Newstead or asking about after-hours availability.
             </p>
 
-            {invite.status === "checking" && <p className="mt-8 text-sm text-slate-500">Checking your demo link…</p>}
+            {invite.status === "checking" && <p className="mt-8 text-center text-sm text-slate-500">Checking your demo link…</p>}
 
-            {(invite.status === "none" || invite.status === "invalid" || (invite.status === "valid" && !canCall)) && (
+            {!showFollowUp && (invite.status === "none" || invite.status === "invalid" || (invite.status === "valid" && !canCall)) && (
                 <DemoRequestForm invalid={invite.status === "invalid" || invite.status === "valid"} />
             )}
 
             {canCall && invite.status === "valid" && (
                 <>
-                    <p className="mt-4 text-sm font-medium text-slate-700">
-                        {invite.remaining} of {invite.max} demo calls remaining
-                    </p>
+                    <div className="mt-5 flex justify-center">
+                        <p
+                            className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-1.5 text-sm font-semibold text-emerald-800"
+                            aria-label={`${invite.remaining} of ${invite.max} demo calls remaining`}
+                        >
+                            <span className="flex gap-1" aria-hidden="true">
+                                {Array.from({ length: invite.max }).map((_, i) => (
+                                    <span key={i} className={`h-2.5 w-2.5 rounded-full ${i < invite.remaining ? "bg-emerald-500" : "bg-emerald-200"}`} />
+                                ))}
+                            </span>
+                            {invite.remaining} of {invite.max} demo calls remaining
+                        </p>
+                    </div>
                     <div className="mt-4 flex min-h-[7rem] flex-col items-center justify-center gap-4 rounded-2xl bg-slate-50 p-6">
                         {active ? (
                             <>
@@ -808,27 +835,42 @@ function VoiceTab() {
                                 className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
                             >
                                 <Phone className="h-4 w-4" aria-hidden="true" />
-                                Start Voice Call
+                                {completedCall ? "Call Sam Again" : "Start Voice Call"}
                             </button>
                         )}
                     </div>
                     {!active && (
                         <>
-                            <p className="mt-3 text-center text-xs text-slate-500 md:hidden">Tap Allow when asked for microphone access.</p>
-                            <p className="mt-3 hidden text-center text-xs text-slate-500 md:block">
-                                On a desktop PC? Make sure a mic or headset is connected — or open this link on your phone.
+                            <p className="mt-3 flex items-center justify-center gap-2 rounded-xl bg-blue-50 px-4 py-2.5 text-sm text-blue-900 md:hidden">
+                                <Mic className="h-4 w-4 shrink-0" aria-hidden="true" />
+                                Tap Allow when asked for microphone access.
+                            </p>
+                            <p className="mt-3 hidden items-center justify-center gap-2 rounded-xl bg-blue-50 px-4 py-2.5 text-sm text-blue-900 md:flex">
+                                <Mic className="h-4 w-4 shrink-0" aria-hidden="true" />
+                                <span>
+                                    <strong>On a desktop PC?</strong> Make sure a mic or headset is connected — or open this link on your phone.
+                                </span>
                             </p>
                         </>
                     )}
                 </>
             )}
 
+            {showFollowUp && token && (
+                <DemoFollowUp
+                    token={token}
+                    contactName={contactName}
+                    remaining={remaining}
+                    onCallAgain={remaining > 0 ? () => setCompletedCall(false) : undefined}
+                />
+            )}
+
             {error && (
-                <p role="alert" className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+                <p role="alert" className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-center text-sm text-red-700">
                     {error}
                 </p>
             )}
-            <p className="mt-4 text-xs text-slate-500">Sam is an AI. Calls use your browser microphone and aren&apos;t connected to a real phone line.</p>
+            <p className="mt-4 text-center text-xs text-slate-500">Sam is an AI. Calls use your browser microphone and aren&apos;t connected to a real phone line.</p>
         </div>
     );
 }

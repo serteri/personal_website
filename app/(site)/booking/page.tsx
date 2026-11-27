@@ -1,9 +1,17 @@
+import type { Metadata } from 'next';
 
 
 
 
 import BookingClient from './BookingClient';
 import { isBookableDay, isValidDateStr, isValidSlot, isWithinWindow } from '@/lib/slots';
+
+export const metadata: Metadata = {
+    title: 'Book a Call',
+    description: 'Book a free 20-minute call with Altiq Design to talk software, web design or AI voice receptionists for your Brisbane business.',
+    alternates: { canonical: '/booking' },
+};
+
 
 // Optional deep link from the website's AI receptionist: /booking?date=YYYY-MM-DD&time=HH:MM
 function parseDeepLink(date?: string, time?: string) {

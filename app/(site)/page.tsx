@@ -1,9 +1,15 @@
+import type { Metadata } from 'next';
 import Link from "next/link";
 
 import ProductShowcase from "@/components/ProductShowcase";
 import WhatWeDo from "@/components/WhatWeDo";
 import FaqAccordion from "@/components/FaqAccordion";
 import CallToAction from "@/components/CallToAction";
+
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+};
+
 
 const headline = ["Websites, AI Workflows", "& SaaS Products", "Built to Convert."];
 
