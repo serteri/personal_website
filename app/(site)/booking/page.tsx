@@ -3,17 +3,12 @@
 
 
 import BookingClient from './BookingClient';
-
-
-
-const ALLOWED_SLOTS = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
+import { isBookableDay, isValidDateStr, isValidSlot, isWithinWindow } from '@/lib/slots';
 
 // Optional deep link from the website's AI receptionist: /booking?date=YYYY-MM-DD&time=HH:MM
 function parseDeepLink(date?: string, time?: string) {
-    if (!date || !time || !/^\d{4}-\d{2}-\d{2}$/.test(date) || !ALLOWED_SLOTS.includes(time)) return {};
-    const d = new Date(`${date}T00:00:00Z`);
-    if (Number.isNaN(d.getTime()) || d.toISOString().slice(0, 10) !== date) return {};
-    if (d.getTime() < Date.now() - 48 * 60 * 60 * 1000) return {}; // not in the past
+    if (!date || !time || !isValidDateStr(date) || !isValidSlot(time)) return {};
+    if (!isWithinWindow(date) || !isBookableDay(date)) return {};
     return { initialDate: date, initialTime: time };
 }
 

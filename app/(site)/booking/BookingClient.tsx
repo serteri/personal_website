@@ -1,12 +1,11 @@
 'use client'
 
-import { useState ,useEffect, useRef} from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { localDateKey } from '@/lib/dateKey';
 import BookingCalendar from '@/components/BookingCalendar';
 import TimeSlots     from '@/components/TimeSlots';
 import BookingForm   from '@/components/BookingForm';
 import { FaArrowLeft } from 'react-icons/fa';
-// Only date + time slot of existing bookings; no personal data is ever received.
-interface BookedSlot{date:string;time:string}
 
 
 export default function BookingClient({ initialDate, initialTime }: { initialDate?: string; initialTime?: string }) {
@@ -17,38 +16,46 @@ export default function BookingClient({ initialDate, initialTime }: { initialDat
     const [selectedTime, setSelectedTime] = useState<string | null>(fromLink ? (initialTime as string) : null);
     const linkChecked = useRef(false);
 
-    // Rezervasyonları tutmak için yeni state
-    const [booked, setBooked] = useState<BookedSlot[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-// Verileri çekecek fonksiyon
-    const fetchBookings = async () => {
-        setIsLoading(true);
-        try {
-            const response = await fetch('/api/booking', { cache: 'no-store' });
-            if (!response.ok) throw new Error(`Bookings request failed: ${response.status}`);
-            const slots: BookedSlot[] = await response.json();
-            setBooked(slots);
-        } catch (error) {
-            console.error("Error fetching bookings:", error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    // Free slots for the selected day, computed server-side (Google Calendar + bookings + blocks)
+    const [slots, setSlots] = useState<string[]>([]);
+    const [slotsLoading, setSlotsLoading] = useState(false);
+    const [slotsError, setSlotsError] = useState(false);
 
-    // Component ilk yüklendiğinde verileri çek
-    useEffect(() => {
-        fetchBookings();
-    }, []);
-    // Deep link: if the pre-selected slot turns out to be taken, fall back to the time slot list
-    useEffect(() => {
-        if (!fromLink || isLoading || linkChecked.current || !selectedDate) return;
-        linkChecked.current = true;
-        const dayKey = selectedDate.toISOString().slice(0, 10);
-        if (booked.some(b => b.date.slice(0, 10) === dayKey && b.time === selectedTime)) {
-            setSelectedTime(null);
-            setStep('timeslots');
+    const fetchSlots = useCallback(async (day: Date): Promise<string[] | null> => {
+        setSlotsLoading(true);
+        setSlotsError(false);
+        try {
+            const response = await fetch(`/api/availability?date=${localDateKey(day)}`, { cache: 'no-store' });
+            if (!response.ok) throw new Error(`Availability request failed: ${response.status}`);
+            const data: { slots: string[] } = await response.json();
+            setSlots(data.slots);
+            return data.slots;
+        } catch (error) {
+            console.error('Error fetching availability:', error);
+            setSlots([]);
+            setSlotsError(true);
+            return null;
+        } finally {
+            setSlotsLoading(false);
         }
-    }, [fromLink, isLoading, booked, selectedDate, selectedTime]);
+    }, []);
+
+    // Load free slots whenever the time-slot step is shown for a day
+    useEffect(() => {
+        if (step === 'timeslots' && selectedDate) void fetchSlots(selectedDate);
+    }, [step, selectedDate, fetchSlots]);
+
+    // Deep link: if the pre-selected slot is not free, fall back to the time slot list
+    useEffect(() => {
+        if (!fromLink || linkChecked.current || !selectedDate) return;
+        linkChecked.current = true;
+        void fetchSlots(selectedDate).then(free => {
+            if (free && !free.includes(selectedTime as string)) {
+                setSelectedTime(null);
+                setStep('timeslots');
+            }
+        });
+    }, [fromLink, selectedDate, selectedTime, fetchSlots]);
 
     const handleDateClick = (info: { date: Date }) => {
         setSelectedDate(info.date);
@@ -64,10 +71,6 @@ export default function BookingClient({ initialDate, initialTime }: { initialDat
         }
     };
 
-    if (isLoading) {
-        return <div className="text-center text-ink">Loading Calendar...</div>;
-    }
-
     // Geri butonu
     const BackButton = () => (
         <button onClick={handleGoBack} className="mb-4 flex items-center font-mono text-xs uppercase tracking-wider text-ink hover:text-cobalt">
@@ -80,18 +83,14 @@ export default function BookingClient({ initialDate, initialTime }: { initialDat
     }
 
     if (step === 'timeslots' && selectedDate) {
-        // A booking's stored UTC date matches the clicked day's UTC date (see POST handler)
-        const dayKey = selectedDate.toISOString().slice(0, 10);
-        const bookedTimes = booked
-            .filter(b => b.date.slice(0, 10) === dayKey)
-            .map(b => b.time);
-
         return (
             <div>
                 <BackButton />
                 <TimeSlots
                     date={selectedDate}
-                    bookedTimes={bookedTimes}
+                    slots={slots}
+                    loading={slotsLoading}
+                    error={slotsError}
                     onSelect={time => {
                         setSelectedTime(time);
                         setStep('form');
@@ -109,8 +108,6 @@ export default function BookingClient({ initialDate, initialTime }: { initialDat
                     date={selectedDate}
                     time={selectedTime}
                     onSuccess={() => {
-                        // Rezervasyon başarılı olduğunda verileri YENİDEN ÇEKİYORUZ!
-                        fetchBookings();
                         setStep('calendar'); // Takvim ekranına geri dön
                     }}
                 />

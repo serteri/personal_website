@@ -20,7 +20,7 @@ export function inviteState(i: Pick<DemoInvite, 'expiresAt' | 'callsUsed' | 'max
 }
 
 // Returns true when the email was accepted by Resend. Never throws.
-export async function sendMail(opts: { to: string; subject: string; html: string }): Promise<boolean> {
+export async function sendMail(opts: { to: string; subject: string; html: string; replyTo?: string }): Promise<boolean> {
     const apiKey = process.env.RESEND_API_KEY?.trim();
     if (!apiKey) {
         console.error('sendMail skipped: RESEND_API_KEY missing');
@@ -32,6 +32,7 @@ export async function sendMail(opts: { to: string; subject: string; html: string
             to: [opts.to],
             subject: opts.subject,
             html: opts.html,
+            ...(opts.replyTo ? { reply_to: opts.replyTo } : {}),
         });
         if (error) {
             console.error('sendMail failed:', error);

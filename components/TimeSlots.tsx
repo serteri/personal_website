@@ -1,48 +1,40 @@
 'use client'
 
-export default function TimeSlots({date,bookedTimes,onSelect}:{
+import { localDateKey } from '@/lib/dateKey';
+
+// `slots` are the free Brisbane-time slot starts from GET /api/availability (computed server-side).
+export default function TimeSlots({ date, slots, loading, error, onSelect }: {
     date: Date;
-    bookedTimes: string[];      // e.g. ['10:00','14:00']
+    slots: string[];
+    loading: boolean;
+    error: boolean;
     onSelect: (time: string) => void;
 }) {
-    const allSlots = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
-    // Figure out “now” and reset seconds/millis for a clean compare
-    const now = new Date();
-    const isToday =
-        now.toDateString() === date.toDateString();
-
-    const available = allSlots.filter(slot => {
-        // 2) If it’s today, exclude any slot ≤ current time
-        if (isToday) {
-            const [h, m] = slot.split(':').map(Number);
-            if (
-                h < now.getHours() ||
-                (h === now.getHours() && m <= now.getMinutes())
-            ) {
-                return false;
-            }
-        }
-        return true;
-    });
-
     return (
         <div>
-            <h3 className="font-semibold text-ink">Select a time for {date.toDateString()} :</h3>
-            <div className="grid grid-cols-4 gap-4 mt-2">
-                {available.map(time => {
-                    const taken = bookedTimes.includes(time);
-                    return (
-                        <button key={time} onClick={() => onSelect(time)} disabled={taken}
-                                title={taken ? 'Not available' : undefined}
-                                className="p-2 rounded-lg bg-white border border-slate-200 text-ink font-mono text-sm hover:border-cobalt hover:text-cobalt disabled:bg-[#F1F5F9] disabled:text-zinc-400 disabled:line-through disabled:cursor-not-allowed disabled:hover:border-line disabled:hover:text-zinc-400">
+            <h3 className="font-semibold text-ink">Select a time for {date.toDateString()}:</h3>
+            <p className="mt-1 text-xs text-slate-500">20-minute appointments · times shown in Brisbane time (AEST)</p>
+
+            {loading ? (
+                <p className="mt-4 text-sm text-slate-500" role="status">Loading available times…</p>
+            ) : error ? (
+                <p className="mt-4 text-sm text-red-600" role="alert">Could not load available times. Please go back and try again.</p>
+            ) : slots.length === 0 ? (
+                <p className="mt-4 text-sm text-slate-600">No times left on {localDateKey(date)}. Please pick another day.</p>
+            ) : (
+                // 27 slots: 3 columns on mobile (9 even rows), 9 columns on desktop (3 even rows)
+                <div className="mt-3 grid grid-cols-3 gap-2 md:grid-cols-9">
+                    {slots.map(time => (
+                        <button
+                            key={time}
+                            onClick={() => onSelect(time)}
+                            className="min-h-[44px] rounded-lg border border-slate-200 bg-white py-2 font-mono text-sm text-ink transition-colors hover:border-cobalt hover:text-cobalt"
+                        >
                             {time}
                         </button>
-                    );
-                })}
-
-            </div>
+                    ))}
+                </div>
+            )}
         </div>
-
-    )
-
+    );
 }

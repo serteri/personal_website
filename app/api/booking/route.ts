@@ -1,18 +1,20 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { z } from 'zod';
+import { getDbBusy, getGoogleBusy } from '@/lib/availability';
+import { createCalendarEvent } from '@/lib/googleCalendar';
+import { sendBookingEmails } from '@/lib/bookingEmail';
+import { SLOT_MINUTES, brisbaneInstant, isBookableDay, isValidDateStr, isValidSlot, isWithinWindow, overlaps, slotInterval } from '@/lib/slots';
 
-
-const ALLOWED_SLOTS = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
-
-// Strict server-side validation
+// Strict server-side validation. `date` is the Brisbane calendar day (YYYY-MM-DD), `time` a slot from lib/slots.
 const bookingSchema = z.object({
     firstName: z.string().trim().min(1).max(80),
     lastName: z.string().trim().min(1).max(80),
     email: z.string().trim().toLowerCase().email().max(254),
     phone: z.string().trim().regex(/^\+?[\d\s()-]{5,30}$/, 'Invalid phone number'),
-    date: z.string().datetime(), // ISO 8601
-    time: z.string().refine(t => ALLOWED_SLOTS.includes(t), 'Invalid time slot'),
+    date: z.string().refine(isValidDateStr, 'Invalid date'),
+    time: z.string().refine(isValidSlot, 'Invalid time slot'),
+    notes: z.string().trim().max(1000).optional(),
     website: z.string().max(200).optional(), // honeypot: real users never fill this
 });
 
@@ -82,34 +84,41 @@ export async function POST(req: Request) {
             return NextResponse.json({ message: 'Booking successful!' }, { status: 200 });
         }
 
-        const { firstName, lastName, email, phone, date, time } = bookingSchema.parse(body);
+        const { firstName, lastName, email, phone, date, time, notes } = bookingSchema.parse(body);
 
-        // Build the appointment instant (same convention as before: slot hours set in UTC)
-        const bookingDateTime = new Date(date);
-        const [hours, minutes] = time.split(':').map(Number);
-        bookingDateTime.setUTCHours(hours, minutes, 0, 0);
-
-        // Reject past dates (14h tolerance for the UTC convention above across timezones)
-        if (bookingDateTime.getTime() < Date.now() - 14 * 60 * 60 * 1000) {
+        if (!isBookableDay(date) || !isWithinWindow(date)) {
+            return NextResponse.json({ message: 'Please choose an available day.' }, { status: 400 });
+        }
+        const slot = slotInterval(date, time);
+        if (slot.start <= Date.now()) {
             return NextResponse.json({ message: 'Please choose a future date and time.' }, { status: 400 });
         }
 
-        // Double-booking guard: check + insert in one serializable transaction
+        const clash = () => NextResponse.json({ message: 'That time slot is no longer available.' }, { status: 409 });
+
+        // Fresh Google check (not cached) before taking the slot.
+        const googleBusy = await getGoogleBusy(date, true);
+        if (googleBusy.some(b => overlaps(slot, b))) return clash();
+
+        // Double-booking guard: check Bookings (incl. legacy hourly rows) + Availability blocks and insert atomically.
         const created = await prisma.$transaction(async (tx) => {
-            const clash = await tx.booking.findFirst({
-                where: { date: bookingDateTime, time },
-                select: { id: true },
-            });
-            if (clash) return null;
+            const busy = await getDbBusy(date, tx);
+            if (busy.some(b => overlaps(slot, b))) return null;
             return tx.booking.create({
-                data: { firstName, lastName, email, phone, date: bookingDateTime, time },
+                data: { firstName, lastName, email, phone, date: brisbaneInstant(date, time), time },
                 select: { date: true, time: true },
             });
         }, { isolationLevel: 'Serializable' });
 
-        if (!created) {
-            return NextResponse.json({ message: 'That time slot is no longer available.' }, { status: 409 });
-        }
+        if (!created) return clash();
+
+        // Saved. Calendar event + emails are best-effort: a failure must never lose or fail the booking.
+        const name = `${firstName} ${lastName}`;
+        const results = await Promise.allSettled([
+            createCalendarEvent({ date, time, durationMinutes: SLOT_MINUTES, name, email, phone, notes }),
+            sendBookingEmails({ date, time, name, email, phone, notes }),
+        ]);
+        results.forEach(r => r.status === 'rejected' && console.error('Post-booking step failed:', r.reason));
 
         return NextResponse.json(
             { message: 'Booking successful!', booking: { date: created.date.toISOString(), time: created.time } },
