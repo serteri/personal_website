@@ -100,6 +100,7 @@ export async function POST(req: Request) {
         const googleBusy = await getGoogleBusy(date, true);
         if (googleBusy.some(b => overlaps(slot, b))) return clash();
 
+        // Only database work runs inside the transaction; Google/Resend calls stay outside it.
         // Double-booking guard: check Bookings (incl. legacy hourly rows) + Availability blocks and insert atomically.
         const created = await prisma.$transaction(async (tx) => {
             const busy = await getDbBusy(date, tx);
@@ -108,7 +109,11 @@ export async function POST(req: Request) {
                 data: { firstName, lastName, email, phone, date: brisbaneInstant(date, time), time },
                 select: { date: true, time: true },
             });
-        }, { isolationLevel: 'Serializable' });
+        }, {
+            isolationLevel: 'Serializable',
+            maxWait: 10_000, // wait for a connection: Neon cold starts can exceed Prisma's 2s default (P2028)
+            timeout: 15_000, // max transaction run time
+        });
 
         if (!created) return clash();
 
