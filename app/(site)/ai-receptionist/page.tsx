@@ -16,20 +16,20 @@ const steps = [
   { n: "3", title: "Get instant job summaries & bookings", text: "Each call becomes a short summary with urgency, issue and suburb, plus a booking request, sent to you straight away." },
 ];
 
-const pilotFeatures = ["$0 setup fee", "100 voice minutes", "24/7 Web Chat included", "Cancel anytime"];
+const pilotFeatures = ["$0 setup fee", "100 AI voice minutes", "24/7 Web Chat included", "Instant job summaries", "Cancel anytime"];
 
 const plans = [
   {
     key: "starter" as const,
     name: "Starter",
     price: "$149",
-    features: ["150 voice minutes / month", "24/7 Web Chat", "Instant job summaries", "$0.60/min overage"],
+    features: ["$0 setup fee", "150 AI voice minutes / month", "24/7 Web Chat included", "Instant job summaries", "$0.60/min overage"],
   },
   {
     key: "growth" as const,
     name: "Growth",
     price: "$249",
-    features: ["400 voice minutes / month", "24/7 Web Chat", "Calendar integration", "Custom suburb rules", "$0.50/min overage"],
+    features: ["Everything in Starter, plus:", "400 AI voice minutes / month", "Google Calendar / Cal.com booking sync", "Custom suburb & call routing rules", "$0.50/min overage"],
   },
 ];
 
