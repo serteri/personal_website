@@ -446,10 +446,14 @@ function ChatTab({ industry }: { industry: Industry }) {
 
 const MAX_CALL_SECONDS = 180;
 function voiceErrorMessage(err: unknown): string {
-    const name = err instanceof Error ? err.name : "";
-    const msg = err instanceof Error ? err.message : "";
+    const e = (err ?? {}) as { name?: unknown; message?: unknown };
+    const name = typeof e.name === "string" ? e.name : "";
+    const msg = typeof e.message === "string" ? e.message : typeof err === "string" ? err : "";
+    if (name === "NotFoundError" || /NotFoundError|device not found|requested device/i.test(msg)) {
+        return "No microphone detected on this PC — plug in a headset, or open this link on your phone to test.";
+    }
     if (name === "NotAllowedError" || /permission|denied|notallowed/i.test(msg)) {
-        return "Microphone access was blocked. Allow the microphone in your browser and try again.";
+        return "Microphone access was blocked — allow mic permission in your browser bar and try again.";
     }
     if (/429|rate|limit/i.test(msg)) return "Demo call limit reached. Please try again in a few minutes.";
     return "Could not start the call. Please try again.";
@@ -808,6 +812,14 @@ function VoiceTab() {
                             </button>
                         )}
                     </div>
+                    {!active && (
+                        <>
+                            <p className="mt-3 text-center text-xs text-slate-500 md:hidden">Tap Allow when asked for microphone access.</p>
+                            <p className="mt-3 hidden text-center text-xs text-slate-500 md:block">
+                                On a desktop PC? Make sure a mic or headset is connected — or open this link on your phone.
+                            </p>
+                        </>
+                    )}
                 </>
             )}
 
