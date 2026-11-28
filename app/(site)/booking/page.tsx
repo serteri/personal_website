@@ -1,8 +1,4 @@
 import type { Metadata } from 'next';
-
-
-
-
 import BookingClient from './BookingClient';
 import { isBookableDay, isValidDateStr, isValidSlot, isWithinWindow } from '@/lib/slots';
 
@@ -29,12 +25,11 @@ export default async function BookingPage({
     const link = parseDeepLink(date, time);
 
     return (
-        <main className="pt-40 ml-20 max-w-3xl mx-auto">
-            <h1 className="text-3xl font-bold mb-4 text-ink" >Book an Appointment</h1>
-            {/* Calendar */}
-            <BookingClient {...link} />
-            {/* Time slots (conditional) */}
-            {/* Booking form (conditional) */}
+        <main className="min-h-screen bg-slate-50 px-4 pb-20 pt-10 sm:pt-14">
+            <div className="mx-auto max-w-4xl">
+                <h1 className="mb-6 text-center text-3xl font-bold tracking-tight text-slate-900">Book a call with Altiq Design</h1>
+                <BookingClient {...link} />
+            </div>
         </main>
     );
 }

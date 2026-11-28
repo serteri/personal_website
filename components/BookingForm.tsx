@@ -10,7 +10,8 @@ import { localDateKey } from '@/lib/dateKey';
 interface BookingFormProps {
     date: Date
     time: string
-    onSuccess: () => void
+    onSuccess: (email: string) => void
+    onConflict?: () => void // slot was taken while the form was open (409)
 }
 
 // Zod ile form validasyon şemasını oluşturuyoruz
@@ -25,7 +26,7 @@ const BookingFormSchema = z.object({
 // Zod şemasından TypeScript tipini otomatik olarak türetiyoruz
 type FormValues = z.infer<typeof BookingFormSchema>;
 
-export default function BookingForm({date, time, onSuccess}: BookingFormProps) {
+export default function BookingForm({date, time, onSuccess, onConflict}: BookingFormProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitMessage, setSubmitMessage] = useState('');
 
@@ -59,17 +60,17 @@ export default function BookingForm({date, time, onSuccess}: BookingFormProps) {
             });
 
             if (!response.ok) {
-                const errorData = await response.json();
+                const errorData = await response.json().catch(() => ({}));
+                if (response.status === 409 && onConflict) {
+                    onConflict();
+                    return;
+                }
                 throw new Error(errorData.message || 'Failed to save booking');
             }
 
-            setSubmitMessage('Your appointment has been booked successfully!');
-
-            // Başarılı olunca formu sıfırla ve 2 saniye sonra ana ekrana dön
+            // Parent shows the confirmation screen
             reset();
-            setTimeout(() => {
-                onSuccess();
-            }, 2000);
+            onSuccess(payload.email);
 
         } catch (error: any) {
             console.error('Submission error:', error);
@@ -80,18 +81,11 @@ export default function BookingForm({date, time, onSuccess}: BookingFormProps) {
     };
 
 return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 max-w-lg mx-auto text-ink" noValidate>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 text-ink" noValidate>
             {/* Honeypot: hidden from people, bots tend to fill it */}
             <div aria-hidden="true" style={{ position: 'absolute', left: '-10000px', width: 1, height: 1, overflow: 'hidden' }}>
                 <label>Website <input type="text" tabIndex={-1} autoComplete="off" {...register('website')} /></label>
             </div>
-        <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm p-4 text-center">
-            <p>You are booking an appointment for:</p>
-            <p className="font-bold text-cobalt text-lg">
-                {date.toDateString()} at {time} <span className="text-sm font-normal text-slate-500">(Brisbane time)</span>
-            </p>
-        </div>
-
         <input
             {...register('firstName')}
             placeholder="First Name"
@@ -134,7 +128,7 @@ return (
             {isSubmitting ? 'Booking...' : 'Book Appointment'}
         </button>
 
-        {submitMessage && <p className={`mt-4 text-center font-semibold ${submitMessage.startsWith('Your appointment') ? 'text-green-500' : 'text-red-500'}`}>{submitMessage}</p>}
+        {submitMessage && <p role="alert" className="text-center text-sm font-semibold text-red-600">{submitMessage}</p>}
         
         
     </form>
