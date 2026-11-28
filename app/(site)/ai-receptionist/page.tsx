@@ -3,6 +3,7 @@ import Link from "next/link";
 import ReceptionistDemo from "@/components/ReceptionistDemo";
 import SectionHeader from "@/components/SectionHeader";
 import PlanCheckoutButton from "@/components/PlanCheckoutButton";
+import { tradeLandings } from "@/lib/tradeLandings";
 
 export const metadata: Metadata = {
   title: "AI Voice Receptionist for Brisbane Tradies & Clinics",
@@ -145,6 +146,30 @@ export default function AiReceptionistPage() {
                     Choose {p.name}
                   </PlanCheckoutButton>
                 </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Trade landing pages (contextual internal links) */}
+        <section className="bg-white px-4 py-20">
+          <div className="mx-auto max-w-6xl">
+            <SectionHeader
+              eyebrow="By trade"
+              title="Built for Brisbane trades"
+              description="See how the AI receptionist handles the calls your trade actually gets, from after-hours emergencies to quote requests."
+            />
+            <div className="grid gap-6 md:grid-cols-2">
+              {tradeLandings.map((t) => (
+                <Link
+                  key={t.slug}
+                  href={`/${t.slug}`}
+                  className="group rounded-3xl border border-slate-200/80 bg-white p-8 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+                >
+                  <h3 className="text-lg font-semibold text-slate-900">AI receptionist for Brisbane {t.trade}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-600">{t.scenarios.slice(0, 3).map((x) => x.title).join(", ")} and more.</p>
+                  <span className="mt-4 inline-block text-sm font-semibold text-blue-600 group-hover:underline">See how it works for {t.trade} →</span>
+                </Link>
               ))}
             </div>
           </div>
