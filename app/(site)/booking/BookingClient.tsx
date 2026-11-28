@@ -2,11 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, CalendarDays, Check, Clock, Globe } from 'lucide-react'
+import { ArrowLeft, CalendarDays, CalendarX, Check, Clock, Globe } from 'lucide-react'
 import DatePicker, { monthOf, type MonthView } from '@/components/DatePicker'
 import SlotList, { SlotSkeleton } from '@/components/SlotList'
 import BookingForm from '@/components/BookingForm'
-import { BUSINESS_HOURS_LABEL, CLOSED_DAY_MESSAGE, MAX_DAYS_AHEAD, SLOT_MINUTES, TIMEZONE, brisbaneToday, isBookableDay, isWithinWindow } from '@/lib/slots'
+import { BUSINESS_HOURS_LABEL, MAX_DAYS_AHEAD, SLOT_MINUTES, TIMEZONE, brisbaneToday, isBookableDay, isWithinWindow } from '@/lib/slots'
 
 const longDate = (d: string) =>
     new Date(`${d}T00:00:00Z`).toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' })
@@ -56,6 +56,16 @@ export default function BookingClient({ initialDate, initialTime }: { initialDat
         setLoading(false)
     }, [])
 
+    // Weekend selected: no slots to fetch, the panel explains we're closed
+    const showClosedDay = useCallback((date: string) => {
+        seq.current++ // drop any in-flight availability response
+        setSelectedDate(date)
+        setTime(null)
+        setSlots([])
+        setSlotsError(false)
+        setLoading(false)
+    }, [])
+
     // First load: deep link day, otherwise the next bookable day that actually has free times
     useEffect(() => {
         let cancelled = false
@@ -64,8 +74,11 @@ export default function BookingClient({ initialDate, initialTime }: { initialDat
                 await showDay(initialDate, initialTime)
                 return
             }
-            // Landed on a closed weekend via the URL: explain, then fall through to the next open weekday
-            if (initialDate && isClosedDay(initialDate)) setNotice(CLOSED_DAY_MESSAGE)
+            // Landed on a closed weekend via the URL: show that day with the closed message (no availability call)
+            if (initialDate && isClosedDay(initialDate)) {
+                showClosedDay(initialDate)
+                return
+            }
             let firstBookable: string | null = null
             for (let i = 0; i < 21; i++) {
                 const d = addDays(today, i)
@@ -82,14 +95,37 @@ export default function BookingClient({ initialDate, initialTime }: { initialDat
             if (!cancelled && firstBookable) await showDay(firstBookable)
         })()
         return () => { cancelled = true }
-    }, [initialDate, initialTime, today, showDay])
-
-    // Clicking a closed weekend day: keep the current day, explain why it can't be picked
-    const pickClosedDay = () => setNotice(CLOSED_DAY_MESSAGE)
+    }, [initialDate, initialTime, today, showDay, showClosedDay])
 
     const pickDate = (d: string) => {
         setNotice('')
-        void showDay(d)
+        if (isClosedDay(d)) showClosedDay(d)
+        else void showDay(d)
+    }
+
+    // Jump to the next weekday (after the selected day) that has free times
+    const goToNextOpen = async () => {
+        const from = selectedDate ?? today
+        const id = ++seq.current
+        setLoading(true)
+        setNotice('')
+        let firstOpen: string | null = null
+        for (let i = 1; i <= 30; i++) {
+            const d = addDays(from, i)
+            if (!selectable(d)) continue
+            firstOpen ??= d
+            const result = await loadSlots(d)
+            if (id !== seq.current) return
+            if (result && result.length > 0) {
+                setMonth(monthOf(d))
+                await showDay(d)
+                return
+            }
+        }
+        if (firstOpen) {
+            setMonth(monthOf(firstOpen))
+            await showDay(firstOpen)
+        } else setLoading(false)
     }
 
     // Booked by someone else while the form was open: back to the refreshed list
@@ -148,7 +184,6 @@ export default function BookingClient({ initialDate, initialTime }: { initialDat
                         isSelectable={selectable}
                         onSelect={pickDate}
                         isClosed={isClosedDay}
-                        onClosedClick={pickClosedDay}
                         minMonth={minMonth}
                         maxMonth={maxMonth}
                     />
@@ -162,6 +197,24 @@ export default function BookingClient({ initialDate, initialTime }: { initialDat
             <div className="p-6 md:min-h-[28rem]">
                 {loading || !selectedDate ? (
                     <SlotSkeleton />
+                ) : isClosedDay(selectedDate) ? (
+                    <div>
+                        <h3 className="text-base font-semibold text-slate-900">{longDate(selectedDate)}</h3>
+                        <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center">
+                            <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-slate-200 text-slate-500">
+                                <CalendarX className="h-5 w-5" aria-hidden="true" />
+                            </span>
+                            <p className="mt-3 text-base font-semibold text-slate-900">We are closed on weekends</p>
+                            <p className="mt-1 text-sm text-slate-600">You can book Monday to Friday, 09:00 – 18:00 AEST.</p>
+                            <button
+                                type="button"
+                                onClick={() => void goToNextOpen()}
+                                className="mt-5 rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+                            >
+                                Go to next available day
+                            </button>
+                        </div>
+                    </div>
                 ) : time ? (
                     <div>
                         <button type="button" onClick={() => setTime(null)} className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-slate-900">

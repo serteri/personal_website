@@ -18,15 +18,14 @@ const arrow =
     'flex h-9 w-9 items-center justify-center rounded-full text-slate-700 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent'
 
 // Compact month picker (Monday-first). Pure UI: the parent decides which days are selectable.
-export default function DatePicker({ month, onMonthChange, selected, today, isSelectable, onSelect, isClosed, onClosedClick, minMonth, maxMonth }: {
+export default function DatePicker({ month, onMonthChange, selected, today, isSelectable, onSelect, isClosed, minMonth, maxMonth }: {
     month: MonthView
     onMonthChange: (m: MonthView) => void
     selected: string | null
     today: string
     isSelectable: (d: string) => boolean
     onSelect: (d: string) => void
-    isClosed?: (d: string) => boolean // closed days stay clickable so we can explain why
-    onClosedClick?: (d: string) => void
+    isClosed?: (d: string) => boolean // closed (weekend) days: clickable but styled muted
     minMonth: MonthView
     maxMonth: MonthView
 }) {
@@ -71,25 +70,28 @@ export default function DatePicker({ month, onMonthChange, selected, today, isSe
                 {Array.from({ length: daysInMonth }).map((_, i) => {
                     const d = i + 1
                     const key = dayKey(month.y, month.m, d)
-                    const ok = isSelectable(key)
-                    const closed = !ok && !!isClosed?.(key)
+                    const closed = !!isClosed?.(key)
+                    const ok = isSelectable(key) || closed // closed days can be selected to see why they're closed
                     const isSelected = key === selected
                     const isToday = key === today
                     return (
                         <button
                             key={key}
                             type="button"
-                            disabled={!ok && !closed}
-                            aria-disabled={closed || undefined}
+                            disabled={!ok}
                             title={closed ? 'Closed on weekends' : undefined}
-                            onClick={() => (ok ? onSelect(key) : onClosedClick?.(key))}
+                            onClick={() => onSelect(key)}
                             aria-pressed={isSelected}
                             aria-current={isToday ? 'date' : undefined}
                             aria-label={new Date(`${key}T00:00:00Z`).toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })}
                             className={`relative mx-auto flex h-10 w-10 items-center justify-center rounded-full text-sm transition-colors ${
-                                isSelected
-                                    ? 'bg-slate-900 font-semibold text-white'
-                                    : ok
+                                isSelected && closed
+                                    ? 'bg-slate-200 font-semibold text-slate-700 ring-2 ring-slate-400'
+                                    : isSelected
+                                      ? 'bg-slate-900 font-semibold text-white'
+                                      : closed
+                                        ? 'font-normal text-slate-400 hover:bg-slate-50'
+                                        : ok
                                       ? 'font-medium text-slate-900 hover:bg-slate-100'
                                       : 'cursor-not-allowed text-slate-300'
                             } ${isToday && !isSelected ? 'ring-1 ring-slate-300' : ''}`}
