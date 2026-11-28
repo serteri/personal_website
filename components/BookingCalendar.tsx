@@ -73,25 +73,11 @@ export default function BookingCalendar({
             }}
             height="auto"
             headerToolbar={{
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                left: 'title',
+                center: '',
+                right: 'prev,next today',
             }}
-            buttonText={{
-                today: 'Go Live!',
-                month: 'Monthly View',
-                week: 'Weekly View',
-                day: 'Daily View',
-            }}
-            customButtons={{
-                addEventButton: {
-                    text: '+ Book Slot',
-                    click: () => {
-                        /* open your “new booking” modal */
-                        alert('Open booking modal!');
-                    },
-                },
-            }}
+            buttonText={{ today: 'Today' }}
             eventClassNames={() => [
                 'bg-cobalt text-white rounded-md p-1',
                 'transition-colors duration-150',
