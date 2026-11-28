@@ -20,18 +20,38 @@ const steps = [
 
 const pilotFeatures = ["$0 setup fee", "100 AI voice minutes", "24/7 Web Chat included", "Instant job summaries", "Cancel anytime"];
 
-const plans = [
+type PlanFeature = string | { text: string; note: string };
+
+const plans: { key: "starter" | "growth"; name: string; price: string; features: PlanFeature[] }[] = [
   {
-    key: "starter" as const,
+    key: "starter",
     name: "Starter",
     price: "$149",
-    features: ["$0 setup fee", "150 AI voice minutes / month", "24/7 Web Chat included", "Instant job summaries", "$0.60/min overage"],
+    features: [
+      "$0 setup fee",
+      "150 AI voice minutes / month",
+      "24/7 Web Chat included",
+      {
+        text: "Instant job summaries",
+        note: "Right after each call, get a clean email summary with the caller's name, phone number, suburb, job details, and urgency—no listening to voicemails.",
+      },
+      "$0.60/min overage",
+    ],
   },
   {
-    key: "growth" as const,
+    key: "growth",
     name: "Growth",
     price: "$249",
-    features: ["Everything in Starter, plus:", "400 AI voice minutes / month", "Google Calendar / Cal.com booking sync", "Custom suburb & call routing rules", "$0.50/min overage"],
+    features: [
+      "Everything in Starter, plus:",
+      "400 AI voice minutes / month",
+      "Google Calendar / Cal.com booking sync",
+      {
+        text: "Custom suburb & call routing rules",
+        note: "Define your exact Brisbane service suburbs (politely declining out-of-area jobs) and set rules for emergencies vs. quotes—like transferring urgent calls to your mobile while logging routine enquiries.",
+      },
+      "$0.50/min overage",
+    ],
   },
 ];
 
@@ -125,19 +145,26 @@ export default function AiReceptionistPage() {
             <p className="mb-4 mt-12 text-sm font-semibold text-slate-900">After the pilot, keep going on:</p>
             <div className="grid gap-6 md:grid-cols-2">
               {plans.map((p) => (
-                <div key={p.name} className="rounded-3xl border border-slate-200/80 bg-white p-8 shadow-sm">
+                <div key={p.name} className="flex flex-col rounded-3xl border border-slate-200/80 bg-white p-8 shadow-sm">
                   <h3 className="text-lg font-semibold text-slate-900">{p.name}</h3>
                   <p className="mt-2 text-4xl font-bold tracking-tight text-slate-900">
                     {p.price}
                     <span className="text-base font-medium text-slate-500">/mo</span>
                   </p>
-                  <ul className="mt-6 space-y-2 text-sm text-slate-700">
-                    {p.features.map((f) => (
-                      <li key={f} className="flex items-center gap-2">
-                        <span className="text-blue-600" aria-hidden="true">✓</span>
-                        {f}
-                      </li>
-                    ))}
+                  <ul className="mt-6 flex-1 space-y-3 text-sm text-slate-700">
+                    {p.features.map((f) => {
+                      const text = typeof f === "string" ? f : f.text;
+                      const note = typeof f === "string" ? null : f.note;
+                      return (
+                        <li key={text} className="flex items-start gap-2">
+                          <span className="text-blue-600" aria-hidden="true">✓</span>
+                          <span>
+                            {text}
+                            {note && <span className="mt-0.5 block text-xs leading-relaxed text-slate-500">{note}</span>}
+                          </span>
+                        </li>
+                      );
+                    })}
                   </ul>
                   <PlanCheckoutButton
                     plan={p.key}
