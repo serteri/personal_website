@@ -7,6 +7,7 @@ import { Send, Phone, Mic } from "lucide-react";
 import type { RetellWebClient } from "retell-client-js-sdk";
 import SectionHeader from "./SectionHeader";
 import { services } from "@/lib/services";
+import { brisbaneToday, isBookableDay } from "@/lib/slots";
 import DemoFollowUp from "./DemoFollowUp";
 
 const MAX_USER_MESSAGES = 12;
@@ -43,50 +44,46 @@ function ServiceCard({ slug }: { slug: string }) {
     );
 }
 
-type Booked = { date: string; time: string };
-
-function dayKey(d: string) {
-    // Same convention as /booking: local midnight -> UTC date string
-    return new Date(`${d}T00:00:00`).toISOString().slice(0, 10);
-}
-
+// Next 5 bookable days (Monday to Friday, Brisbane calendar) for the chat booking picker
 function upcomingDays(): { value: string; label: string }[] {
     const out: { value: string; label: string }[] = [];
-    const d = new Date();
+    let ms = Date.parse(`${brisbaneToday()}T00:00:00Z`);
     while (out.length < 5) {
-        d.setDate(d.getDate() + 1);
-        if (d.getDay() === 0) continue; // closed on Sundays
-        const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-        out.push({ value, label: d.toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short" }) });
+        ms += 24 * 60 * 60 * 1000;
+        const value = new Date(ms).toISOString().slice(0, 10);
+        if (!isBookableDay(value)) continue;
+        out.push({ value, label: new Date(ms).toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" }) });
     }
     return out;
 }
 
 function BookingPicker() {
     const router = useRouter();
-    const [status, setStatus] = useState<"loading" | "ok" | "error">("loading");
-    const [booked, setBooked] = useState<Booked[]>([]);
+    const [status, setStatus] = useState<"loading" | "ok" | "error">("ok");
+    const [free, setFree] = useState<string[]>([]);
     const [days] = useState(upcomingDays);
     const [day, setDay] = useState<string | null>(null);
 
+    // Live free times for the chosen day (same source as /booking: Google Calendar + bookings)
     useEffect(() => {
+        if (!day) return;
         let cancelled = false;
-        fetch("/api/booking", { cache: "no-store" })
+        setStatus("loading");
+        fetch(`/api/availability?date=${day}`, { cache: "no-store" })
             .then((r) => {
                 if (!r.ok) throw new Error("bad status");
                 return r.json();
             })
-            .then((data: Booked[]) => {
-                if (!cancelled) {
-                    setBooked(data);
-                    setStatus("ok");
-                }
+            .then((data: { slots: string[] }) => {
+                if (cancelled) return;
+                setFree(data.slots.filter((t) => t.endsWith(":00"))); // on-the-hour picks; full list lives on /booking
+                setStatus("ok");
             })
             .catch(() => !cancelled && setStatus("error"));
         return () => {
             cancelled = true;
         };
-    }, []);
+    }, [day]);
 
     if (status === "error") {
         return (
@@ -99,15 +96,10 @@ function BookingPicker() {
         );
     }
 
-    const takenForDay = day ? booked.filter((b) => b.date.slice(0, 10) === dayKey(day)).map((b) => b.time) : [];
-    const free = SLOTS.filter((t) => !takenForDay.includes(t));
-
     return (
         <div className="mt-2 max-w-sm rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Pick a time for a 15-min call</p>
-            {status === "loading" ? (
-                <p className="mt-3 text-sm text-slate-500">Loading availability…</p>
-            ) : (
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Pick a time for a 20-min call (Mon–Fri, Brisbane time)</p>
+            {(
                 <>
                     <div className="mt-3 flex flex-wrap gap-2">
                         {days.map((d) => (
@@ -127,7 +119,8 @@ function BookingPicker() {
                     </div>
                     {day && (
                         <div className="mt-3 grid grid-cols-5 gap-2">
-                            {free.length === 0 && <p className="col-span-5 text-sm text-slate-500">No free slots that day.</p>}
+                            {status === "loading" && <p className="col-span-5 text-sm text-slate-500">Loading times…</p>}
+                            {status === "ok" && free.length === 0 && <p className="col-span-5 text-sm text-slate-500">No free slots that day.</p>}
                             {free.map((t) => (
                                 <button
                                     key={t}
@@ -139,7 +132,9 @@ function BookingPicker() {
                             ))}
                         </div>
                     )}
-                    <p className="mt-3 text-[11px] text-slate-500">You&apos;ll confirm your details on the booking page.</p>
+                    <p className="mt-3 text-[11px] text-slate-500">
+                        You&apos;ll confirm your details on the booking page, which also has every 20-minute time.
+                    </p>
                 </>
             )}
         </div>

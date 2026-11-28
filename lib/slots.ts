@@ -60,7 +60,11 @@ export function brisbaneToday(now = Date.now()): string {
 /** Day of week of a Brisbane date (0 = Sunday). */
 export const brisbaneWeekday = (dateStr: string) => new Date(`${dateStr}T00:00:00Z`).getUTCDay();
 
-export const isBookableDay = (dateStr: string) => brisbaneWeekday(dateStr) !== 0; // closed Sundays
+/** Open Monday to Friday only; Saturday (6) and Sunday (0) are closed. Single source of truth for every booking/reschedule check. */
+export const isBookableDay = (dateStr: string) => {
+    const wd = brisbaneWeekday(dateStr);
+    return wd >= 1 && wd <= 5;
+};
 
 /** Whether a date is today..MAX_DAYS_AHEAD in Brisbane. */
 export function isWithinWindow(dateStr: string, now = Date.now()): boolean {

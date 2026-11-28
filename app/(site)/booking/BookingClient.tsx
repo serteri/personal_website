@@ -13,7 +13,7 @@ const longDate = (d: string) =>
 
 const addDays = (d: string, n: number) => new Date(Date.parse(`${d}T00:00:00Z`) + n * 86_400_000).toISOString().slice(0, 10)
 
-const selectable = (d: string) => isWithinWindow(d) && isBookableDay(d) // today..+90 days, closed Sundays
+const selectable = (d: string) => isWithinWindow(d) && isBookableDay(d) // today..+90 days, Monday to Friday only
 
 // Free slots for a Brisbane day from the server (Google Calendar + bookings + blocks). null = request failed.
 async function loadSlots(date: string): Promise<string[] | null> {
@@ -140,6 +140,7 @@ export default function BookingClient({ initialDate, initialTime }: { initialDat
                         minMonth={minMonth}
                         maxMonth={maxMonth}
                     />
+                    <p className="mt-4 text-xs text-slate-500">Available Monday to Friday.</p>
                 </div>
             </div>
 

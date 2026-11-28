@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import TimeSlots from '@/components/TimeSlots';
-import { MAX_DAYS_AHEAD, brisbaneToday } from '@/lib/slots';
+import { MAX_DAYS_AHEAD, brisbaneToday, isBookableDay } from '@/lib/slots';
 
 interface View {
     date: string; // Brisbane YYYY-MM-DD
@@ -56,6 +56,8 @@ export default function ManageClient({ token }: { token: string }) {
     // Live slots for the chosen day
     useEffect(() => {
         if (mode !== 'reschedule' || !newDate) return;
+        setNewTime(null);
+        if (!isBookableDay(newDate)) { setSlots([]); setSlotsError(false); setSlotsLoading(false); return; } // weekends are closed
         let cancelled = false;
         setSlotsLoading(true);
         setSlotsError(false);
@@ -181,7 +183,15 @@ export default function ManageClient({ token }: { token: string }) {
                                 />
                             </label>
 
-                            {newDate && (
+                            <p className="text-xs text-slate-500">We’re open Monday to Friday.</p>
+
+                            {newDate && !isBookableDay(newDate) && (
+                                <p role="alert" className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                                    We’re closed on weekends. Please pick a day from Monday to Friday.
+                                </p>
+                            )}
+
+                            {newDate && isBookableDay(newDate) && (
                                 <TimeSlots date={new Date(`${newDate}T00:00:00`)} slots={slots} loading={slotsLoading} error={slotsError} onSelect={setNewTime} />
                             )}
 
