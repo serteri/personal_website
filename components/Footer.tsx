@@ -1,10 +1,15 @@
 import React from 'react';
 import Link from 'next/link';
 import { services } from '@/lib/services';
+import { tradeLandings } from '@/lib/tradeLandings';
 
 // Linkleri daha kolay yönetmek için bir veri yapısı oluşturalım
 const footerLinks = {
     whatWeDo: services.map((sv) => ({ name: sv.title, href: `/services/${sv.slug}` })),
+    trades: [
+        { name: 'AI Receptionist', href: '/ai-receptionist' },
+        ...tradeLandings.map((t) => ({ name: `For Brisbane ${t.trade.charAt(0).toUpperCase()}${t.trade.slice(1)}`, href: `/${t.slug}` })),
+    ],
     about: [
         { name: 'Serter Iyigunlu', href: '/about' },
         { name: 'Case Studies', href: '/#products' },
@@ -15,13 +20,27 @@ const Footer = () => {
     return (
         <footer className="bg-white border-t border-slate-200/80 text-slate-600 py-16 px-6 md:px-12">
             <div className="container mx-auto">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-12">
                     
                     {/* Sütun 1: What We Do */}
                     <div className="lg:col-span-1">
                         <h3 className="text-sm font-semibold text-slate-900 mb-4">WHAT WE DO</h3>
                         <ul className="space-y-3">
                             {footerLinks.whatWeDo.map((link) => (
+                                <li key={link.name}>
+                                    <Link href={link.href} className="hover:text-blue-600 transition-colors">
+                                        {link.name}
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    {/* Brisbane trades (SEO landing pages) */}
+                    <div className="lg:col-span-1">
+                        <h3 className="text-sm font-semibold text-slate-900 mb-4">BRISBANE TRADES</h3>
+                        <ul className="space-y-3">
+                            {footerLinks.trades.map((link) => (
                                 <li key={link.name}>
                                     <Link href={link.href} className="hover:text-blue-600 transition-colors">
                                         {link.name}

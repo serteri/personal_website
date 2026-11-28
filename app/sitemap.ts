@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next';
 import { caseStudies } from '@/lib/caseStudies';
 import { services } from '@/lib/services';
+import { tradeLandings } from '@/lib/tradeLandings';
 
 const SITE = 'https://www.altiqdesign.com';
 
@@ -16,6 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ];
     return [
         ...pages.map(([path, priority]) => ({ url: `${SITE}${path}`, lastModified, priority })),
+        ...tradeLandings.map((t) => ({ url: `${SITE}/${t.slug}`, lastModified, priority: 0.8 })),
         ...services.map((s) => ({ url: `${SITE}/services/${s.slug}`, lastModified, priority: 0.8 })),
         ...caseStudies.map((c) => ({ url: `${SITE}/case-studies/${c.slug}`, lastModified, priority: 0.7 })),
     ];
