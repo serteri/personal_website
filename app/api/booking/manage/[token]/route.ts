@@ -6,7 +6,7 @@ import { createCalendarEvent, deleteCalendarEvent, updateCalendarEvent } from '@
 import { manageUrlFor, sendCancellationEmails, sendRescheduledEmails } from '@/lib/bookingEmail';
 import { CUTOFF_MESSAGE, TOKEN_RE, canModify, publicView } from '@/lib/manage';
 import {
-    SLOT_MINUTES, bookingInterval, brisbaneInstant, brisbaneParts, isBookableDay, isValidDateStr, isValidSlot, isWithinWindow, overlaps, slotInterval,
+    CLOSED_DAY_MESSAGE, SLOT_MINUTES, bookingInterval, brisbaneInstant, brisbaneParts, isBookableDay, isValidDateStr, isValidSlot, isWithinWindow, overlaps, slotInterval,
 } from '@/lib/slots';
 
 const NO_STORE = { 'Cache-Control': 'no-store' };
@@ -74,7 +74,8 @@ export async function PATCH(req: Request, ctx: Ctx) {
         if (!parsed.success) return json({ message: 'Invalid date or time.' }, 400);
         const { date, time } = parsed.data;
 
-        if (!isBookableDay(date) || !isWithinWindow(date)) return json({ message: 'Please choose an available day.' }, 400);
+        if (!isBookableDay(date)) return json({ message: CLOSED_DAY_MESSAGE }, 400);
+        if (!isWithinWindow(date)) return json({ message: 'Please choose an available day.' }, 400);
         const slot = slotInterval(date, time);
         if (slot.start <= Date.now()) return json({ message: 'Please choose a future date and time.' }, 400);
 

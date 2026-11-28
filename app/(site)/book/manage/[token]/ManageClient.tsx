@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import TimeSlots from '@/components/TimeSlots';
-import { MAX_DAYS_AHEAD, brisbaneToday, isBookableDay } from '@/lib/slots';
+import { BUSINESS_HOURS_LABEL, CLOSED_DAY_MESSAGE, MAX_DAYS_AHEAD, brisbaneToday, isBookableDay } from '@/lib/slots';
 
 interface View {
     date: string; // Brisbane YYYY-MM-DD
@@ -183,11 +183,11 @@ export default function ManageClient({ token }: { token: string }) {
                                 />
                             </label>
 
-                            <p className="text-xs text-slate-500">We’re open Monday to Friday.</p>
+                            <p className="text-xs text-slate-500">{BUSINESS_HOURS_LABEL} (Brisbane time). We’re closed on weekends.</p>
 
                             {newDate && !isBookableDay(newDate) && (
                                 <p role="alert" className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                                    We’re closed on weekends. Please pick a day from Monday to Friday.
+                                    {CLOSED_DAY_MESSAGE}
                                 </p>
                             )}
 

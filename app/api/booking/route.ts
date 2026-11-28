@@ -5,7 +5,7 @@ import { randomBytes } from 'crypto';
 import { getDbBusy, getGoogleBusy } from '@/lib/availability';
 import { createCalendarEvent } from '@/lib/googleCalendar';
 import { manageUrlFor, sendBookingEmails } from '@/lib/bookingEmail';
-import { SLOT_MINUTES, brisbaneInstant, isBookableDay, isValidDateStr, isValidSlot, isWithinWindow, overlaps, slotInterval } from '@/lib/slots';
+import { CLOSED_DAY_MESSAGE, SLOT_MINUTES, brisbaneInstant, isBookableDay, isValidDateStr, isValidSlot, isWithinWindow, overlaps, slotInterval } from '@/lib/slots';
 
 // Strict server-side validation. `date` is the Brisbane calendar day (YYYY-MM-DD), `time` a slot from lib/slots.
 const bookingSchema = z.object({
@@ -87,9 +87,8 @@ export async function POST(req: Request) {
 
         const { firstName, lastName, email, phone, date, time, notes } = bookingSchema.parse(body);
 
-        if (!isBookableDay(date) || !isWithinWindow(date)) {
-            return NextResponse.json({ message: 'Please choose an available day.' }, { status: 400 });
-        }
+        if (!isBookableDay(date)) return NextResponse.json({ message: CLOSED_DAY_MESSAGE }, { status: 400 });
+        if (!isWithinWindow(date)) return NextResponse.json({ message: 'Please choose an available day.' }, { status: 400 });
         const slot = slotInterval(date, time);
         if (slot.start <= Date.now()) {
             return NextResponse.json({ message: 'Please choose a future date and time.' }, { status: 400 });

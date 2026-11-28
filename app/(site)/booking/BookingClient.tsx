@@ -2,17 +2,18 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Check, Clock, Globe } from 'lucide-react'
+import { ArrowLeft, CalendarDays, Check, Clock, Globe } from 'lucide-react'
 import DatePicker, { monthOf, type MonthView } from '@/components/DatePicker'
 import SlotList, { SlotSkeleton } from '@/components/SlotList'
 import BookingForm from '@/components/BookingForm'
-import { MAX_DAYS_AHEAD, SLOT_MINUTES, TIMEZONE, brisbaneToday, isBookableDay, isWithinWindow } from '@/lib/slots'
+import { BUSINESS_HOURS_LABEL, CLOSED_DAY_MESSAGE, MAX_DAYS_AHEAD, SLOT_MINUTES, TIMEZONE, brisbaneToday, isBookableDay, isWithinWindow } from '@/lib/slots'
 
 const longDate = (d: string) =>
     new Date(`${d}T00:00:00Z`).toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' })
 
 const addDays = (d: string, n: number) => new Date(Date.parse(`${d}T00:00:00Z`) + n * 86_400_000).toISOString().slice(0, 10)
 
+const isClosedDay = (d: string) => isWithinWindow(d) && !isBookableDay(d) // weekends inside the booking window
 const selectable = (d: string) => isWithinWindow(d) && isBookableDay(d) // today..+90 days, Monday to Friday only
 
 // Free slots for a Brisbane day from the server (Google Calendar + bookings + blocks). null = request failed.
@@ -63,6 +64,8 @@ export default function BookingClient({ initialDate, initialTime }: { initialDat
                 await showDay(initialDate, initialTime)
                 return
             }
+            // Landed on a closed weekend via the URL: explain, then fall through to the next open weekday
+            if (initialDate && isClosedDay(initialDate)) setNotice(CLOSED_DAY_MESSAGE)
             let firstBookable: string | null = null
             for (let i = 0; i < 21; i++) {
                 const d = addDays(today, i)
@@ -80,6 +83,9 @@ export default function BookingClient({ initialDate, initialTime }: { initialDat
         })()
         return () => { cancelled = true }
     }, [initialDate, initialTime, today, showDay])
+
+    // Clicking a closed weekend day: keep the current day, explain why it can't be picked
+    const pickClosedDay = () => setNotice(CLOSED_DAY_MESSAGE)
 
     const pickDate = (d: string) => {
         setNotice('')
@@ -129,6 +135,10 @@ export default function BookingClient({ initialDate, initialTime }: { initialDat
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1"><Clock className="h-3.5 w-3.5" aria-hidden="true" />{SLOT_MINUTES} min</span>
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1"><Globe className="h-3.5 w-3.5" aria-hidden="true" />{TIMEZONE}</span>
                 </div>
+                <p className="mt-3 flex items-center gap-1.5 text-sm font-semibold text-slate-900">
+                    <CalendarDays className="h-4 w-4 text-slate-500" aria-hidden="true" />
+                    {BUSINESS_HOURS_LABEL}
+                </p>
                 <div className="mt-6">
                     <DatePicker
                         month={month}
@@ -137,10 +147,14 @@ export default function BookingClient({ initialDate, initialTime }: { initialDat
                         today={today}
                         isSelectable={selectable}
                         onSelect={pickDate}
+                        isClosed={isClosedDay}
+                        onClosedClick={pickClosedDay}
                         minMonth={minMonth}
                         maxMonth={maxMonth}
                     />
-                    <p className="mt-4 text-xs text-slate-500">Available Monday to Friday.</p>
+                    <p className="mt-4 rounded-xl bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                        We&apos;re closed on weekends — you can book Monday to Friday, 09:00–18:00.
+                    </p>
                 </div>
             </div>
 

@@ -18,13 +18,15 @@ const arrow =
     'flex h-9 w-9 items-center justify-center rounded-full text-slate-700 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent'
 
 // Compact month picker (Monday-first). Pure UI: the parent decides which days are selectable.
-export default function DatePicker({ month, onMonthChange, selected, today, isSelectable, onSelect, minMonth, maxMonth }: {
+export default function DatePicker({ month, onMonthChange, selected, today, isSelectable, onSelect, isClosed, onClosedClick, minMonth, maxMonth }: {
     month: MonthView
     onMonthChange: (m: MonthView) => void
     selected: string | null
     today: string
     isSelectable: (d: string) => boolean
     onSelect: (d: string) => void
+    isClosed?: (d: string) => boolean // closed days stay clickable so we can explain why
+    onClosedClick?: (d: string) => void
     minMonth: MonthView
     maxMonth: MonthView
 }) {
@@ -70,14 +72,17 @@ export default function DatePicker({ month, onMonthChange, selected, today, isSe
                     const d = i + 1
                     const key = dayKey(month.y, month.m, d)
                     const ok = isSelectable(key)
+                    const closed = !ok && !!isClosed?.(key)
                     const isSelected = key === selected
                     const isToday = key === today
                     return (
                         <button
                             key={key}
                             type="button"
-                            disabled={!ok}
-                            onClick={() => onSelect(key)}
+                            disabled={!ok && !closed}
+                            aria-disabled={closed || undefined}
+                            title={closed ? 'Closed on weekends' : undefined}
+                            onClick={() => (ok ? onSelect(key) : onClosedClick?.(key))}
                             aria-pressed={isSelected}
                             aria-current={isToday ? 'date' : undefined}
                             aria-label={new Date(`${key}T00:00:00Z`).toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })}

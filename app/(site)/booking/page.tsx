@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import BookingClient from './BookingClient';
-import { isBookableDay, isValidDateStr, isValidSlot, isWithinWindow } from '@/lib/slots';
+import { isValidDateStr, isValidSlot, isWithinWindow } from '@/lib/slots';
 
 export const metadata: Metadata = {
     title: 'Book a Call',
@@ -12,7 +12,8 @@ export const metadata: Metadata = {
 // Optional deep link from the website's AI receptionist: /booking?date=YYYY-MM-DD&time=HH:MM
 function parseDeepLink(date?: string, time?: string) {
     if (!date || !time || !isValidDateStr(date) || !isValidSlot(time)) return {};
-    if (!isWithinWindow(date) || !isBookableDay(date)) return {};
+    if (!isWithinWindow(date)) return {};
+    // Weekend dates are passed through on purpose: the client explains we're closed and jumps to the next weekday.
     return { initialDate: date, initialTime: time };
 }
 

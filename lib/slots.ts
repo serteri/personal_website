@@ -5,6 +5,8 @@ export const SLOT_MINUTES = 20;
 export const TIMEZONE = 'Australia/Brisbane';
 export const DAY_START = '09:00';
 export const DAY_END = '18:00'; // end of day: the last slot STARTS at 17:40
+export const BUSINESS_HOURS_LABEL = 'Mon–Fri · 09:00 – 18:00 AEST';
+export const CLOSED_DAY_MESSAGE = 'We are closed on Saturdays and Sundays. Please choose a weekday (Monday–Friday, 09:00–18:00).';
 export const BRISBANE_OFFSET = '+10:00';
 export const MAX_DAYS_AHEAD = 90;
 /** Legacy bookings were hourly, so they block a full hour. */
